@@ -31,6 +31,9 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 14 | Project cards expand inline ("Show details"); detail pages kept for direct links | 2026-11-01 | cards link out only |
 | 15 | Now page: no talk about the portfolio itself; show AI Engineering Lab instead | 2026-11-01 | "React version next" line |
 | 16 | Live at https://sudeeptabiswas.github.io (GitHub Pages, branch main, root) | 2026-11-01 | — |
+| 17 | Keep GitHub link on the site | 2026-11-01 | FACTS.md line 185 "GitHub private, never on CV" (CV rule only) |
+| 18 | Home shows "Open to remote work, full CET (Berlin) hours" (FACTS.md line 325) | 2026-11-01 | location only |
+| 19 | Project page generator lives in repo `tools/` | 2026-11-01 | one-off script in scratchpad |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -81,14 +84,12 @@ Fixed:
 
 Not done (open):
 - No public Java code yet (reviewer item 11) — queue.
-- Remote / CET hours line — needs owner confirm (FACTS 325).
-- GitHub link vs FACTS 185 "GitHub private, never on CV" — needs owner confirm.
 - Next blog post should be real work (optimistic locking, CVE fixes, ADLC) — queue.
 - og:image preview card — needs an image.
 - Early-career timeline not folded: kept full per decision 8.
 
-Project pages are generated from one data file by a one-off script (not in repo).
-Edit the HTML directly, or ask to add the generator to the repo.
+Project pages are generated: edit `tools/projects_data.py`, run
+`python tools/build_projects.py` (see CLAUDE.md).
 
 ## 7. Implementation status
 - [x] Phase 1 — Home, Now, blog index, 2 posts (Kafka, RabbitMQ), CSS, dark mode

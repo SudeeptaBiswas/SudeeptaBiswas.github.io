@@ -35,19 +35,19 @@
 <article class="article">
   <p class="crumb"><a href="./">Projects</a> / Personal project</p>
   <h1>FleetCheck — Quarterly Random Pick</h1>
-  <dl class="facts"><dt>Organization</dt><dd>Personal case study</dd><dt>Role</dt><dd>Designer and reviewer (code drafted with Claude Code)</dd><dt>When</dt><dd>2026</dd></dl>
-  <div class="stats"><div class="stat"><b>48</b><span>tests</span></div><div class="stat"><b>~0.9 s</b><span>200,000 vehicles on my PC</span></div><div class="stat"><b>O(n log n)</b><span>time</span></div></div>
-  <p class="links"><a class="btn primary" href="https://github.com/SudeeptaBiswas/fleetcheck_quarterly_pick" rel="noopener">View code on GitHub</a></p>
-  <h2>The problem</h2>
-  <p>Each quarter, a set share of a company's active vehicles gets a surprise inspection. The pick must be fair, an auditor must be able to repeat it, and it may run only once per company and quarter.</p>
-  <h2>How it works</h2>
-  <ul><li><b>Score:</b> each vehicle gets <code>HMAC-SHA256(seed, "quarter:vehicleId")</code>.</li><li><b>Pick:</b> sort by score, take the first <code>ceil(n × percent / 100)</code>.</li><li><b>Fair:</b> every vehicle has the same chance, k / n. A test checks this over 4,000 seeds.</li><li><b>Seed:</b> 32 random bytes, made when the pick runs and saved with it. Nobody can know the pick before it runs; anyone with the seed can repeat it.</li><li><b>Once per quarter:</b> one saved pick per company and quarter. In Postgres: a unique key and <code>INSERT ... ON CONFLICT DO NOTHING</code>.</li><li><b>Audit:</b> the vehicle list, its SHA-256 hash, the seed and the result are saved, so an auditor gets the same vehicles.</li></ul>
-  <h2>How it was built</h2>
-  <p>I chose the design: a random seed with HMAC ranking, Vitest, and a thin store for run-once. Claude Code drafted the code, tests and README; I reviewed every line.</p>
-  <h2>Results</h2>
-  <ul><li>48 tests, each named after the rule it checks.</li><li>200,000 vehicles with 50,000 picked in 876–962 ms (6 runs, Node 24, my PC).</li></ul>
-  <h2>Stack</h2>
-  <ul class="tags"><li>TypeScript</li><li>Node.js</li><li>Vitest</li></ul>
+<dl class="facts"><dt>Organization</dt><dd>Personal case study</dd><dt>Role</dt><dd>Designer and reviewer (code drafted with Claude Code)</dd><dt>When</dt><dd>2026</dd></dl>
+<div class="stats"><div class="stat"><b>48</b><span>tests</span></div><div class="stat"><b>~0.9 s</b><span>200,000 vehicles on my PC</span></div><div class="stat"><b>O(n log n)</b><span>time</span></div></div>
+<p class="links"><a class="btn primary" href="https://github.com/SudeeptaBiswas/fleetcheck_quarterly_pick" rel="noopener">View code on GitHub</a></p>
+<h2>The problem</h2>
+<p>Each quarter, a set share of a company&#x27;s active vehicles gets a surprise inspection. The pick must be fair, an auditor must be able to repeat it, and it may run only once per company and quarter.</p>
+<h2>How it works</h2>
+<ul><li><b>Score:</b> each vehicle gets <code>HMAC-SHA256(seed, &quot;quarter:vehicleId&quot;)</code>.</li><li><b>Pick:</b> sort by score, take the first <code>ceil(n × percent / 100)</code>.</li><li><b>Fair:</b> every vehicle has the same chance, k / n. A test checks this over 4,000 seeds.</li><li><b>Seed:</b> 32 random bytes, made when the pick runs and saved with it. Nobody can know the pick before it runs; anyone with the seed can repeat it.</li><li><b>Once per quarter:</b> one saved pick per company and quarter. In Postgres: a unique key and <code>INSERT ... ON CONFLICT DO NOTHING</code>.</li><li><b>Audit:</b> the vehicle list, its SHA-256 hash, the seed and the result are saved, so an auditor gets the same vehicles.</li></ul>
+<h2>How it was built</h2>
+<p>I chose the design: a random seed with HMAC ranking, Vitest, and a thin store for run-once. Claude Code drafted the code, tests and README; I reviewed every line.</p>
+<h2>Results</h2>
+<ul><li>48 tests, each named after the rule it checks.</li><li>200,000 vehicles with 50,000 picked in 876–962 ms (6 runs, Node 24, my PC).</li></ul>
+<h2>Stack</h2>
+<ul class="tags"><li>TypeScript</li><li>Node.js</li><li>Vitest</li></ul>
   <nav class="pager" aria-label="More projects"><a href="database-copy-tool.html">← Dynamic Relational Database Copy Tool</a><a href="pc-organizer.html">PC Organizer →</a></nav>
 </article>
 </main>
