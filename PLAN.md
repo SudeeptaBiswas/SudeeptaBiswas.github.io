@@ -28,6 +28,9 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 11 | Reviews: fact-check vs FACTS.md, independent reviewer, UX + accessibility | 2026-11-01 | self-review only |
 | 12 | Add personal project: AI Engineering Lab | 2026-11-01 | — |
 | 13 | Fact source widened: `cv/FACTS.md` + `cv/master.md` (full history) | 2026-11-01 | Java CV only |
+| 14 | Project cards expand inline ("Show details"); detail pages kept for direct links | 2026-11-01 | cards link out only |
+| 15 | Now page: no talk about the portfolio itself; show AI Engineering Lab instead | 2026-11-01 | "React version next" line |
+| 16 | Live at https://sudeeptabiswas.github.io (GitHub Pages, branch main, root) | 2026-11-01 | — |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
