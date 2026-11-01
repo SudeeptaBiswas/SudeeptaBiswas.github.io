@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PC Organizer — Sudeepta Biswas</title>
+  <meta name="description" content="Finds duplicate files, reviews them in a local web page, organizes files, and backs up and syncs between two PCs through a USB folder. Safety first.">
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/projects/pc-organizer.html">
+  <meta property="og:title" content="PC Organizer — Sudeepta Biswas">
+  <meta property="og:description" content="Finds duplicate files, reviews them in a local web page, organizes files, and backs up and syncs between two PCs through a USB folder. Safety first.">
+  <meta property="og:url" content="https://sudeeptabiswas.github.io/projects/pc-organizer.html">
+  <meta property="og:type" content="website">
+  <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">Sudeepta Biswas</a>
+    <nav class="nav" aria-label="Main">
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../#skills">Skills</a>
+      <a href="../#experience">Experience</a>
+      <a href="../blog/">Blog</a>
+      <a href="../now.html">Now</a>
+    </nav>
+    <button class="theme-toggle" type="button">Dark</button>
+  </div>
+</header>
+
+<main id="main">
+<article class="article">
+  <p class="crumb"><a href="./">Projects</a> / Personal project</p>
+  <h1>PC Organizer</h1>
+  <dl class="facts"><dt>Organization</dt><dd>Personal tool</dd><dt>Role</dt><dd>Owner (built with AI coding agents)</dd><dt>When</dt><dd>2026</dd></dl>
+  <div class="note">Private repo. Screenshots coming.</div>
+  <div class="stats"><div class="stat"><b>3</b><span>modules</span></div><div class="stat"><b>0</b><span>third-party packages</span></div></div>
+  <h2>The problem</h2>
+  <p>Two PCs, many drives, and years of copied files. I wanted to clean them up without ever losing a file.</p>
+  <h2>Modules</h2>
+  <ul><li><b>Duplicates:</b> a report-only scanner finds duplicate files; a local web page reviews them side by side, with previews.</li><li><b>Librarian:</b> classifies files, reports misplaced ones and suggests moves.</li><li><b>Courier / Backup:</b> offline backup and sync between my two PCs through a USB or transfer folder.</li></ul>
+  <h2>Safety rules</h2>
+  <ul><li>Deletes always go to the Recycle Bin. Never the last copy, and never a bulk "delete all".</li><li>The tool only suggests. A move or delete happens only when I click.</li><li>The web server listens on this PC only (<code>127.0.0.1</code>).</li><li>Each PC writes only to its own data folder.</li><li>Tests run on fake folders, never on real drives.</li></ul>
+  <h2>How it&#x27;s built</h2>
+  <p>Python standard library only, with no <code>pip install</code>. Tests use the built-in <code>unittest</code>. AI coding agents work on it in parallel, so it has a written process, short module docs and tagged commits.</p>
+  <h2>Stack</h2>
+  <ul class="tags"><li>Python</li><li>unittest</li><li>HTML</li><li>JavaScript</li></ul>
+  <nav class="pager" aria-label="More projects"><a href="fleetcheck.html">← FleetCheck — Quarterly Random Pick</a><a href="avocabulary.html">avocabulary →</a></nav>
+</article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Sudeepta Biswas</span>
+    <span><a href="https://www.linkedin.com/in/sudeepta-biswas" rel="noopener">LinkedIn</a> · <a href="https://github.com/SudeeptaBiswas" rel="noopener">GitHub</a> · <a href="../blog/">Blog</a></span>
+  </div>
+</footer>
+
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>

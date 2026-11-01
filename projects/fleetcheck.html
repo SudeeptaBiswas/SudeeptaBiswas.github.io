@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FleetCheck — Quarterly Random Pick — Sudeepta Biswas</title>
+  <meta name="description" content="Fair, repeatable random vehicle inspections: HMAC-SHA256 scoring, one pick per company and quarter, 48 tests.">
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/projects/fleetcheck.html">
+  <meta property="og:title" content="FleetCheck — Quarterly Random Pick — Sudeepta Biswas">
+  <meta property="og:description" content="Fair, repeatable random vehicle inspections: HMAC-SHA256 scoring, one pick per company and quarter, 48 tests.">
+  <meta property="og:url" content="https://sudeeptabiswas.github.io/projects/fleetcheck.html">
+  <meta property="og:type" content="website">
+  <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">Sudeepta Biswas</a>
+    <nav class="nav" aria-label="Main">
+      <a href="./" aria-current="page">Projects</a>
+      <a href="../#skills">Skills</a>
+      <a href="../#experience">Experience</a>
+      <a href="../blog/">Blog</a>
+      <a href="../now.html">Now</a>
+    </nav>
+    <button class="theme-toggle" type="button">Dark</button>
+  </div>
+</header>
+
+<main id="main">
+<article class="article">
+  <p class="crumb"><a href="./">Projects</a> / Personal project</p>
+  <h1>FleetCheck — Quarterly Random Pick</h1>
+  <dl class="facts"><dt>Organization</dt><dd>Personal case study</dd><dt>Role</dt><dd>Designer and reviewer (code drafted with Claude Code)</dd><dt>When</dt><dd>2026</dd></dl>
+  <div class="stats"><div class="stat"><b>48</b><span>tests</span></div><div class="stat"><b>~0.9 s</b><span>200,000 vehicles on my PC</span></div><div class="stat"><b>O(n log n)</b><span>time</span></div></div>
+  <p class="links"><a class="btn primary" href="https://github.com/SudeeptaBiswas/fleetcheck_quarterly_pick" rel="noopener">View code on GitHub</a></p>
+  <h2>The problem</h2>
+  <p>Each quarter, a set share of a company's active vehicles gets a surprise inspection. The pick must be fair, an auditor must be able to repeat it, and it may run only once per company and quarter.</p>
+  <h2>How it works</h2>
+  <ul><li><b>Score:</b> each vehicle gets <code>HMAC-SHA256(seed, "quarter:vehicleId")</code>.</li><li><b>Pick:</b> sort by score, take the first <code>ceil(n × percent / 100)</code>.</li><li><b>Fair:</b> every vehicle has the same chance, k / n. A test checks this over 4,000 seeds.</li><li><b>Seed:</b> 32 random bytes, made when the pick runs and saved with it. Nobody can know the pick before it runs; anyone with the seed can repeat it.</li><li><b>Once per quarter:</b> one saved pick per company and quarter. In Postgres: a unique key and <code>INSERT ... ON CONFLICT DO NOTHING</code>.</li><li><b>Audit:</b> the vehicle list, its SHA-256 hash, the seed and the result are saved, so an auditor gets the same vehicles.</li></ul>
+  <h2>How it was built</h2>
+  <p>I chose the design: a random seed with HMAC ranking, Vitest, and a thin store for run-once. Claude Code drafted the code, tests and README; I reviewed every line.</p>
+  <h2>Results</h2>
+  <ul><li>48 tests, each named after the rule it checks.</li><li>200,000 vehicles with 50,000 picked in 876–962 ms (6 runs, Node 24, my PC).</li></ul>
+  <h2>Stack</h2>
+  <ul class="tags"><li>TypeScript</li><li>Node.js</li><li>Vitest</li></ul>
+  <nav class="pager" aria-label="More projects"><a href="database-copy-tool.html">← Dynamic Relational Database Copy Tool</a><a href="pc-organizer.html">PC Organizer →</a></nav>
+</article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Sudeepta Biswas</span>
+    <span><a href="https://www.linkedin.com/in/sudeepta-biswas" rel="noopener">LinkedIn</a> · <a href="https://github.com/SudeeptaBiswas" rel="noopener">GitHub</a> · <a href="../blog/">Blog</a></span>
+  </div>
+</footer>
+
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>
