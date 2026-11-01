@@ -35,7 +35,7 @@
 <div class="wrap">
   <section class="page-head">
     <h1>Projects</h1>
-    <p class="lead">All 19 projects, from my first job in 2011 to today. Click a project to see the full story: context, my role, what I built and the results.</p>
+    <p class="lead">All 19 projects, from my first job in 2011 to today. Use "Show details" to open the full story in place, or click a title for its own page.</p>
     <p class="muted small">Client systems are private, so work projects have no screenshots.
     At BJIT one person often plays four roles on a project: tech lead, architect, engineering manager and project manager.
     Each project shows the role I played; my official designation is in brackets.</p>
@@ -50,42 +50,175 @@
         <p class="meta">BJIT Limited — Client: Shin-Etsu Chemical Co., Ltd. (Japan) · Mar 2025 – May 2026<br>Tech Lead &amp; Architect</p>
         <p>Moved a 105-screen PowerBuilder desktop system to Java 21, Spring Boot and React.js. 300+ APIs, 135 man-months, live on time.</p>
         <div class="foot"><ul class="tags"><li>Java 21</li><li>Spring Boot 3.5</li><li>Spring Security 6.5</li><li>Spring Data JPA</li><li>Hibernate</li><li>JWT</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: Shin-Etsu Chemical Co., Ltd. (Japan)</dd><dt>Role</dt><dd>Tech Lead &amp; Architect <span class="muted">(designation: Senior Project Manager)</span></dd><dt>When</dt><dd>Mar 2025 – May 2026</dd><dt>Team</dt><dd>10+ in frontend, backend and SRS teams; coordinated UI/UX, QA and DevOps teams</dd></dl>
+<div class="stats"><div class="stat"><b>105</b><span>screens migrated</span></div><div class="stat"><b>300+</b><span>REST APIs (40+ written by me)</span></div><div class="stat"><b>135</b><span>man-months, on time</span></div><div class="stat"><b>90%</b><span>test coverage</span></div><div class="stat"><b>~74</b><span>CVE fixes led</span></div><div class="stat"><b>9</b><span>releases</span></div></div>
+<h4>Context</h4>
+<p>RIMS (Research Inventory Management System) tracks research inventory for Shin-Etsu. It was a PowerBuilder desktop app, and the client asked for a web version. It was BJIT's trial project with this client.</p>
+<h4>The problem</h4>
+<ul><li>Move <b>105 screens</b> to Spring Boot and React.js.</li><li>Keep the existing <b>Oracle 19c schema</b>, so no data migration was needed.</li><li>Make the web app match the desktop app's speed, behaviour and navigation.</li></ul>
+<h4>My role</h4>
+<ul><li><b>Architect:</b> system architecture and non-functional requirements (security, performance, scalability).</li><li><b>Tech lead:</b> wrote code, set code review standards, designed features, mentored and trained developers.</li><li><b>Engineering manager:</b> 1:1s, performance, training, development process.</li><li><b>Project manager:</b> WBS, effort-to-cost estimates, sprints, change control, risks and dependencies. Also the main client contact: daily client meetings, steering committee meetings, releases, UAT and go-live.</li></ul>
+<h4>Architecture</h4>
+<ul><li><b>Feature-based modules (6):</b> each module owns one feature area, which means less coupling and easier changes.</li><li><b>Patterns:</b> Repository, Builder, DTO mapping (MapStruct), one global error handler (<code>@RestControllerAdvice</code>).</li><li><b>API governance:</b> a generic request/response pattern, localized messages (English and Japanese), error handling, encryption and documentation standards.</li><li><b>Security:</b> username/password login with Spring Security, stateless JWT, and role-based authorization.</li><li><b>Concurrency:</b> optimistic locking. The UPDATE compares every column it read earlier. If the row changed, the user sees "data already updated, search again".</li></ul>
+<h4>Hands-on work</h4>
+<ul><li>Wrote <b>40+ of the 300+ REST APIs</b> in Java 21 and Spring Boot.</li><li>Built the <b>Excel (Apache POI) and CSV exports</b>.</li><li>Wrote integration tests (JUnit 5, Mockito, AssertJ, Spring Security Test).</li><li>Reviewed team code.</li></ul>
+<h4>AI-first delivery</h4>
+<ul><li>The client approved AI use on its code before we started.</li><li>AI analyzed the legacy PowerBuilder code before design and coding.</li><li><b>Parent-child prompts</b> per screen and per API. AI wrote the code; developers reviewed every line and owned it.</li><li>Team rules: AI must not guess beyond the spec, must follow the existing code structure, no auto-commit, no proprietary code uploaded.</li></ul>
+<h4>Challenges and how we handled them</h4>
+<ul><li><b>Desktop feel on the web:</b> the client wanted desktop-style switching between many tabs. We built it, with limits the client approved before development. We tested desktop and web side by side to match every feature.</li><li><b>Pagination:</b> the client didn't want paging. We pushed back because large data would be slow, and built a configurable page size.</li><li><b>Pixel-perfect PDFs</b> with no font or sample: we built a sample for review. The client then shared the font and a sample PDF.</li><li><b>Prompt adoption:</b> in the first month, developers skipped the parent-child prompts. I found this in code review, trained them and followed up.</li></ul>
+<h4>Quality and security</h4>
+<ul><li><b>90% test coverage</b> (JUnit 5, Mockito, JaCoCo).</li><li>SonarQube runs in the Jenkins pipeline. The DevOps team set it up.</li><li>Started the <b>OSV-Scanner</b> checks and led <b>~74 CVE fixes</b>, then shared the work across the team. The fixes were Spring Boot 3.3 → 3.5 upgrades, forced transitive versions and Gradle dependency locking.</li><li>Deploys moved to Jenkins and Docker. The DevOps team configured them.</li></ul>
+<h4>Results</h4>
+<ul><li><b>Live on time</b>; handover done.</li><li>9 releases (6 sprint, 3 milestone). The client signed off UAT.</li><li>Client feedback after every release; lessons-learned session after each milestone.</li><li><b>Trial project win:</b> after milestone 2, the client gave BJIT <b>3 more migration projects</b>, run by other teams.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Java 21</li><li>Spring Boot 3.5</li><li>Spring Security 6.5</li><li>Spring Data JPA</li><li>Hibernate</li><li>JWT</li><li>MapStruct</li><li>Apache POI</li><li>React.js</li><li>Oracle 19c</li><li>Gradle</li><li>JUnit 5</li><li>Mockito</li><li>JaCoCo</li><li>Jenkins</li><li>Docker</li><li>JasperReports</li><li>SonarQube</li><li>OSV-Scanner</li><li>GitHub Copilot</li></ul>
+            <p><a href="rims-legacy-migration.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work ai frontend">
         <h3><a href="ai-requirements-platform.html">AI Requirements Documentation Platform</a></h3>
         <p class="meta">BJIT Limited — AI Transformation department · Jun 2026 – now<br>Tech Lead &amp; Architect</p>
         <p>A tool that reads legacy PowerBuilder/Oracle systems and writes screen-level SRS and API specs. ~60% less manual effort in pilot.</p>
         <div class="foot"><ul class="tags"><li>Electron</li><li>React.js</li><li>TypeScript</li><li>Python</li><li>Claude Code</li><li>GitHub Copilot</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — AI Transformation department</dd><dt>Role</dt><dd>Tech Lead &amp; Architect <span class="muted">(designation: Senior Project Manager)</span></dd><dt>When</dt><dd>Jun 2026 – now</dd><dt>Team</dt><dd>Team of 5</dd></dl>
+<div class="stats"><div class="stat"><b>~60%</b><span>less manual SRS effort (pilot)</span></div><div class="stat"><b>50%</b><span>lower documentation cost on the next migration</span></div><div class="stat"><b>5</b><span>people in the team</span></div></div>
+<h4>Context</h4>
+<p>A legacy migration starts by documenting the old system: every screen, rule and API. Done by hand, this is slow and costly. The product is still in development and built for reuse on legacy migrations.</p>
+<h4>My role</h4>
+<ul><li><b>Architect:</b> system architecture and tech stack choice.</li><li><b>Tech lead:</b> hands-on coding, technical design of features, unblocking and mentoring developers.</li><li><b>Engineering manager:</b> 1:1s and performance, team growth and training, development process.</li><li><b>Project manager:</b> plan, estimates, WBS, stakeholder updates, scope, roadmap, risks, pilot and release.</li></ul>
+<h4>What we built</h4>
+<ul><li>Reads legacy PowerBuilder/Oracle code and writes <b>screen-level SRS</b> and <b>API specs</b>.</li><li><b>Hybrid design:</b> rule-based extraction with no LLM for the facts; LLM calls only for prose such as requirements, user stories and use cases.</li><li><b>Configurable LLM provider:</b> Claude or GitHub Copilot, picked in settings.</li><li>Output to DOCX, XLSX and Markdown.</li></ul>
+<h4>How the team works</h4>
+<ul><li><b>Agentic development lifecycle (ADLC):</b> AI agents (Claude Code) plan, code and check each change. A human gives final approval.</li><li>Set team AI standards: reusable Claude Code skills and shared prompt rules.</li><li>Planned the next features and changed the plan after the pilot. Gave demos to stakeholders.</li></ul>
+<h4>Results</h4>
+<ul><li>Manual SRS effort cut by <b>~60%</b> in pilot tests.</li><li>Used on the next legacy migration project: documentation cost cut by <b>50%</b>.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Electron</li><li>React.js</li><li>TypeScript</li><li>Python</li><li>Claude Code</li><li>GitHub Copilot</li><li>PowerBuilder</li><li>Oracle</li></ul>
+            <p><a href="ai-requirements-platform.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work devops plm">
         <h3><a href="ericsson-release-management.html">Release Management for a 12-App PLM Platform</a></h3>
         <p class="meta">BJIT Limited — Client: Ericsson (Sweden), CPD team · Aug 2021 – Feb 2025<br>Release &amp; DevOps Consultant (one of 5 release managers)</p>
         <p>Planned and shipped releases for a distributed 12-app 3DEXPERIENCE platform. 18/18 PROD releases on time, deploy time cut 50%.</p>
         <div class="foot"><ul class="tags"><li>3DEXPERIENCE R2021x/R2022x</li><li>Java</li><li>JavaScript</li><li>JPO</li><li>MQL</li><li>TCL</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: Ericsson (Sweden), CPD team</dd><dt>Role</dt><dd>Release &amp; DevOps Consultant (one of 5 release managers) <span class="muted">(designation: Project Manager → Senior Project Manager (Jul 2023))</span></dd><dt>When</dt><dd>Aug 2021 – Feb 2025</dd><dt>Team</dt><dd>One of 5 peer release managers; supported 2–3 of 6 teams at a time</dd></dl>
+<div class="stats"><div class="stat"><b>18 / 18</b><span>monthly PROD releases on time</span></div><div class="stat"><b>~100</b><span>SIT and UAT deploys</span></div><div class="stat"><b>50%</b><span>faster deploys</span></div><div class="stat"><b>16</b><span>PROD instances on 4 servers</span></div></div>
+<h4>Context</h4>
+<p>Ericsson runs a distributed Dassault 3DEXPERIENCE platform: 12 apps, including 3DSpace, 3DPassport, 3DDashboard and full-text search, on separate servers. PROD ran on 4 Linux servers with 16 instances.</p>
+<h4>The problem</h4>
+<p>6 development teams shipped into the same platform. Every release had to land on time without breaking production.</p>
+<h4>What I did</h4>
+<ul><li>Planned and owned release schedules: <b>3 SIT</b> and <b>1–2 UAT</b> deploys a month, and a <b>monthly PROD</b> release. 2–3 deploys a day to the test environments.</li><li>Found the code changes for each release and wrote the deployment plan from them.</li><li><b>Automated packaging and deployment</b> with Jenkins, Ansible and Ant.</li><li>Designed the <b>Gerrit branching strategy</b>; led code review, merges and release-package QA.</li><li>Briefed the client before and after every release.</li><li>Maintained 3DSpace <b>full-text search</b>: index updates and data indexing.</li><li>Kept 6 teams on one delivery line without delaying any release; supported on-demand deploys.</li></ul>
+<h4>Results</h4>
+<ul><li><b>All 18 monthly PROD releases on time</b> over 1.5 years.</li><li><b>~100 SIT/UAT deploys.</b></li><li>Deploy time cut by <b>50%</b>.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>3DEXPERIENCE R2021x/R2022x</li><li>Java</li><li>JavaScript</li><li>JPO</li><li>MQL</li><li>TCL</li><li>Gerrit</li><li>Ant</li><li>Tomcat</li><li>Jenkins</li><li>Ansible</li><li>Linux</li></ul>
+            <p><a href="ericsson-release-management.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java plm devops frontend data">
         <h3><a href="valmet-plm-platform.html">Enterprise PLM Platform (CATIA V6)</a></h3>
         <p class="meta">BJIT Limited — Client: Valmet Technologies Oy (Finland) · Oct 2017 – Aug 2021<br>Tech Lead &amp; Architect</p>
         <p>Built apps, integrations and search on Valmet's distributed 3DEXPERIENCE platform; ran 2–3 small projects at once.</p>
         <div class="foot"><ul class="tags"><li>Java</li><li>Spring MVC</li><li>Spring Boot</li><li>JPO</li><li>eMatrix REST</li><li>JavaScript</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: Valmet Technologies Oy (Finland)</dd><dt>Role</dt><dd>Tech Lead &amp; Architect <span class="muted">(designation: Project Manager)</span></dd><dt>When</dt><dd>Oct 2017 – Aug 2021</dd><dt>Team</dt><dd>Team of 5</dd></dl>
+<div class="stats"><div class="stat"><b>5</b><span>engineers led</span></div><div class="stat"><b>2–3</b><span>small projects at once</span></div><div class="stat"><b>R2015x → R2021x</b><span>platform upgrades</span></div></div>
+<h4>Context</h4>
+<p>Valmet manages product data on Dassault 3DEXPERIENCE: 3DSpace, 3DPassport, 3DDashboard, file and search servers. My team built and maintained apps on this distributed platform.</p>
+<h4>My role</h4>
+<ul><li><b>Architect:</b> system architecture, non-functional requirements, API and integration design.</li><li><b>Tech lead:</b> coding, code review standards, feature design, mentoring.</li><li><b>Engineering manager:</b> interview panels and written-exam review, 1:1s and performance, training, development process and CI/CD.</li><li><b>Project manager:</b> POCs, requirement analysis, SRS, functional specs, WBS, effort budgets in man-months, Jira dashboards, risks, client communication, weekly reports and sign-off. Ran Scrum: standups, retros, grooming.</li></ul>
+<h4>What I built and ran</h4>
+<ul><li><b>Translation Management widget:</b> integration with the third-party Global Translation System (GTS). It requests new translations, fetches missing ones and saves approved ones.</li><li><b>REST and integration services</b> with Spring MVC and eMatrix REST: services used by the apps, and integration services that talk to other systems.</li><li><b>Exalead CloudView search:</b> indexed 3DSpace data for search and analysis, with results shown through filters.</li><li><b>ELK monitoring:</b> see the <a href="elk-log-monitoring.html">ELK Log Monitoring</a> page.</li><li><b>CATIA Client Tool</b> moved to R2018x and R2020x, with new features.</li><li>Platform upgrades R2015x → R2018x → R2021x. Built and deployed apps to the DEV and TEST environments.</li><li><b>CI/CD:</b> set up, configured and ran pipelines with Rundeck, Jenkins, Ant and JFrog.</li><li>Researched and introduced new technologies.</li></ul>
+<h4>Documents</h4>
+<p>User guides, deployment documents, deployment plans for each release, release notes and weekly status reports.</p>
+<h4>Results</h4>
+<ul><li>Delivered for nearly 4 years (Oct 2017 – Aug 2021) with a team of 5; owned client communication, weekly reports and sign-off.</li><li>Ran 2–3 small projects in parallel: translations, ELK, product-structure export/import, CloudView.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Java</li><li>Spring MVC</li><li>Spring Boot</li><li>JPO</li><li>eMatrix REST</li><li>JavaScript</li><li>RequireJS</li><li>AJAX</li><li>jQuery</li><li>Bootstrap</li><li>Thymeleaf</li><li>VBScript</li><li>Shell</li><li>RHEL 6/7</li><li>Windows Server 2012 R2</li><li>Jira</li><li>Confluence</li><li>Redmine</li><li>Bitbucket</li><li>Gerrit</li></ul>
+            <p><a href="valmet-plm-platform.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work devops data">
         <h3><a href="elk-log-monitoring.html">ELK Log Monitoring</a></h3>
         <p class="meta">BJIT Limited — Client: Valmet Technologies Oy (Finland) · 2015 – 2021<br>Owner, end to end</p>
         <p>Ran ELK on Docker for 2–3 TB of logs: 50+ log formats, 10+ Kibana dashboards, alerts. From first R&amp;D to production support.</p>
         <div class="foot"><ul class="tags"><li>Elasticsearch</li><li>Logstash</li><li>Kibana</li><li>Filebeat</li><li>Docker</li><li>nginx</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: Valmet Technologies Oy (Finland)</dd><dt>Role</dt><dd>Owner, end to end</dd><dt>When</dt><dd>2015 – 2021</dd></dl>
+<div class="stats"><div class="stat"><b>2–3 TB</b><span>of logs</span></div><div class="stat"><b>50+</b><span>log formats parsed</span></div><div class="stat"><b>10+</b><span>Kibana dashboards</span></div><div class="stat"><b>100</b><span>visualizations</span></div></div>
+<h4>Context</h4>
+<p>Valmet's PLM platform needed one place to collect, search and alert on its logs.</p>
+<h4>What I did</h4>
+<ul><li>Owned it end to end: first R&amp;D, production release, then investigating issues after release.</li><li>Ran <b>Elasticsearch, Logstash, Kibana and Filebeat on Docker</b> (Red Hat).</li><li><b>Log parsing and ingestion</b> for 50+ log formats, plus indexing.</li><li>Built <b>10+ Kibana dashboards</b> with 100 visualizations.</li><li>Set up <b>alerts</b> in Kibana and Jenkins.</li><li>Protected the Kibana login with <b>nginx authentication</b>.</li><li>Used the logs to investigate and fix production issues.</li></ul>
+<h4>Results</h4>
+<p>2–3 TB of logs searchable in one place, with dashboards and alerts, used to troubleshoot production issues.</p>
+<h4>Stack</h4>
+<ul class="tags"><li>Elasticsearch</li><li>Logstash</li><li>Kibana</li><li>Filebeat</li><li>Docker</li><li>nginx</li><li>Jenkins</li><li>RHEL</li></ul>
+            <p><a href="elk-log-monitoring.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java plm frontend data">
         <h3><a href="valmet-enovia-platform.html">ENOVIA PLM Platform (CATIA V5)</a></h3>
         <p class="meta">BJIT Limited — Client: Valmet Technologies Oy (Finland) · Nov 2015 – Sep 2017<br>Tech Lead</p>
         <p>Built 3 ENOVIA widgets and a desktop release tool from scratch, plus Excel/CSV product-structure import/export and a data migration tool.</p>
         <div class="foot"><ul class="tags"><li>Java</li><li>JavaScript</li><li>JPO</li><li>MQL</li><li>TCL</li><li>Shell</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: Valmet Technologies Oy (Finland)</dd><dt>Role</dt><dd>Tech Lead <span class="muted">(designation: Senior Software Engineer)</span></dd><dt>When</dt><dd>Nov 2015 – Sep 2017</dd><dt>Team</dt><dd>Team of 5</dd></dl>
+<div class="stats"><div class="stat"><b>3</b><span>widgets built from scratch</span></div><div class="stat"><b>1000+</b><span>products per structure (export/import)</span></div><div class="stat"><b>5</b><span>engineers led</span></div></div>
+<h4>Context</h4>
+<p>Valmet used ENOVIA and CATIA V5 to manage product designs. The team built tools to help engineers release, move and find product data.</p>
+<h4>My role</h4>
+<p>Led the team of 5: requirement analysis, design, WBS, client communication, code review and branching (merges, conflict resolution, tagging). Wrote design and technical documents.</p>
+<h4>What I built</h4>
+<ul><li><b>3 ENOVIA widgets</b> from scratch with JavaScript, JPO, MQL, Java and TCL.</li><li><b>CATIA Client Tool (R2015x):</b> designed and built a desktop app for continuous package release.</li><li><b>Product-structure export/import</b> with Excel and CSV: export, import and update 1000+ products per structure.</li><li><b>Data migration and comparison tool.</b></li><li><b>OCR document search:</b> see the <a href="ocr-document-search.html">OCR Document Search</a> page.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Java</li><li>JavaScript</li><li>JPO</li><li>MQL</li><li>TCL</li><li>Shell</li><li>PHP</li><li>Maven</li><li>Ant</li><li>Jenkins</li><li>Rundeck</li><li>Docker</li><li>RHEL</li><li>Git</li></ul>
+            <p><a href="valmet-enovia-platform.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java data">
         <h3><a href="ocr-document-search.html">OCR Document Search</a></h3>
         <p class="meta">BJIT Limited — Client: Valmet Technologies Oy (Finland) · 2015 – 2017<br>Developer (built it from scratch)</p>
         <p>Made large document sets, including scanned image PDFs, searchable with Solr, Apache Tika and Tesseract OCR.</p>
         <div class="foot"><ul class="tags"><li>Java</li><li>Apache Solr</li><li>SolrJ</li><li>Apache Tika</li><li>Tesseract OCR</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: Valmet Technologies Oy (Finland)</dd><dt>Role</dt><dd>Developer (built it from scratch)</dd><dt>When</dt><dd>2015 – 2017</dd></dl>
+<h4>The problem</h4>
+<p>Many documents were scanned images inside PDFs. Normal search could not read them.</p>
+<h4>What I built</h4>
+<ul><li><b>Text extraction</b> from documents with Apache Tika.</li><li><b>OCR</b> for scanned images and image PDFs with Tesseract.</li><li><b>Indexing and search</b> with Apache Solr and SolrJ.</li></ul>
+<h4>Results</h4>
+<p>Large document sets, including image-only PDFs, became searchable by their text.</p>
+<h4>Stack</h4>
+<ul class="tags"><li>Java</li><li>Apache Solr</li><li>SolrJ</li><li>Apache Tika</li><li>Tesseract OCR</li></ul>
+            <p><a href="ocr-document-search.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
     </div>
   </section>
@@ -97,48 +230,138 @@
         <p class="meta">BJIT Limited — Client: Omron (US) · Aug 2015 – Oct 2015<br>Senior Software Engineer</p>
         <p>Selenium test automation in Java using the Factory pattern; regression testing and performance analysis.</p>
         <div class="foot"><ul class="tags"><li>Java</li><li>Selenium</li><li>Gerrit</li><li>Eclipse</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: Omron (US)</dd><dt>Role</dt><dd>Senior Software Engineer</dd><dt>When</dt><dd>Aug 2015 – Oct 2015</dd></dl>
+<h4>What I did</h4>
+<ul><li>Analyzed, designed, wrote and ran test cases.</li><li>Built <b>automated test suites with Selenium</b> in Java, using the <b>Factory pattern</b>.</li><li>Ran regression testing.</li><li>Analyzed and improved performance.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Java</li><li>Selenium</li><li>Gerrit</li><li>Eclipse</li></ul>
+            <p><a href="omron-test-automation.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work data">
         <h3><a href="shopbook-db-migration.html">ShopBook — Oracle to PostgreSQL Migration R&amp;D</a></h3>
         <p class="meta">BJIT Limited · Jun 2015 – Aug 2015<br>Senior Software Engineer</p>
         <p>R&amp;D on moving an Oracle 11g database to PostgreSQL 9.4: tables, procedures and interfaces.</p>
         <div class="foot"><ul class="tags"><li>Oracle 11g</li><li>PostgreSQL 9.4</li><li>SQL</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited</dd><dt>Role</dt><dd>Senior Software Engineer</dd><dt>When</dt><dd>Jun 2015 – Aug 2015</dd></dl>
+<h4>What I did</h4>
+<ul><li>R&amp;D on an <b>Oracle 11g → PostgreSQL 9.4</b> migration: tables, procedures, TCL and interfaces.</li><li>Fixed compatibility issues and checked data integrity.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Oracle 11g</li><li>PostgreSQL 9.4</li><li>SQL</li></ul>
+            <p><a href="shopbook-db-migration.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java frontend">
         <h3><a href="issue-book.html">Issue Book</a></h3>
         <p class="meta">BJIT Limited — Client: NTT Data (Thailand) · Jul 2014 – May 2015<br>Software Engineer</p>
         <p>Java EE app on intra-mart: requirements, design, business logic, UI, mail integration and end-user documents.</p>
         <div class="foot"><ul class="tags"><li>intra-mart Accel Platform (Java EE)</li><li>JSP</li><li>JPA</li><li>JavaScript</li><li>jQuery</li><li>Postfix</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: NTT Data (Thailand)</dd><dt>Role</dt><dd>Software Engineer</dd><dt>When</dt><dd>Jul 2014 – May 2015</dd></dl>
+<h4>What I did</h4>
+<ul><li>Requirement analysis, design, business logic, UI and testing.</li><li>Server-side and browser JavaScript on the intra-mart platform.</li><li>Mail features with Postfix, IMAP and SMTP.</li><li>Investigated and fixed issues; wrote end-user documents.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>intra-mart Accel Platform (Java EE)</li><li>JSP</li><li>JPA</li><li>JavaScript</li><li>jQuery</li><li>Postfix</li><li>IMAP</li><li>SMTP</li><li>PostgreSQL</li><li>Ubuntu</li></ul>
+            <p><a href="issue-book.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java frontend">
         <h3><a href="hrms.html">HRMS — HR Management System</a></h3>
         <p class="meta">BJIT Limited — Client: NTT Data (Myanmar) · Jun 2013 – Jun 2014<br>Software Engineer</p>
         <p>HR system on intra-mart: requirements, WBS, Hibernate data models, UI, and code review for the team.</p>
         <div class="foot"><ul class="tags"><li>intra-mart Accel Platform</li><li>Java</li><li>Hibernate</li><li>PostgreSQL</li><li>Tomcat</li><li>HTML</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: NTT Data (Myanmar)</dd><dt>Role</dt><dd>Software Engineer</dd><dt>When</dt><dd>Jun 2013 – Jun 2014</dd></dl>
+<h4>What I did</h4>
+<ul><li>Requirement analysis, design, documentation and WBS.</li><li>Business logic, UI and <b>Hibernate ORM data models</b>.</li><li><b>Reviewed team code.</b></li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>intra-mart Accel Platform</li><li>Java</li><li>Hibernate</li><li>PostgreSQL</li><li>Tomcat</li><li>HTML</li><li>CSS</li><li>JavaScript</li><li>AJAX</li><li>jQuery</li><li>Gerrit</li></ul>
+            <p><a href="hrms.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java testing">
         <h3><a href="food-navi.html">Food Navi — Food Navigation System</a></h3>
         <p class="meta">BJIT Limited · Mar 2013 – May 2013<br>Software Engineer</p>
         <p>Server-side Java with TERASOLUNA, built test-first: 98% test coverage, UML design, functional spec.</p>
         <div class="foot"><ul class="tags"><li>Java</li><li>TERASOLUNA</li><li>Tomcat 7</li><li>MySQL</li><li>JUnit</li><li>Gerrit</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited</dd><dt>Role</dt><dd>Software Engineer</dd><dt>When</dt><dd>Mar 2013 – May 2013</dd></dl>
+<div class="stats"><div class="stat"><b>98%</b><span>test coverage (TDD)</span></div></div>
+<h4>What I did</h4>
+<ul><li>Server-side business logic, UI and bug fixing.</li><li>Worked <b>test-first (TDD)</b> and reached <b>98% test coverage</b>.</li><li>Wrote the functional spec and <b>UML diagrams</b>.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Java</li><li>TERASOLUNA</li><li>Tomcat 7</li><li>MySQL</li><li>JUnit</li><li>Gerrit</li></ul>
+            <p><a href="food-navi.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java testing">
         <h3><a href="ntt-offshore-trial.html">NTT Data Offshore Trial</a></h3>
         <p class="meta">BJIT Limited — Client: NTT Data (Japan) · Jan 2013 – Feb 2013<br>Software Engineer</p>
         <p>My first BJIT project: Java Servlet business logic, built test-first with 98% test coverage.</p>
         <div class="foot"><ul class="tags"><li>Java</li><li>Servlet</li><li>intra-mart J2EE 7.0</li><li>JUnit</li><li>djUnit</li><li>Resin</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>BJIT Limited — Client: NTT Data (Japan)</dd><dt>Role</dt><dd>Software Engineer</dd><dt>When</dt><dd>Jan 2013 – Feb 2013</dd></dl>
+<div class="stats"><div class="stat"><b>98%</b><span>test coverage (TDD)</span></div></div>
+<h4>What I did</h4>
+<ul><li>Business logic with Java Servlets on intra-mart J2EE.</li><li>Worked <b>test-first (TDD)</b> with JUnit/djUnit and reached <b>98% test coverage</b>.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Java</li><li>Servlet</li><li>intra-mart J2EE 7.0</li><li>JUnit</li><li>djUnit</li><li>Resin</li><li>Oracle 10g R2</li></ul>
+            <p><a href="ntt-offshore-trial.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java">
         <h3><a href="sms-vas.html">SMS Value-Added Services</a></h3>
         <p class="meta">True Services (Pvt.) Limited, Bangladesh · Aug 2012 – Dec 2012<br>Software Engineer</p>
         <p>Java server components (sockets, threads) for telco SMS value-added services, from client requirements to delivery.</p>
         <div class="foot"><ul class="tags"><li>Java</li><li>Servlet</li><li>Sockets</li><li>Threads</li><li>XML (DOM/SAX)</li><li>Log4j</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>True Services (Pvt.) Limited, Bangladesh</dd><dt>Role</dt><dd>Software Engineer</dd><dt>When</dt><dd>Aug 2012 – Dec 2012</dd></dl>
+<h4>What I did</h4>
+<ul><li>Built <b>Java server components</b> for telco SMS value-added services, using sockets and threads.</li><li>Talked to the client: gathered requirements, then did the analysis and design.</li><li>Built the UI, business logic and data access layers; tested and delivered.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Java</li><li>Servlet</li><li>Sockets</li><li>Threads</li><li>XML (DOM/SAX)</li><li>Log4j</li><li>MySQL</li><li>Tomcat</li><li>Linux</li></ul>
+            <p><a href="sms-vas.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="work java data testing">
         <h3><a href="database-copy-tool.html">Dynamic Relational Database Copy Tool</a></h3>
         <p class="meta">Therap (BD) Ltd · Nov 2011 – Mar 2012<br>Programmer</p>
         <p>My first job: a Java tool that copies data between relational databases.</p>
         <div class="foot"><ul class="tags"><li>Java</li><li>XML (DOM/SAX)</li><li>Log4j</li><li>JUnit</li><li>Apache Ant</li><li>Oracle</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>Therap (BD) Ltd</dd><dt>Role</dt><dd>Programmer</dd><dt>When</dt><dd>Nov 2011 – Mar 2012</dd></dl>
+<h4>What I did</h4>
+<ul><li>Analysis, design, implementation and unit testing of a <b>relational database copy tool</b>.</li><li>XML handling with DOM and SAX; logging with Log4j; build with Ant.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Java</li><li>XML (DOM/SAX)</li><li>Log4j</li><li>JUnit</li><li>Apache Ant</li><li>Oracle</li></ul>
+            <p><a href="database-copy-tool.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
     </div>
   </section>
@@ -150,24 +373,93 @@
         <p class="meta">Personal case study · 2026<br>Designer and reviewer (code drafted with Claude Code)</p>
         <p>Fair, repeatable random vehicle inspections: HMAC-SHA256 scoring, one pick per company and quarter, 48 tests.</p>
         <div class="foot"><ul class="tags"><li>TypeScript</li><li>Node.js</li><li>Vitest</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>Personal case study</dd><dt>Role</dt><dd>Designer and reviewer (code drafted with Claude Code)</dd><dt>When</dt><dd>2026</dd></dl>
+<div class="stats"><div class="stat"><b>48</b><span>tests</span></div><div class="stat"><b>~0.9 s</b><span>200,000 vehicles on my PC</span></div><div class="stat"><b>O(n log n)</b><span>time</span></div></div>
+<p class="links"><a class="btn primary" href="https://github.com/SudeeptaBiswas/fleetcheck_quarterly_pick" rel="noopener">View code on GitHub</a></p>
+<h4>The problem</h4>
+<p>Each quarter, a set share of a company's active vehicles gets a surprise inspection. The pick must be fair, an auditor must be able to repeat it, and it may run only once per company and quarter.</p>
+<h4>How it works</h4>
+<ul><li><b>Score:</b> each vehicle gets <code>HMAC-SHA256(seed, "quarter:vehicleId")</code>.</li><li><b>Pick:</b> sort by score, take the first <code>ceil(n × percent / 100)</code>.</li><li><b>Fair:</b> every vehicle has the same chance, k / n. A test checks this over 4,000 seeds.</li><li><b>Seed:</b> 32 random bytes, made when the pick runs and saved with it. Nobody can know the pick before it runs; anyone with the seed can repeat it.</li><li><b>Once per quarter:</b> one saved pick per company and quarter. In Postgres: a unique key and <code>INSERT ... ON CONFLICT DO NOTHING</code>.</li><li><b>Audit:</b> the vehicle list, its SHA-256 hash, the seed and the result are saved, so an auditor gets the same vehicles.</li></ul>
+<h4>How it was built</h4>
+<p>I chose the design: a random seed with HMAC ranking, Vitest, and a thin store for run-once. Claude Code drafted the code, tests and README; I reviewed every line.</p>
+<h4>Results</h4>
+<ul><li>48 tests, each named after the rule it checks.</li><li>200,000 vehicles with 50,000 picked in 876–962 ms (6 runs, Node 24, my PC).</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>TypeScript</li><li>Node.js</li><li>Vitest</li></ul>
+            <p><a href="fleetcheck.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="personal data">
         <h3><a href="pc-organizer.html">PC Organizer</a></h3>
         <p class="meta">Personal tool · 2026<br>Owner (built with AI coding agents)</p>
         <p>Finds duplicate files, reviews them in a local web page, organizes files, and backs up and syncs between two PCs through a USB folder. Safety first.</p>
         <div class="foot"><ul class="tags"><li>Python</li><li>unittest</li><li>HTML</li><li>JavaScript</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>Personal tool</dd><dt>Role</dt><dd>Owner (built with AI coding agents)</dd><dt>When</dt><dd>2026</dd></dl>
+<div class="note">Private repo. Screenshots coming.</div>
+<div class="stats"><div class="stat"><b>3</b><span>modules</span></div><div class="stat"><b>0</b><span>third-party packages</span></div></div>
+<h4>The problem</h4>
+<p>Two PCs, many drives, and years of copied files. I wanted to clean them up without ever losing a file.</p>
+<h4>Modules</h4>
+<ul><li><b>Duplicates:</b> a report-only scanner finds duplicate files; a local web page reviews them side by side, with previews.</li><li><b>Librarian:</b> classifies files, reports misplaced ones and suggests moves.</li><li><b>Courier / Backup:</b> offline backup and sync between my two PCs through a USB or transfer folder.</li></ul>
+<h4>Safety rules</h4>
+<ul><li>Deletes always go to the Recycle Bin. Never the last copy, and never a bulk "delete all".</li><li>The tool only suggests. A move or delete happens only when I click.</li><li>The web server listens on this PC only (<code>127.0.0.1</code>).</li><li>Each PC writes only to its own data folder.</li><li>Tests run on fake folders, never on real drives.</li></ul>
+<h4>How it&#x27;s built</h4>
+<p>Python standard library only, with no <code>pip install</code>. Tests use the built-in <code>unittest</code>. AI coding agents work on it in parallel, so it has a written process, short module docs and tagged commits.</p>
+<h4>Stack</h4>
+<ul class="tags"><li>Python</li><li>unittest</li><li>HTML</li><li>JavaScript</li></ul>
+            <p><a href="pc-organizer.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="personal frontend">
         <h3><a href="avocabulary.html">avocabulary</a></h3>
         <p class="meta">Personal mobile app · 2026<br>Owner</p>
         <p>Offline vocabulary app: dictionary lookup, bookmarks, GRE and IELTS word lists, courses and text-to-speech.</p>
         <div class="foot"><ul class="tags"><li>Flutter</li><li>Dart</li><li>Android</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>Personal mobile app</dd><dt>Role</dt><dd>Owner</dd><dt>When</dt><dd>2026</dd></dl>
+<div class="note">Private repo. Screenshots coming.</div>
+<h4>Features</h4>
+<ul><li><b>Offline dictionary</b> lookup from <code>.slob</code> files (XDXF/HTML).</li><li>Bookmark and revisit words.</li><li>Word lists: GRE, IELTS and more.</li><li>Courses with a learning schedule.</li><li>Text-to-speech pronunciation.</li></ul>
+<h4>How it&#x27;s built</h4>
+<p>Flutter, Android first, with a multi-platform setup. Dictionary files are not bundled; free ones come from the Kiwix library and aard2.</p>
+<h4>Stack</h4>
+<ul class="tags"><li>Flutter</li><li>Dart</li><li>Android</li></ul>
+            <p><a href="avocabulary.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
       <article class="card" data-filters="personal ai">
         <h3><a href="ai-engineering-lab.html">AI Engineering Lab</a></h3>
         <p class="meta">Personal learning project · Nov 2026 – now<br>Learner and builder</p>
         <p>Learning AI engineering by building: RAG, agents and MCP, ending with Spring Boot calling a Python AI service.</p>
         <div class="foot"><ul class="tags"><li>Python</li><li>Ollama</li><li>LangChain</li><li>LangGraph</li><li>Chroma</li><li>MCP</li></ul></div>
+        <details class="more">
+          <summary><span class="closed">Show details</span><span class="opened">Hide details</span></summary>
+          <div class="more-body">
+<dl class="facts"><dt>Organization</dt><dd>Personal learning project</dd><dt>Role</dt><dd>Learner and builder</dd><dt>When</dt><dd>Nov 2026 – now</dd></dl>
+<div class="note">Self-study. Not work experience.</div>
+<div class="stats"><div class="stat"><b>10</b><span>phases</span></div><div class="stat"><b>10</b><span>projects planned</span></div></div>
+<h4>Status</h4>
+<p>Just started. The plan is written and reviewed; the code comes next.</p>
+<h4>Goal</h4>
+<p>Learn RAG, agents and MCP by building each idea by hand first, then with a framework. Free and open-source tools first.</p>
+<h4>Plan</h4>
+<ul><li>Python for Java developers (typing, async, pydantic, pytest, uv).</li><li>LLM basics: tokens, sampling, context, embeddings.</li><li>Prompting, structured output and raw tool calling.</li><li>RAG by hand, then LangChain, then reranking.</li><li>Evals and tracing (Langfuse).</li><li>Agents: a hand-written loop, then LangGraph.</li><li>MCP: server, client, and an agent that uses MCP tools.</li><li>Serving with FastAPI and Docker, with guardrails.</li><li><b>Java bridge:</b> Spring Boot calls the AI service; a Java MCP server.</li><li>Capstone: an enterprise assistant with RAG, agents and MCP.</li></ul>
+<h4>Stack</h4>
+<ul class="tags"><li>Python</li><li>Ollama</li><li>LangChain</li><li>LangGraph</li><li>Chroma</li><li>MCP</li><li>FastAPI</li><li>Spring Boot</li></ul>
+            <p><a href="ai-engineering-lab.html">Open the full page →</a></p>
+          </div>
+        </details>
       </article>
     </div>
   </section>

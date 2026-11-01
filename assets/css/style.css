@@ -154,6 +154,15 @@ h3 { font-size: 1.15rem; margin: 0 0 6px; }
 :root[data-theme="dark"] .chip[aria-pressed="true"] { color: #0b1220; }
 .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* Expandable project cards */
+.more { margin-top: 12px; border-top: 1px solid var(--border); border-bottom: 0; padding: 10px 0 0; }
+.more summary { color: var(--accent); font-weight: 600; font-size: 15px; }
+.more .opened, .more[open] .closed { display: none; }
+.more[open] .opened { display: inline; }
+.more-body h4 { font-size: 1.05rem; margin: 20px 0 6px; }
+.more-body .stats { margin: 16px 0; }
+.card:has(.more[open]) { grid-column: 1 / -1; }
+
 /* Project detail */
 .crumb { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
 .facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 16px 0 24px; }
