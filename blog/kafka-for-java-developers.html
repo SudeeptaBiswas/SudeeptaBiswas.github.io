@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apache Kafka for Java Developers — Sudeepta Biswas</title>
+  <meta name="description" content="Kafka core concepts for Java developers: topics, partitions, consumer groups, reliability settings, and a Spring Boot example.">
+  <meta property="og:title" content="Apache Kafka for Java Developers">
+  <meta property="og:description" content="Kafka core concepts for Java developers: topics, partitions, consumer groups, reliability settings, and a Spring Boot example.">
+  <meta property="og:type" content="article">
+  <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+  <meta property="og:url" content="https://sudeeptabiswas.github.io/blog/kafka-for-java-developers.html">
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/kafka-for-java-developers.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">Sudeepta Biswas</a>
+    <nav class="nav" aria-label="Main">
+      <a href="../projects/">Projects</a>
+      <a href="../#skills">Skills</a>
+      <a href="../#experience">Experience</a>
+      <a href="./" aria-current="page">Blog</a>
+      <a href="../now.html">Now</a>
+    </nav>
+    <button class="theme-toggle" type="button">Dark</button>
+  </div>
+</header>
+
+<main id="main">
+<article class="article">
+  <p class="label">Messaging · Study notes</p>
+  <h1>Apache Kafka for Java Developers</h1>
+  <p class="post-meta">1 November 2026 · Kafka 3.x/4.x, Spring Boot 3, spring-kafka</p>
+
+  <p class="lead">Kafka is a distributed event log. Services write events to it, and other
+  services read them in order, at their own pace. This post covers the parts you need
+  before writing your first Spring Boot producer and consumer.</p>
+
+  <div class="note">These are my study notes, not production experience. I wrote them to
+  learn the topic properly. Please check the official docs (links at the end) before
+  using them in a real system.</div>
+
+  <nav class="toc" aria-label="Contents">
+    <b>Contents</b>
+    <ol>
+      <li><a href="#when">When to use Kafka</a></li>
+      <li><a href="#picture">The big picture</a></li>
+      <li><a href="#components">Core components</a></li>
+      <li><a href="#rules">Data rules: retention, acks, delivery</a></li>
+      <li><a href="#flow">How a write and a read work</a></li>
+      <li><a href="#spring">Spring Boot example</a></li>
+      <li><a href="#plain">Plain Java client</a></li>
+      <li><a href="#local">Try it locally with Docker</a></li>
+      <li><a href="#pitfalls">Common pitfalls</a></li>
+      <li><a href="#check">Check yourself</a></li>
+      <li><a href="#refs">Further reading</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="when">1. When to use Kafka</h2>
+  <p>Use Kafka when <b>many systems need the same stream of events</b>, and when you
+  may need to <b>replay</b> past events. Kafka does not delete an event when someone
+  reads it. It keeps events for a set time, for example 7 days.</p>
+  <ul>
+    <li>Good fit: order events read by billing, analytics and audit; activity logs; data pipelines.</li>
+    <li>Weaker fit: a simple job queue where one worker takes each task and then it is gone.
+      A broker like RabbitMQ is often simpler there. See my
+      <a href="rabbitmq-for-java-developers.html">RabbitMQ notes</a>.</li>
+  </ul>
+
+  <h2 id="picture">2. The big picture</h2>
+  <figure>
+    <svg viewBox="0 0 720 270" role="img" aria-labelledby="kafka-fig-title">
+      <title id="kafka-fig-title">Two producers write to a topic with two partitions. A billing group with two consumers splits the partitions. An analytics group with one consumer reads both.</title>
+      <defs>
+        <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" class="d-arrow"/>
+        </marker>
+      </defs>
+      <rect class="d-box" x="10" y="81" width="140" height="44" rx="6"/>
+      <text class="d-text" x="80" y="108" text-anchor="middle">Order service</text>
+      <rect class="d-box" x="10" y="171" width="140" height="44" rx="6"/>
+      <text class="d-text" x="80" y="198" text-anchor="middle">Payment service</text>
+      <text class="d-small" x="80" y="70" text-anchor="middle">Producers</text>
+
+      <rect class="d-box" x="190" y="20" width="280" height="230" rx="8"/>
+      <text class="d-text" x="205" y="42" font-weight="600">Kafka cluster</text>
+      <text class="d-small" x="205" y="60">topic: orders · 2 brokers · KRaft controller</text>
+      <rect class="d-key" x="210" y="78" width="240" height="50" rx="6"/>
+      <text class="d-text" x="330" y="99" text-anchor="middle">Partition 0</text>
+      <text class="d-small" x="330" y="117" text-anchor="middle">leader Broker 1 · copy on Broker 2</text>
+      <rect class="d-key" x="210" y="168" width="240" height="50" rx="6"/>
+      <text class="d-text" x="330" y="189" text-anchor="middle">Partition 1</text>
+      <text class="d-small" x="330" y="207" text-anchor="middle">leader Broker 2 · copy on Broker 1</text>
+
+      <rect class="d-box" x="520" y="20" width="190" height="130" rx="8"/>
+      <text class="d-text" x="532" y="42" font-weight="600">Group: billing</text>
+      <rect class="d-key" x="540" y="52" width="150" height="36" rx="6"/>
+      <text class="d-text" x="615" y="75" text-anchor="middle">Consumer A</text>
+      <rect class="d-key" x="540" y="100" width="150" height="36" rx="6"/>
+      <text class="d-text" x="615" y="123" text-anchor="middle">Consumer B</text>
+
+      <rect class="d-box" x="520" y="170" width="190" height="80" rx="8"/>
+      <text class="d-text" x="532" y="192" font-weight="600">Group: analytics</text>
+      <rect class="d-key" x="540" y="202" width="150" height="36" rx="6"/>
+      <text class="d-text" x="615" y="225" text-anchor="middle">Consumer X</text>
+
+      <line class="d-line" x1="150" y1="103" x2="206" y2="103" marker-end="url(#arr)"/>
+      <line class="d-line" x1="150" y1="193" x2="206" y2="193" marker-end="url(#arr)"/>
+      <line class="d-line" x1="450" y1="103" x2="536" y2="72" marker-end="url(#arr)"/>
+      <line class="d-line" x1="450" y1="193" x2="536" y2="120" marker-end="url(#arr)"/>
+      <line class="d-line" x1="450" y1="108" x2="536" y2="214" marker-end="url(#arr)"/>
+      <line class="d-line" x1="450" y1="198" x2="536" y2="226" marker-end="url(#arr)"/>
+    </svg>
+    <figcaption>Billing has 2 consumers, so each takes 1 partition. Analytics has 1 consumer, so it reads both. Each group gets every record.</figcaption>
+  </figure>
+
+  <h2 id="components">3. Core components</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Component</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td>Record</td><td>One event: key, value, headers, timestamp.</td></tr>
+      <tr><td>Topic</td><td>A named stream of records, e.g. <code>orders</code>. Append-only.</td></tr>
+      <tr><td>Partition</td><td>An ordered log. A topic is split into partitions so it can scale. Order is kept <b>only inside one partition</b>.</td></tr>
+      <tr><td>Offset</td><td>The position of a record in a partition. A consumer saves its offset to know where it stopped.</td></tr>
+      <tr><td>Producer</td><td>Writes records. Records with the same key go to the same partition, so their order is kept.</td></tr>
+      <tr><td>Consumer group</td><td>Consumers with the same group id share the partitions. Different groups each get all the data.</td></tr>
+      <tr><td>Broker / cluster</td><td>A broker is one Kafka server. A cluster is several brokers working together.</td></tr>
+      <tr><td>Replica, leader, follower</td><td>Each partition is copied to other brokers. The leader handles reads and writes; followers copy it and take over if it fails.</td></tr>
+      <tr><td>ISR</td><td>In-sync replicas: followers that are fully caught up. Only they can become leader.</td></tr>
+      <tr><td>KRaft controller</td><td>Manages cluster metadata and leader election. Built into Kafka 3.x. It replaced ZooKeeper, which Kafka 4.0 removed.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="rules">4. Data rules: retention, acks, delivery</h2>
+  <ul>
+    <li><b>Retention:</b> records stay for a set time or size. Reading does not delete them.</li>
+    <li><b>Log compaction:</b> keeps only the latest record per key. Useful for "current state" topics.</li>
+    <li><b>acks</b> (producer safety): <code>0</code> = don't wait, <code>1</code> = leader wrote it,
+      <code>all</code> = all in-sync replicas wrote it (safest).</li>
+    <li><b>Rebalance:</b> partitions are re-assigned when a consumer joins or leaves a group.</li>
+    <li><b>Delivery:</b> at-most-once, at-least-once (the usual default), or exactly-once
+      (idempotent producer + transactions).</li>
+  </ul>
+  <p>A safe default for important data: replication factor 3, <code>acks=all</code>,
+  <code>min.insync.replicas=2</code>, idempotent producer, and commit offsets
+  <b>after</b> processing.</p>
+
+  <h2 id="flow">5. How a write and a read work</h2>
+  <ol>
+    <li>The producer sends <code>(key, value)</code> with <code>acks=all</code> to the partition leader.</li>
+    <li>The leader appends the record to its log.</li>
+    <li>Followers fetch the new record. When all in-sync replicas have it, the leader acks the producer.</li>
+    <li>A consumer polls from its last offset, e.g. 42, and gets records 42 to 50.</li>
+    <li>After processing them, the consumer commits offset 51.</li>
+  </ol>
+
+  <h2 id="spring">6. Spring Boot example</h2>
+  <p>Add <code>spring-kafka</code>. Use <code>KafkaTemplate</code> to send and <code>@KafkaListener</code> to consume.</p>
+  <pre><code># application.yml
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all                       # wait for all in-sync replicas
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true      # no duplicates when the producer retries
+    consumer:
+      group-id: billing
+      auto-offset-reset: earliest     # a new group starts from the beginning
+      enable-auto-commit: false       # commit only after processing
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.example.order"
+    listener:
+      ack-mode: record                # commit after each record succeeds</code></pre>
+  <pre><code>@Configuration
+class KafkaTopics {
+    @Bean NewTopic orders() {                        // created at startup if missing
+        return TopicBuilder.name("orders").partitions(3).replicas(3).build();
+    }
+}
+
+@Service
+class OrderProducer {
+    private final KafkaTemplate&lt;String, OrderEvent&gt; kafka;
+    OrderProducer(KafkaTemplate&lt;String, OrderEvent&gt; kafka) { this.kafka = kafka; }
+
+    void publish(OrderEvent e) {
+        // key = customerId: same partition, so order is kept per customer
+        kafka.send("orders", e.customerId(), e)
+             .whenComplete((res, ex) -&gt; {
+                 if (ex != null) log.error("send failed", ex);
+                 else log.info("partition {} offset {}",
+                         res.getRecordMetadata().partition(),
+                         res.getRecordMetadata().offset());
+             });
+    }
+}
+
+@Component
+class BillingConsumer {
+    @KafkaListener(topics = "orders", groupId = "billing", concurrency = "3") // 3 threads, 3 partitions
+    void onOrder(OrderEvent e) {
+        billingService.charge(e);   // must be idempotent: the same record can arrive twice
+    }
+}
+
+record OrderEvent(String orderId, String customerId, BigDecimal amount) {}</code></pre>
+  <p>Note: <code>replicas(3)</code> needs at least 3 brokers. With the one-broker Docker
+  setup in <a href="#local">section 8</a>, use <code>replicas(1)</code>.</p>
+  <p>For retries, add <code>@RetryableTopic(attempts = "3")</code> to the listener.
+  Records that still fail go to a dead-letter topic, <code>orders-dlt</code>.</p>
+
+  <h2 id="plain">7. Plain Java client</h2>
+  <p>Without Spring, so you can see the basics:</p>
+  <pre><code>Properties p = new Properties();
+p.put("bootstrap.servers", "localhost:9092");
+p.put("key.serializer", StringSerializer.class.getName());
+p.put("value.serializer", StringSerializer.class.getName());
+p.put("acks", "all");
+try (var producer = new KafkaProducer&lt;String, String&gt;(p)) {
+    producer.send(new ProducerRecord&lt;&gt;("orders", "cust-42", "{\"orderId\":\"o1\"}"));
+}
+
+Properties c = new Properties();
+c.put("bootstrap.servers", "localhost:9092");
+c.put("group.id", "billing");
+c.put("enable.auto.commit", "false");
+c.put("key.deserializer", StringDeserializer.class.getName());
+c.put("value.deserializer", StringDeserializer.class.getName());
+try (var consumer = new KafkaConsumer&lt;String, String&gt;(c)) {
+    consumer.subscribe(List.of("orders"));
+    while (true) {
+        for (var r : consumer.poll(Duration.ofMillis(500))) {
+            System.out.printf("p%d off%d %s=%s%n", r.partition(), r.offset(), r.key(), r.value());
+        }
+        consumer.commitSync();      // after processing: at-least-once
+    }
+}</code></pre>
+
+  <h2 id="local">8. Try it locally with Docker</h2>
+  <p>One broker in KRaft mode, no ZooKeeper:</p>
+  <pre><code>docker run -d --name kafka -p 9092:9092 apache/kafka:3.9.0
+
+# create a topic with 3 partitions
+docker exec -it kafka /opt/kafka/bin/kafka-topics.sh \
+  --bootstrap-server localhost:9092 --create --topic orders --partitions 3
+
+# type key:value lines to send
+docker exec -it kafka /opt/kafka/bin/kafka-console-producer.sh \
+  --bootstrap-server localhost:9092 --topic orders \
+  --property parse.key=true --property key.separator=:
+
+# read them as group "billing"
+docker exec -it kafka /opt/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 --topic orders --group billing \
+  --from-beginning --property print.key=true
+
+# see consumer lag
+docker exec -it kafka /opt/kafka/bin/kafka-consumer-groups.sh \
+  --bootstrap-server localhost:9092 --describe --group billing</code></pre>
+
+  <h2 id="pitfalls">9. Common pitfalls</h2>
+  <ul>
+    <li><b>No key:</b> records spread across partitions, so there is no order per customer.</li>
+    <li><b>Auto-commit before processing:</b> if the app crashes, the record is lost. Commit after processing and make the consumer idempotent.</li>
+    <li><b>More consumers than partitions:</b> the extra consumers sit idle.</li>
+    <li><b>Slow processing:</b> longer than <code>max.poll.interval.ms</code> and the consumer is removed from the group, which causes repeated rebalances.</li>
+    <li><b>Adding partitions later:</b> changes which partition a key goes to, so order breaks for existing keys.</li>
+  </ul>
+
+  <h2 id="check">10. Check yourself</h2>
+  <details><summary>How does Kafka keep order?</summary><p>Only inside one partition. Use the same key for related events so they land in the same partition.</p></details>
+  <details><summary>How do you scale consumers?</summary><p>Add partitions and consumers in one group. The maximum useful consumers per group equals the number of partitions.</p></details>
+  <details><summary>How do you avoid data loss?</summary><p>Replication factor 3, <code>acks=all</code>, <code>min.insync.replicas=2</code>, idempotent producer, commit after processing.</p></details>
+  <details><summary>How do you get exactly-once?</summary><p>Inside Kafka: idempotent producer plus transactions. When writing outside Kafka, e.g. to a database: at-least-once plus an idempotent consumer.</p></details>
+  <details><summary>What is consumer lag?</summary><p>Latest offset minus committed offset. If it keeps growing, consumers are too slow.</p></details>
+  <details><summary>Kafka or RabbitMQ?</summary><p>Kafka keeps a stream that many systems read and replay. RabbitMQ delivers each job to one worker reliably. See the <a href="rabbitmq-for-java-developers.html#compare">comparison table</a>.</p></details>
+
+  <h2 id="refs">11. Further reading</h2>
+  <ul>
+    <li><a href="https://kafka.apache.org/documentation/" rel="noopener">Apache Kafka documentation</a></li>
+    <li><a href="https://docs.spring.io/spring-kafka/reference/" rel="noopener">Spring for Apache Kafka reference</a></li>
+  </ul>
+
+  <p><a href="./">← All posts</a></p>
+</article>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Sudeepta Biswas</span>
+    <span><a href="https://www.linkedin.com/in/sudeepta-biswas" rel="noopener">LinkedIn</a> · <a href="https://github.com/SudeeptaBiswas" rel="noopener">GitHub</a> · <a href="./">Blog</a></span>
+  </div>
+</footer>
+
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>
