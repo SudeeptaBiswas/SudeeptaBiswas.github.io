@@ -7,9 +7,11 @@ Java-focused portfolio. Show work in detail: job projects, personal projects,
 different technologies, screenshots where allowed. Blog of improved study notes.
 
 ## 2. Source of facts
+- Raw facts + "never claim" rules: `G:\Workspace\Projects\2026_career_transition\Code\career_transition\cv\FACTS.md`
+- Master CV (full history): `...\career_transition\cv\master.md`
 - Java CV: `G:\Workspace\Projects\2026_career_transition\Code\career_transition\cv\out\java\Sudeepta_Biswas_Senior_Java_Developer_CV.md`
 - Study notes: `...\career_transition\prep\study\*.md`
-- Rule: site text must match the CV. Update the CV first, then the site.
+- Rule: site text must match these sources. Update FACTS.md / the CV first, then the site.
 - Rule (from TOPICS.md): studied topics are never shown as work experience.
 
 ## 3. Decisions log
@@ -31,8 +33,8 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 14 | Project cards expand inline ("Show details"); detail pages kept for direct links | 2026-11-01 | cards link out only |
 | 15 | Now page: no talk about the portfolio itself; show AI Engineering Lab instead | 2026-11-01 | "React version next" line |
 | 16 | Live at https://sudeeptabiswas.github.io (GitHub Pages, branch main, root) | 2026-11-01 | — |
-| 17 | Keep GitHub link on the site | 2026-11-01 | FACTS.md line 185 "GitHub private, never on CV" (CV rule only) |
-| 18 | Home shows "Open to remote work, full CET (Berlin) hours" (FACTS.md line 325) | 2026-11-01 | location only |
+| 17 | Keep GitHub link on the site. Owner confirmed 2026-11-01; FACTS.md line 185 ("GitHub private, never on CV") is a CV rule and needs updating there | 2026-11-01 | — |
+| 18 | Home availability: "Open to remote work · 14+ years working across time zones with clients in Japan, Europe and the US" (Java CV clients) | 2026-11-02 | 2026-11-01 "full CET (Berlin) hours" — owner: too narrow |
 | 19 | Project page generator lives in repo `tools/` | 2026-11-01 | one-off script in scratchpad |
 
 Why the change (decision 4): you want to learn React. React is a separate
