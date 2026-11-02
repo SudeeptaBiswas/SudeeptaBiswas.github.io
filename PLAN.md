@@ -36,6 +36,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 17 | Keep GitHub link on the site. Owner confirmed 2026-11-01; FACTS.md line 185 ("GitHub private, never on CV") is a CV rule and needs updating there | 2026-11-01 | — |
 | 18 | Home availability: "Open to remote work · 14+ years working across time zones with clients in Japan, Europe and the US" (Java CV clients) | 2026-11-02 | 2026-11-01 "full CET (Berlin) hours" — owner: too narrow |
 | 19 | Project page generator lives in repo `tools/` | 2026-11-01 | one-off script in scratchpad |
+| 20 | Headline: "Senior Java Engineer & Tech Lead — Java 21, Spring Boot, REST APIs, Modernization" (new Java CV headline; ad titles = Senior SE / Senior Java Developer) | 2026-11-02 | 3 "Java Tech Lead" |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.

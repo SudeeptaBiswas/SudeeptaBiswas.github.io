@@ -196,7 +196,7 @@ def index():
 {chr(10).join(groups)}
 </div>"""
     out = page("Projects — Sudeepta Biswas",
-               "All projects of Sudeepta Biswas, Java Tech Lead: enterprise Java, Spring Boot, release management, PLM, AI tools and personal projects.",
+               "All projects of Sudeepta Biswas, Senior Java Engineer & Tech Lead: enterprise Java, Spring Boot, release management, PLM, AI tools and personal projects.",
                body, "")
     out += '<script src="../assets/js/filter.js"></script>\n</body>\n</html>\n'
     return out
