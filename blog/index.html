@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Blog — Sudeepta Biswas</title>
-  <meta name="description" content="Study notes on Java backend topics, starting with messaging: Apache Kafka and RabbitMQ with Spring Boot.">
+  <meta name="description" content="Notes and articles by Sudeepta Biswas, Senior Java Engineer &amp; Tech Lead, written while learning.">
   <meta property="og:title" content="Blog — Sudeepta Biswas">
-  <meta property="og:description" content="Study notes on Java backend topics, starting with messaging: Apache Kafka and RabbitMQ with Spring Boot.">
+  <meta property="og:description" content="Notes and articles by Sudeepta Biswas, Senior Java Engineer &amp; Tech Lead, written while learning.">
   <meta property="og:type" content="website">
   <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
   <meta property="og:url" content="https://sudeeptabiswas.github.io/blog/">
@@ -25,20 +25,51 @@
       <a href="../#skills">Skills</a>
       <a href="../#experience">Experience</a>
       <a href="./" aria-current="page">Blog</a>
-      <a href="../now.html">Now</a>
     </nav>
     <button class="theme-toggle" type="button">Dark</button>
   </div>
 </header>
 
-<main id="main" class="wrap">
+<main id="main">
+<div class="page-layout">
+  <nav class="toc" aria-label="Contents">
+    <details>
+    <summary>Contents</summary>
+    <div class="toc-body">
+    <div class="toc-head"><span>Contents</span><a class="toc-back" href="../" aria-label="Back to Home">← Back</a></div>
+    <ol>
+      <li><a href="#in-progress">In Progress</a></li>
+      <li><a href="#published">Published</a></li>
+      <li><a href="#planned">Planned</a></li>
+    </ol>
+    </div>
+    </details>
+  </nav>
+<div class="content">
   <section>
     <h1>Blog</h1>
-    <p class="lead">Study notes on Java backend topics. I write them while I learn, and each one is grouped by topic.</p>
+    <p class="lead">Notes from what I'm learning, written as articles.</p>
   </section>
 
   <section>
-    <h2>Messaging</h2>
+    <h2 id="in-progress">In Progress</h2>
+    <div class="grid">
+      <article class="card">
+        <h3>AI Engineering</h3>
+        <p>RAG, agents and MCP, built by hand first, then with frameworks. Ends with Spring Boot calling a Python AI service.</p>
+        <p class="foot"><a href="../projects/ai-engineering-lab.html">AI Engineering Lab →</a></p>
+      </article>
+      <article class="card">
+        <h3>CI/CD with Jenkins and Docker</h3>
+        <p>A Jenkins pipeline that builds an app and deploys it with Docker.</p>
+        <p class="foot muted small">Private repo · details coming</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2 id="published">Published</h2>
+    <p class="label">Messaging</p>
     <ul class="post-list">
       <li>
         <h3><a href="kafka-for-java-developers.html">Apache Kafka for Java Developers</a></h3>
@@ -52,6 +83,70 @@
       </li>
     </ul>
   </section>
+
+  <section>
+    <h2 id="planned">Planned</h2>
+    <p class="muted">Not written yet. Each one gets a link when it's published.</p>
+    <ul class="post-list">
+      <li>
+        <h3>Optimistic Locking in Practice</h3>
+        <p class="muted small">Java · From work</p>
+        <p>How to stop two users from overwriting each other's changes, and what to show the user when it happens.</p>
+      </li>
+      <li>
+        <h3>Fixing CVEs with OSV-Scanner</h3>
+        <p class="muted small">Java · From work</p>
+        <p>Finding vulnerable libraries, upgrading them and forcing safe transitive versions in Gradle.</p>
+      </li>
+      <li>
+        <h3>AI Agents Write the Code, Humans Approve</h3>
+        <p class="muted small">AI delivery · From work</p>
+        <p>A delivery process where AI agents plan and code changes and every change needs human approval.</p>
+      </li>
+      <li>
+        <h3>Design Patterns in Java and Spring</h3>
+        <p class="muted small">Java · Study notes</p>
+        <p>The patterns I use most, one at a time: the problem, the code without and with the pattern, and how Spring uses it.</p>
+      </li>
+      <li>
+        <h3>Database Scaling: Partitioning, Sharding and Query Routing</h3>
+        <p class="muted small">System design · Study notes</p>
+        <p>What happens when one database becomes the bottleneck, and the steps from partitioning to sharding and routing.</p>
+      </li>
+      <li>
+        <h3>React for Java Developers</h3>
+        <p class="muted small">Frontend · Study notes</p>
+        <p>Components, state, hooks and routing, learned by building.</p>
+      </li>
+      <li>
+        <h3>NoSQL and MongoDB for Java Developers</h3>
+        <p class="muted small">System design · Study notes</p>
+        <p>Document design, practical queries and when a document store fits better than SQL.</p>
+      </li>
+      <li>
+        <h3>Containers and Kubernetes Basics</h3>
+        <p class="muted small">Cloud · Study notes</p>
+        <p>Images, pods, deployments and services, with a local demo.</p>
+      </li>
+      <li>
+        <h3>Terraform and GitHub Actions: a Local Lab</h3>
+        <p class="muted small">Cloud · Study notes</p>
+        <p>Infrastructure as code and a CI pipeline, built and run as a small local demo.</p>
+      </li>
+      <li>
+        <h3>Claude Code in Action: Course Recap</h3>
+        <p class="muted small">AI delivery · Study notes</p>
+        <p>What I took from Anthropic's free Claude Code course, lesson by lesson.</p>
+      </li>
+      <li>
+        <h3>PLM on the 3DEXPERIENCE Platform</h3>
+        <p class="muted small">PLM · Study notes</p>
+        <p>What PLM is and how the 3DEXPERIENCE platform fits together.</p>
+      </li>
+    </ul>
+  </section>
+</div>
+</div>
 </main>
 
 <footer class="site-footer">
@@ -62,5 +157,6 @@
 </footer>
 
 <script src="../assets/js/theme.js"></script>
+<script src="../assets/js/toc.js"></script>
 </body>
 </html>
