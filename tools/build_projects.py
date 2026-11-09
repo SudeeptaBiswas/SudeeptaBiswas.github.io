@@ -95,7 +95,6 @@ def page(title, desc, body, path):
       <a href="../#skills">Skills</a>
       <a href="../#experience">Experience</a>
       <a href="../blog/">Blog</a>
-      <a href="../now.html">Now</a>
     </nav>
     <button class="theme-toggle" type="button">Dark</button>
   </div>
@@ -198,7 +197,7 @@ def index():
     out = page("Projects — Sudeepta Biswas",
                "All projects of Sudeepta Biswas, Senior Java Engineer & Tech Lead: enterprise Java, Spring Boot, release management, PLM, AI tools and personal projects.",
                body, "")
-    out += '<script src="../assets/js/filter.js"></script>\n</body>\n</html>\n'
+    out += '<script src="../assets/js/filter.js"></script>\n<script src="../assets/js/toc.js"></script>\n</body>\n</html>\n'
     return out
 
 
@@ -210,30 +209,82 @@ def section(h, content, hx="h2"):
     return f"<{hx}>{e(h)}</{hx}>\n{inner}\n"
 
 
-def detail(i, p):
-    prev_p = PROJECTS[i - 1] if i > 0 else None
-    next_p = PROJECTS[i + 1] if i < len(PROJECTS) - 1 else None
+MONTHS = {m: i for i, m in enumerate(
+    ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], 1)}
+
+
+def start_key(p):
+    """Start date from 'Mon YYYY – ...' or 'YYYY – ...'. Year only = month 0, so it
+    sorts after the dated projects of that year (the month is not known)."""
+    m = re.match(r"(?:([A-Z][a-z]{2}) )?(\d{4})", p["dates"])
+    assert m and (m.group(1) is None or m.group(1) in MONTHS), f"{p['slug']}: can't read start of dates {p['dates']!r}"
+    return (int(m.group(2)), MONTHS.get(m.group(1), 0))
+
+
+# Newest first. sorted() is stable, so equal dates keep their order in projects_data.py.
+BY_DATE = sorted(PROJECTS, key=start_key, reverse=True)
+
+
+PANEL_GROUPS = [("work", "Work"), ("personal", "Personal")]
+# Panel order, also used for prev/next: Work then Personal, each newest first.
+ORDER = [p for k, _ in PANEL_GROUPS for p in BY_DATE if p["kind"] == k]
+
+
+def project_list(current):
+    """Left panel on project pages: titles only, in 2 groups, newest first."""
+    groups = []
+    for k, label in PANEL_GROUPS:
+        items = []
+        for p in ORDER:
+            if p["kind"] != k:
+                continue
+            cur = ' class="active" aria-current="page"' if p is current else ""
+            items.append(f'        <li><a href="{p["slug"]}.html"{cur}>{e(p["title"])}</a></li>')
+        # The group holding the current page starts open; the other opens on click.
+        is_open = " open" if current["kind"] == k else ""
+        groups.append(f'      <li class="toc-group"><details{is_open}><summary>{label}</summary>\n'
+                      f'        <ul>\n{chr(10).join(items)}\n        </ul></details></li>')
+    return f"""  <nav class="toc" aria-label="All projects">
+    <details>
+    <summary>All projects</summary>
+    <div class="toc-body">
+    <div class="toc-head"><span>All projects</span><a class="toc-back" href="./" aria-label="Back to Projects">← Back</a></div>
+    <ul class="toc-list">
+{chr(10).join(groups)}
+    </ul>
+    </div>
+    </details>
+  </nav>"""
+
+
+def detail(p):
+    i = ORDER.index(p)
+    prev_p = ORDER[i - 1] if i > 0 else None
+    next_p = ORDER[i + 1] if i < len(ORDER) - 1 else None
     pn = '<nav class="pager" aria-label="More projects">'
     pn += f'<a href="{prev_p["slug"]}.html">← {e(prev_p["title"])}</a>' if prev_p else "<span></span>"
     pn += f'<a href="{next_p["slug"]}.html">{e(next_p["title"])} →</a>' if next_p else "<span></span>"
     pn += "</nav>"
     kind = "Work project" if p["kind"] == "work" else "Personal project"
-    body = f"""<article class="article">
+    body = f"""<div class="page-layout">
+{project_list(p)}
+<article class="article">
   <p class="crumb"><a href="./">Projects</a> / {kind}</p>
   <h1>{e(p['title'])}</h1>
 {story(p, "h2")}
   {pn}
-</article>"""
+</article>
+</div>"""
     desc = plain(p["card"])
     out = page(f"{p['title']} — Sudeepta Biswas", desc, body, p["slug"] + ".html")
-    return out + "</body>\n</html>\n"
+    return out + '<script src="../assets/js/toc.js"></script>\n</body>\n</html>\n'
 
 
 with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8", newline="\n") as f:
     f.write(index())
-for i, p in enumerate(PROJECTS):
+for p in PROJECTS:
     with open(os.path.join(OUT, p["slug"] + ".html"), "w", encoding="utf-8", newline="\n") as f:
-        f.write(detail(i, p))
+        f.write(detail(p))
 print(f"wrote index + {len(PROJECTS)} project pages")
 
 # Pages left from a renamed or removed project stay live until deleted by hand.

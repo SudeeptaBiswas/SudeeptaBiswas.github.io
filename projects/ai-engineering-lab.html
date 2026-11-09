@@ -25,13 +25,48 @@
       <a href="../#skills">Skills</a>
       <a href="../#experience">Experience</a>
       <a href="../blog/">Blog</a>
-      <a href="../now.html">Now</a>
     </nav>
     <button class="theme-toggle" type="button">Dark</button>
   </div>
 </header>
 
 <main id="main">
+<div class="page-layout">
+  <nav class="toc" aria-label="All projects">
+    <details>
+    <summary>All projects</summary>
+    <div class="toc-body">
+    <div class="toc-head"><span>All projects</span><a class="toc-back" href="./" aria-label="Back to Projects">← Back</a></div>
+    <ul class="toc-list">
+      <li class="toc-group"><details><summary>Work</summary>
+        <ul>
+        <li><a href="ai-requirements-platform.html">AI Requirements Documentation Platform</a></li>
+        <li><a href="rims-legacy-migration.html">RIMS — Legacy Migration to Spring Boot &amp; React.js</a></li>
+        <li><a href="ericsson-release-management.html">Release Management for a 12-App PLM Platform</a></li>
+        <li><a href="valmet-plm-platform.html">Enterprise PLM Platform (CATIA V6)</a></li>
+        <li><a href="valmet-enovia-platform.html">ENOVIA PLM Platform (CATIA V5)</a></li>
+        <li><a href="omron-test-automation.html">Omron Wellness — Test Automation</a></li>
+        <li><a href="shopbook-db-migration.html">ShopBook — Oracle to PostgreSQL Migration R&amp;D</a></li>
+        <li><a href="elk-log-monitoring.html">ELK Log Monitoring</a></li>
+        <li><a href="ocr-document-search.html">OCR Document Search</a></li>
+        <li><a href="issue-book.html">Issue Book</a></li>
+        <li><a href="hrms.html">HRMS — HR Management System</a></li>
+        <li><a href="food-navi.html">Food Navi — Food Navigation System</a></li>
+        <li><a href="ntt-offshore-trial.html">NTT Data Offshore Trial</a></li>
+        <li><a href="sms-vas.html">SMS Value-Added Services</a></li>
+        <li><a href="database-copy-tool.html">Dynamic Relational Database Copy Tool</a></li>
+        </ul></details></li>
+      <li class="toc-group"><details open><summary>Personal</summary>
+        <ul>
+        <li><a href="ai-engineering-lab.html" class="active" aria-current="page">AI Engineering Lab</a></li>
+        <li><a href="fleetcheck.html">FleetCheck — Quarterly Random Pick</a></li>
+        <li><a href="pc-organizer.html">PC Organizer</a></li>
+        <li><a href="avocabulary.html">avocabulary</a></li>
+        </ul></details></li>
+    </ul>
+    </div>
+    </details>
+  </nav>
 <article class="article">
   <p class="crumb"><a href="./">Projects</a> / Personal project</p>
   <h1>AI Engineering Lab</h1>
@@ -46,8 +81,9 @@
 <ul><li>Python for Java developers (typing, async, pydantic, pytest, uv).</li><li>LLM basics: tokens, sampling, context, embeddings.</li><li>Prompting, structured output and raw tool calling.</li><li>RAG by hand, then LangChain, then reranking.</li><li>Evals and tracing (Langfuse).</li><li>Agents: a hand-written loop, then LangGraph.</li><li>MCP: server, client, and an agent that uses MCP tools.</li><li>Serving with FastAPI and Docker, with guardrails.</li><li><b>Java bridge:</b> Spring Boot calls the AI service; a Java MCP server.</li><li>Capstone: an enterprise assistant with RAG, agents and MCP.</li></ul>
 <h2>Stack</h2>
 <ul class="tags"><li>Python</li><li>Ollama</li><li>LangChain</li><li>LangGraph</li><li>Chroma</li><li>MCP</li><li>FastAPI</li><li>Spring Boot</li></ul>
-  <nav class="pager" aria-label="More projects"><a href="avocabulary.html">← avocabulary</a><span></span></nav>
+  <nav class="pager" aria-label="More projects"><a href="database-copy-tool.html">← Dynamic Relational Database Copy Tool</a><a href="fleetcheck.html">FleetCheck — Quarterly Random Pick →</a></nav>
 </article>
+</div>
 </main>
 
 <footer class="site-footer">
@@ -58,5 +94,6 @@
 </footer>
 
 <script src="../assets/js/theme.js"></script>
+<script src="../assets/js/toc.js"></script>
 </body>
 </html>
