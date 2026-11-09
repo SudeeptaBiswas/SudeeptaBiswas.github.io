@@ -25,13 +25,32 @@
       <a href="../#skills">Skills</a>
       <a href="../#experience">Experience</a>
       <a href="./" aria-current="page">Blog</a>
-      <a href="../now.html">Now</a>
     </nav>
     <button class="theme-toggle" type="button">Dark</button>
   </div>
 </header>
 
 <main id="main">
+<div class="page-layout">
+  <nav class="toc" id="contents" aria-label="Contents">
+    <details>
+    <summary>Contents</summary>
+    <div class="toc-body">
+    <div class="toc-head"><span>Contents</span><a class="toc-back" href="./" aria-label="Back to Blog">← Back</a></div>
+    <ol>
+      <li><a href="#picture">The big picture</a></li>
+      <li><a href="#components">Core components</a></li>
+      <li><a href="#exchanges">Exchange types</a></li>
+      <li><a href="#reliability">Reliability: not losing messages</a></li>
+      <li><a href="#spring">Spring Boot example</a></li>
+      <li><a href="#compare">RabbitMQ vs Kafka</a></li>
+      <li><a href="#fit">Where it fits in a business app</a></li>
+      <li><a href="#check">Check yourself</a></li>
+      <li><a href="#refs">Further reading</a></li>
+    </ol>
+    </div>
+    </details>
+  </nav>
 <article class="article">
   <p class="label">Messaging · Study notes</p>
   <h1>RabbitMQ for Java Developers</h1>
@@ -44,21 +63,6 @@
   <div class="note">These are my study notes, not production experience. I wrote them to
   learn the topic properly. Please check the official docs (links at the end) before
   using them in a real system.</div>
-
-  <nav class="toc" aria-label="Contents">
-    <b>Contents</b>
-    <ol>
-      <li><a href="#picture">The big picture</a></li>
-      <li><a href="#components">Core components</a></li>
-      <li><a href="#exchanges">Exchange types</a></li>
-      <li><a href="#reliability">Reliability: not losing messages</a></li>
-      <li><a href="#spring">Spring Boot example</a></li>
-      <li><a href="#compare">RabbitMQ vs Kafka</a></li>
-      <li><a href="#fit">Where it fits in a business app</a></li>
-      <li><a href="#check">Check yourself</a></li>
-      <li><a href="#refs">Further reading</a></li>
-    </ol>
-  </nav>
 
   <h2 id="picture">1. The big picture</h2>
   <figure>
@@ -226,8 +230,9 @@ void onOrder(OrderDto o) { billingService.charge(o); }</code></pre>
     <li><a href="https://docs.spring.io/spring-amqp/reference/" rel="noopener">Spring AMQP reference</a></li>
   </ul>
 
-  <p><a href="./">← All posts</a></p>
+  <p class="back-links"><a href="#contents">↑ Back to contents</a> <a href="./">← All posts</a></p>
 </article>
+</div>
 </main>
 
 <footer class="site-footer">
@@ -238,5 +243,6 @@ void onOrder(OrderDto o) { billingService.charge(o); }</code></pre>
 </footer>
 
 <script src="../assets/js/theme.js"></script>
+<script src="../assets/js/toc.js"></script>
 </body>
 </html>

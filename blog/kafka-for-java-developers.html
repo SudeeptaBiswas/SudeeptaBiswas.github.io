@@ -25,28 +25,18 @@
       <a href="../#skills">Skills</a>
       <a href="../#experience">Experience</a>
       <a href="./" aria-current="page">Blog</a>
-      <a href="../now.html">Now</a>
     </nav>
     <button class="theme-toggle" type="button">Dark</button>
   </div>
 </header>
 
 <main id="main">
-<article class="article">
-  <p class="label">Messaging · Study notes</p>
-  <h1>Apache Kafka for Java Developers</h1>
-  <p class="post-meta">1 November 2026 · Kafka 3.x/4.x, Spring Boot 3, spring-kafka</p>
-
-  <p class="lead">Kafka is a distributed event log. Services write events to it, and other
-  services read them in order, at their own pace. This post covers the parts you need
-  before writing your first Spring Boot producer and consumer.</p>
-
-  <div class="note">These are my study notes, not production experience. I wrote them to
-  learn the topic properly. Please check the official docs (links at the end) before
-  using them in a real system.</div>
-
-  <nav class="toc" aria-label="Contents">
-    <b>Contents</b>
+<div class="page-layout">
+  <nav class="toc" id="contents" aria-label="Contents">
+    <details>
+    <summary>Contents</summary>
+    <div class="toc-body">
+    <div class="toc-head"><span>Contents</span><a class="toc-back" href="./" aria-label="Back to Blog">← Back</a></div>
     <ol>
       <li><a href="#when">When to use Kafka</a></li>
       <li><a href="#picture">The big picture</a></li>
@@ -60,7 +50,21 @@
       <li><a href="#check">Check yourself</a></li>
       <li><a href="#refs">Further reading</a></li>
     </ol>
+    </div>
+    </details>
   </nav>
+<article class="article">
+  <p class="label">Messaging · Study notes</p>
+  <h1>Apache Kafka for Java Developers</h1>
+  <p class="post-meta">1 November 2026 · Kafka 3.x/4.x, Spring Boot 3, spring-kafka</p>
+
+  <p class="lead">Kafka is a distributed event log. Services write events to it, and other
+  services read them in order, at their own pace. This post covers the parts you need
+  before writing your first Spring Boot producer and consumer.</p>
+
+  <div class="note">These are my study notes, not production experience. I wrote them to
+  learn the topic properly. Please check the official docs (links at the end) before
+  using them in a real system.</div>
 
   <h2 id="when">1. When to use Kafka</h2>
   <p>Use Kafka when <b>many systems need the same stream of events</b>, and when you
@@ -294,8 +298,9 @@ docker exec -it kafka /opt/kafka/bin/kafka-consumer-groups.sh \
     <li><a href="https://docs.spring.io/spring-kafka/reference/" rel="noopener">Spring for Apache Kafka reference</a></li>
   </ul>
 
-  <p><a href="./">← All posts</a></p>
+  <p class="back-links"><a href="#contents">↑ Back to contents</a> <a href="./">← All posts</a></p>
 </article>
+</div>
 </main>
 
 <footer class="site-footer">
@@ -306,5 +311,6 @@ docker exec -it kafka /opt/kafka/bin/kafka-consumer-groups.sh \
 </footer>
 
 <script src="../assets/js/theme.js"></script>
+<script src="../assets/js/toc.js"></script>
 </body>
 </html>

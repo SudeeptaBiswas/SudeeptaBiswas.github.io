@@ -33,7 +33,7 @@
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }
-[id] { scroll-margin-top: 72px; }
+[id] { scroll-margin-top: calc(var(--header-h, 61px) + 12px); }
 
 body {
   margin: 0;
@@ -214,6 +214,100 @@ th { background: var(--bg-soft); font-weight: 600; }
 .toc { background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 20px; }
 .toc ol { margin: 6px 0 0; padding-left: 20px; }
 
+/* Left "Contents" panel: closed box on small screens, sticky side panel on wide ones */
+.page-layout { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+.page-layout > .toc { margin-top: 24px; padding: 10px 16px; }
+.page-layout > .article { padding: 32px 0 40px; max-width: none; margin: 0; }
+.page-layout > .content { min-width: 0; padding-bottom: 40px; }
+/* Less gap between the page intro and the first section */
+.page-layout > .content > section:first-child { padding-bottom: 0; }
+.page-layout > .content > section:first-child + section { padding-top: 16px; }
+.toc details { border: 0; padding: 0; }
+.toc summary { font-weight: 600; }
+.toc li { margin: 2px 0; }
+.toc a { display: block; margin-left: -4px; padding: 0 4px; border-radius: 4px; }
+.toc a.active { color: var(--text); font-weight: 600; background: var(--accent-soft); }
+/* Label row: the summary shows the label, so here only "← Back" shows, right-aligned on that line */
+.page-layout > .toc { position: relative; }
+.toc-head { position: absolute; top: 10px; right: 16px; }
+.toc-head span { display: none; }
+.toc a.toc-back { display: inline; margin: 0; padding: 0 4px; font-size: 14px; font-weight: 400; line-height: 26px; }
+/* Lists scroll inside the panel; toc.js sets their height to the free space */
+.toc-list, .toc-body ol { scrollbar-width: thin; }
+
+/* Smaller screens with JS: toc.js moves the panel into the header, before the site name */
+.toc-in-header .site-header { position: sticky; }
+.site-header .toc.in-header { background: none; border: 0; padding: 0; margin: 0; }
+.toc.in-header > details > summary {
+  list-style: none; font-size: 0; line-height: 1;
+  border: 1px solid var(--muted); border-radius: 8px; background: var(--bg-soft);
+  padding: 6px 10px; color: var(--text);
+}
+.toc.in-header > details > summary::-webkit-details-marker { display: none; }
+.toc.in-header > details > summary::before { content: "☰"; content: "☰" / ""; font-size: 18px; }
+.toc.in-header > details[open] > summary { background: var(--accent-soft); border-color: var(--accent); }
+.toc.in-header > details > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.toc.in-header .toc-body {
+  position: absolute; left: 0; right: 0; top: 100%;
+  background: var(--bg); border-bottom: 1px solid var(--border); box-shadow: 0 6px 16px rgba(20, 30, 50, 0.12);
+  padding: 12px 20px 16px; font-size: 15px;
+}
+.toc.in-header .toc-head { position: static; display: flex; justify-content: space-between; align-items: baseline; }
+.toc.in-header .toc-head span { display: inline; font-weight: 600; line-height: 26px; }
+/* Menu lists scroll; toc.js sets their height to the free space */
+.toc.in-header .toc-body ol, .toc.in-header .toc-list { max-width: 760px; overflow-y: auto; }
+/* Phones: the site links move into the menu (toc.js), so the header fits on one row */
+.toc-body > .nav {
+  display: flex; flex-wrap: wrap; gap: 2px 20px;
+  margin: 0 0 10px; padding: 0 0 10px; border-bottom: 1px solid var(--border);
+}
+.toc .toc-body > .nav a { display: inline-block; margin: 0; padding: 4px 0; font-size: 15px; }
+.toc-body > .nav:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
+@media (max-width: 600px) {
+  .toc-in-header .site-header .wrap { min-height: 52px; }
+}
+
+/* Project pages: titles only, grouped Work / Personal, newest first */
+.toc-list, .toc-list ul { list-style: none; margin: 0; padding: 0; }
+.toc-list { margin-top: 6px; }
+.toc-list li { margin: 0; }
+.toc-list a { margin-left: 0; padding: 3px 6px; line-height: 1.35; }
+.toc-group + .toc-group { margin-top: 8px; }
+.toc-group > details > summary {
+  display: block; padding: 2px 6px; cursor: pointer; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted);
+}
+.toc-group > details > summary::before { content: "▸ "; content: "▸ " / ""; }
+.toc-group > details[open] > summary::before { content: "▾ "; content: "▾ " / ""; }
+.toc-group > details > summary::-webkit-details-marker { display: none; }
+.toc-group > details > summary:hover { color: var(--text); }
+.back-links { display: flex; gap: 20px; flex-wrap: wrap; }
+@media (min-width: 1100px) {
+  /* Same width as the header: 960px minus 20px padding each side */
+  .page-layout {
+    max-width: var(--max); display: grid; grid-template-columns: 200px minmax(0, 680px);
+    gap: 40px; align-items: start;
+  }
+  /* The panel starts where it sticks (20px under the header), so it doesn't jump on scroll.
+     toc.js sets its height (header to footer); the max-height here is only the no-JS fallback. */
+  .page-layout > .toc {
+    position: sticky; top: calc(var(--header-h, 61px) + 20px); margin-top: 20px;
+    max-height: calc(100vh - var(--header-h, 61px) - 140px); overflow-y: auto; font-size: 14px;
+  }
+  /* Only the list scrolls, so the label and "← Back" stay in view */
+  .page-layout > .toc .toc-list, .page-layout > .toc .toc-body ol { overflow-y: auto; }
+  .page-layout > .article { padding-top: 20px; }
+  /* First line of a post lines up with the top of the panel */
+  .page-layout > .article > :first-child { margin-top: 0; }
+  .page-layout > .article > .label:first-child { display: block; }
+  /* Same 20px gap above the footer as under the header */
+  main:has(> .page-layout) { padding-bottom: 20px; }
+  .page-layout > .content > section:first-child { padding-top: 20px; }
+  /* toc.js adds .pinned on wide screens: the panel stays open, the label can't toggle it */
+  .toc details.pinned > summary { cursor: default; list-style: none; }
+  .toc details.pinned > summary::-webkit-details-marker { display: none; }
+}
+
 details { border-bottom: 1px solid var(--border); padding: 10px 0; }
 summary { cursor: pointer; font-weight: 600; }
 details p { margin: 8px 0 0; }
@@ -249,5 +343,5 @@ figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; text-align: 
 }
 
 @media print {
-  .site-header, .site-footer, .theme-toggle { display: none; }
+  .site-header, .site-footer, .theme-toggle, .page-layout > .toc, .back-links { display: none; }
 }
