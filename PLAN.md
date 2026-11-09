@@ -37,6 +37,22 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 18 | Home availability: "Open to remote work · 14+ years working across time zones with clients in Japan, Europe and the US" (Java CV clients) | 2026-11-02 | 2026-11-01 "full CET (Berlin) hours" — owner: too narrow |
 | 19 | Project page generator lives in repo `tools/` | 2026-11-01 | one-off script in scratchpad |
 | 20 | Headline: "Senior Java Engineer & Tech Lead — Java 21, Spring Boot, REST APIs, Modernization" (new Java CV headline; ad titles = Senior SE / Senior Java Developer) | 2026-11-02 | 3 "Java Tech Lead" |
+| 21 | Posts + Blog page get a left "Contents" panel: sticky on wide screens (1100px+), highlights the section being read; closed box on small screens (`assets/js/toc.js`) | 2026-11-09 | Contents box inside the post only |
+| 22 | Now page merged into Blog (`blog/`); `now.html` deleted, "Now" removed from nav | 2026-11-09 | Now page part of 7, and 15 |
+| 23 | Blog page has 3 sections in this order: In Progress, Published, Planned | 2026-11-09 | One list of posts grouped by topic |
+| 24 | Blog "Studying": Messaging card removed (both posts published); React moved to Planned. Cloud + System design cards removed (already in Planned). "Writing now" removed: its 2 posts moved to Planned. A Planned item gets a link only when its post is published | 2026-11-09 | 5 Studying cards from old Now page |
+| 25 | Contents panel: "← Back" right-aligned on the Contents line (post → Blog, Blog → Home, project → Projects). Below 1100px (with JS) the panel moves into the sticky header as a ☰ button before the site name | 2026-11-09 | Closed box above content that scrolled away |
+| 26 | Project pages get the same left panel: titles only (no dates), 2 groups Work then Personal, each newest first by start date (year-only dates sort after dated ones of that year; ties keep data order). Prev/next links follow the same order | 2026-11-09 | Prev/next in data order, no list |
+| 27 | Blog Studying: add card "CI/CD with Jenkins and Docker" (repo `jenkins_docker_cicd`, private: GitHub 404 on 2026-11-09, so no link). Details later | 2026-11-09 | 1 Studying card |
+| 28 | Blog In Progress: date, Work list and "Studying" heading removed (Work items already have project pages). Kept: one line "Things I'm learning now. I don't list them as work experience." + study cards | 2026-11-10 | Date + Work list + Studying heading |
+| 29 | Project panel groups Work / Personal collapse and expand; the current page's group starts open | 2026-11-10 | Both groups always shown |
+| 30 | Blog intro is generic, so it needn't change when topics change: "Notes from what I'm learning, written as articles." Smaller gap below it | 2026-11-10 | Intro listing current topics |
+| 31 | Wide screens: panel and page title start 20px under the header (was 40px), the same place the panel sticks, so it no longer jumps on scroll. Panel height capped so the footer never pushes it under the header (was happening on project pages) | 2026-11-10 | 40px top gap, panel jumped 20px; slid under header at page end |
+| 32 | Blog In Progress: "not work experience" line removed. Owner: the Blog is a blog, not a work list. Rule still met: each post keeps its "study notes" box, and study topics stay off Home skills/experience | 2026-11-10 | 28 (one note line kept) |
+| 33 | Phones (600px and less, pages with the panel): site links move into the ☰ menu, above Contents. Header is 1 row, 53px (was 2 rows, 82px, at 375px) | 2026-11-10 | 2-row sticky header |
+| 34 | Panel height measured in toc.js, not fixed CSS numbers: list fills the free space (window bottom, or end of the content column if sooner). Thin scrollbar. At 800px window: 699px mid-page (was 580px) | 2026-11-10 | 31's fixed caps (100vh minus 140px / 210px) |
+| 35 | Panel height changes only on resize, never on scroll (scroll-time resizing made it flicker and get pushed by the footer). Height = window minus header, footer and two 20px gaps; 20px above the footer, same as under the header | 2026-11-10 | 34's scroll-time resizing |
+| 36 | Phones: every page gets the 1-row header with a ☰ menu (home, projects list and 404 too; site links only there) | 2026-11-10 | 33 (pages with the panel only) |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -45,8 +61,7 @@ learning project; v1 ships fast in plain HTML/CSS.
 | Page | File | Holds |
 |---|---|---|
 | Home | `index.html` | Hero, key numbers, projects, skills matrix, experience, contact |
-| Now | `now.html` | Working on + learning (study topics live here, not in skills) |
-| Blog index | `blog/index.html` | Posts grouped by topic |
+| Blog | `blog/index.html` | In Progress (study cards) · Published · Planned. Study topics live here, not in skills |
 | Posts | `blog/<slug>.html` | One improved study note each |
 
 ## 5. Plan review — issues found
@@ -93,6 +108,50 @@ Not done (open):
 
 Project pages are generated: edit `tools/projects_data.py`, run
 `python tools/build_projects.py` (see CLAUDE.md).
+
+## 6c. Review round 3 — UI of left panel + Blog page (2026-11-09)
+Independent agent, headless Edge at 1400 / 1200x600 / 900 / 500 px, light + dark.
+Works (tested): highlight on scroll, click and at bottom; closed on small screens, tap opens, link tap closes; dark mode.
+
+| # | Sev | Where | Problem | Fix |
+|---|---|---|---|---|
+| U1 | High | style.css (wide summary rules), toc.js | Wide: Enter/Space on "Contents" closes the panel; mouse can't reopen it | JS blocks the toggle when wide + `tabindex=-1`; drop pointer-events rule |
+| U2 | High | style.css | Wide + no JS: panel shows only "Contents", can't open | Wide-only summary rules behind `html.js` class (or U1 fix) |
+| U3 | Med | style.css `.page-layout` | Layout 1060px vs header 960px: edges don't line up | Columns `200px minmax(0,720px)`, gap 40 = 960 |
+| U4 | Med | blog/index.html | Heading levels flat: cards + post titles are h3 under h3 | Inner titles → h4 |
+| U5 | Med | blog/index.html | Published posts not visible on first screen | Conflicts with decision 23 (owner order) — owner to decide |
+| U6 | Low | toc.js | After tap on small screens, focus drops to body | Focus target heading (`tabindex=-1`) |
+| U7 | Low | style.css `.toc a.active` | Highlight mostly bold; colour close to link colour | 3px accent bar; `aria-current="location"` |
+| U8 | Low | blog/index.html | Inline `style="margin-top:28px"` | Use a class |
+| U9 | Low | posts, 600px and below | Header not sticky, no way back to Contents | "Back to contents" link at end of post |
+| U10 | Low | blog/index.html | Wide: h1 ~30px lower than panel top | First section 40px top padding |
+
+Not checked: real phones under 496px, Safari/Firefox, real screen reader, touch scrolling.
+
+Fixed 2026-11-09 (retest: 24/24 browser checks pass, 0 broken links): U1–U4, U6–U10. U2 solved by U1 (wide rules only apply when JS adds `.pinned`).
+U3: header content is 920px (960 minus padding), so columns are 200 + 40 + 680. U7: soft background on the active link instead of a bar (the bar overlapped the numbers).
+U5: kept as is, owner keeps decision 23 order; revisit next.
+
+## 6d. Review round 4 — all changes vs owner feedback (2026-11-10)
+Independent agent checked all 25 pages against the 11 feedback items: 9 met, 2 partly (fixed below).
+
+| # | Type | Finding | Done |
+|---|---|---|---|
+| R1 | Bug | Tab past the last menu link left the menu open over the page | Menu closes when focus leaves it |
+| R2 | Improvement | Home, projects list, 404: 2-row phone header | ☰ menu with site links on every page (decision 36) |
+| R3 | Bug | Blog cards h4 directly under h2 | Cards are h3 |
+| R4 | Feedback | Post first line 12px lower than the panel top | Aligned (0px) |
+| R5 | Improvement | Current project centred in list, hid the "Work" label | Scrolls only if out of view, only as far as needed |
+| R6 | Bug | No JS: opened project panel went under the header at page end | CSS fallback height |
+| R7 | Improvement | Wide label looks like a button but does nothing | `aria-disabled` |
+| R9 | Dead code | `.sub`, h4 rules, `position: static`, fallback calc, 2 split media blocks, 60/61px fallbacks, fixed 120px threshold | Removed / merged / tied to header height |
+| R10 | Improvement | Print showed "Back to contents" | Hidden in print |
+| R11 | Text | "AI engineering" not Title Case | "AI Engineering" |
+| R13 | Bug | 404 footer had no Blog link | Added |
+| R8 | Improvement | 900px: content starts 43px right of header edge | Not done: wider text column = long lines |
+| R12 | Consistency | Projects list page has no left panel | Not done: it has its own filter; the list is the page |
+
+Retest: 26/26 new checks, 46/46 blog/menu, 11/11 groups, phone checks, panel never moves, 0 broken links.
 
 ## 7. Implementation status
 - [x] Phase 1 — Home, Now, blog index, 2 posts (Kafka, RabbitMQ), CSS, dark mode

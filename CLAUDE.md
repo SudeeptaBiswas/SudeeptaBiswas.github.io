@@ -18,9 +18,9 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 | What | Where |
 |---|---|
 | Plan, decisions, backlog | `PLAN.md` |
-| Pages | `index.html`, `now.html`, `404.html`, `blog/`, `projects/` (index + one page per project) |
+| Pages | `index.html`, `404.html`, `blog/`, `projects/` (index + one page per project) |
 | Project content + generator | `tools/projects_data.py`, `tools/build_projects.py` |
-| Styles / scripts | `assets/css/style.css`, `assets/js/theme.js` (dark mode), `assets/js/filter.js` (project filter) |
+| Styles / scripts | `assets/css/style.css`, `assets/js/theme.js` (dark mode), `assets/js/filter.js` (project filter), `assets/js/toc.js` (left Contents / All projects panel and its height; header ☰ menu below 1100px; on phones every page's site links sit in the ☰ menu) |
 | Fact sources | `PLAN.md` Section 2 (FACTS.md, master.md, Java CV) |
 
 ## Never break
