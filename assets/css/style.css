@@ -12,6 +12,7 @@
   --shadow: 0 1px 3px rgba(20, 30, 50, 0.06);
   --radius: 10px;
   --max: 960px;
+  --bar-1: #1f5fbf; --bar-2: #d9730d; --bar-3: #2a9467; --bar-4: #8a4fc7;   /* demo bars, one colour per row */
   color-scheme: light;
 }
 
@@ -25,6 +26,7 @@
   --accent-soft: #1d2a3f;
   --code-bg: #1a2029;
   --shadow: none;
+  --bar-1: #6ea8ff; --bar-2: #f5a05a; --bar-3: #5cc99a; --bar-4: #b88cf0;
   color-scheme: dark;
 }
 
@@ -354,6 +356,10 @@ pre code { background: none; padding: 0; }
 .demo-track { height: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
 .demo-fill { display: block; height: 100%; background: var(--accent); border-radius: 7px; transition: width 0.15s ease-out; }
 .demo-pct { text-align: right; font-variant-numeric: tabular-nums; }
+.demo-row:nth-child(4n+1) .demo-fill { background: var(--bar-1); }
+.demo-row:nth-child(4n+2) .demo-fill { background: var(--bar-2); }
+.demo-row:nth-child(4n+3) .demo-fill { background: var(--bar-3); }
+.demo-row:nth-child(4n+4) .demo-fill { background: var(--bar-4); }
 .demo .demo-note { margin: 8px 0 0; font-size: 0.9rem; color: var(--muted); }
 .demo-slider + .demo-slider { margin-top: 12px; }
 .demo-row.demo-off { opacity: 0.45; }
