@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Python for Java Developers — Sudeepta Biswas</title>
-  <meta name="description" content="Python learned as a Java developer: uv, syntax, collections, classes, modules, files and HTTP, and pytest, each compared with Java.">
+  <meta name="description" content="Python learned as a Java developer: uv, syntax, collections, classes, modules and exceptions, files and HTTP, and pytest, each mapped to its Java twin.">
   <meta property="og:title" content="Python for Java Developers">
-  <meta property="og:description" content="Python learned as a Java developer: uv, syntax, collections, classes, modules, files and HTTP, and pytest, each compared with Java.">
+  <meta property="og:description" content="Python learned as a Java developer: uv, syntax, collections, classes, modules and exceptions, files and HTTP, and pytest, each mapped to its Java twin.">
   <meta property="og:type" content="article">
   <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
   <meta property="og:url" content="https://sudeeptabiswas.github.io/blog/python-for-java-developers.html">
@@ -42,8 +42,10 @@
       <li><a href="#syntax">Syntax vs Java</a></li>
       <li><a href="#collections">Collections</a></li>
       <li><a href="#classes">Classes and dataclasses</a></li>
-      <li><a href="#modules">Modules, imports, exceptions</a></li>
-      <li><a href="#http">Files, JSON, HTTP</a></li>
+      <li><a href="#modules">Modules and imports</a></li>
+      <li><a href="#exceptions">Exceptions</a></li>
+      <li><a href="#files">Files and JSON</a></li>
+      <li><a href="#http">HTTP with httpx</a></li>
       <li><a href="#pytest">Testing with pytest</a></li>
       <li><a href="#check">Check yourself</a></li>
       <li><a href="#next">Coming next</a></li>
@@ -55,129 +57,357 @@
 <article class="article">
   <p class="label">Python</p>
   <h1>Python for Java Developers</h1>
-  <p class="post-meta">Started 2 November 2026 · In progress · Python 3, uv, httpx, pytest</p>
+  <p class="post-meta">Started 2 November 2026 · In progress · Python 3.13, uv, httpx, pytest</p>
 
   <p class="lead">Python is the language most AI tools are written in. These notes map each
-  Python idea to the Java one I already know, so the new part is only what really differs.</p>
+  Python idea to the Java one I already know, so the new part is only what really differs.
+  They come from phase 1 of my <a href="../projects/ai-engineering-lab.html">AI Engineering Lab</a>,
+  where every topic ends with exercises that must pass.</p>
 
   <h2 id="setup">1. Setup: uv and venv</h2>
-  <pre><code>pyproject.toml (dependencies) → uv sync → .venv (packages) + uv.lock (exact versions)
-                               → uv run python file.py   (no "activate" needed)</code></pre>
+  <p><code>uv</code> plays the role of Maven or Gradle: it installs Python and the packages,
+  and runs files.</p>
   <div class="table-wrap">
   <table>
-    <thead><tr><th>Python</th><th>Java twin</th></tr></thead>
+    <thead><tr><th>Java</th><th>Python with uv</th></tr></thead>
     <tbody>
-      <tr><td><code>pyproject.toml</code></td><td><code>pom.xml</code> / <code>build.gradle</code></td></tr>
-      <tr><td><code>uv.lock</code></td><td>Gradle lockfile: exact versions</td></tr>
-      <tr><td><code>.venv</code></td><td>A per-project <code>~/.m2</code>, git-ignored</td></tr>
-      <tr><td><code>uv run</code></td><td><code>./gradlew run</code></td></tr>
+      <tr><td>Maven / Gradle</td><td><code>uv</code></td></tr>
+      <tr><td><code>pom.xml</code></td><td><code>pyproject.toml</code></td></tr>
+      <tr><td>Gradle lockfile</td><td><code>uv.lock</code>: exact versions, commit it</td></tr>
+      <tr><td><code>~/.m2</code>, shared by all projects</td><td><code>.venv/</code>, one per project, git-ignored</td></tr>
+      <tr><td>Java toolchain version</td><td><code>.python-version</code> (here 3.13)</td></tr>
+      <tr><td><code>&lt;dependency&gt;</code></td><td><code>uv add httpx</code></td></tr>
+      <tr><td>test scope</td><td><code>uv add --dev pytest</code></td></tr>
+      <tr><td><code>mvn exec:java</code></td><td><code>uv run python file.py</code></td></tr>
     </tbody>
   </table>
   </div>
+  <ul>
+    <li>Each project gets its own isolated <code>.venv</code>, so packages never leak between projects.</li>
+    <li><code>uv run</code> uses that <code>.venv</code> by itself. No "activate" step.</li>
+    <li>No <code>main</code> class: Python runs a file top to bottom. <code>if __name__ == "__main__":</code> marks the part that runs only when the file is started directly (more in <a href="#modules">section 5</a>).</li>
+  </ul>
 
   <h2 id="syntax">2. Syntax vs Java</h2>
-  <ul>
-    <li>Blocks are set by indentation and <code>:</code>. No <code>;</code>, no <code>++</code>.</li>
-    <li><code>None</code>, <code>True</code>, <code>and</code> / <code>or</code> / <code>not</code> instead of <code>null</code>, <code>true</code>, <code>&amp;&amp;</code>.</li>
-    <li>Type hints are <b>not enforced</b> when the code runs. A checker such as pyright reads them.</li>
-  </ul>
   <div class="table-wrap">
   <table>
-    <thead><tr><th>Trap</th><th>Python</th><th>Java</th></tr></thead>
+    <thead><tr><th>Java</th><th>Python</th></tr></thead>
     <tbody>
-      <tr><td>Division</td><td><code>7 / 2</code> is 3.5; <code>7 // 2</code> is 3</td><td><code>7 / 2</code> is 3</td></tr>
-      <tr><td>Equality</td><td><code>==</code> same value; <code>is</code> same object</td><td><code>.equals()</code> vs <code>==</code></td></tr>
-      <tr><td>Truth</td><td><code>if items:</code> means "not empty". <code>0</code>, <code>""</code>, <code>[]</code>, <code>{}</code>, <code>None</code> are false</td><td>Only booleans</td></tr>
+      <tr><td><code>{ }</code> blocks</td><td>indentation (4 spaces) + <code>:</code></td></tr>
+      <tr><td><code>;</code> ends a line</td><td>no <code>;</code></td></tr>
+      <tr><td><code>int x = 5;</code></td><td><code>x = 5</code> (the type lives on the value)</td></tr>
+      <tr><td><code>final</code></td><td>no keyword; UPPER_CASE by convention</td></tr>
+      <tr><td><code>null</code>, <code>true</code>, <code>false</code></td><td><code>None</code>, <code>True</code>, <code>False</code></td></tr>
+      <tr><td><code>&amp;&amp;</code> <code>||</code> <code>!</code></td><td><code>and</code> <code>or</code> <code>not</code></td></tr>
+      <tr><td><code>a.equals(b)</code> / <code>a == b</code></td><td><code>a == b</code> (value) / <code>a is b</code> (same object)</td></tr>
+      <tr><td><code>"a" + n</code></td><td><code>f"a{n}"</code> (f-string)</td></tr>
+      <tr><td><code>for (int i = 0; i &lt; n; i++)</code></td><td><code>for i in range(n):</code></td></tr>
+      <tr><td><code>for (String s : list)</code></td><td><code>for s in items:</code></td></tr>
+      <tr><td><code>switch</code></td><td><code>match</code> (3.10+) or <code>if / elif / else</code></td></tr>
+      <tr><td><code>x &gt; 0 ? a : b</code></td><td><code>a if x &gt; 0 else b</code></td></tr>
+      <tr><td><code>i++</code></td><td><code>i += 1</code></td></tr>
+      <tr><td><code>7 / 2</code> is 3</td><td><code>7 / 2</code> is 3.5; <code>7 // 2</code> is 3</td></tr>
+      <tr><td>method overloading</td><td>default values + keyword arguments</td></tr>
     </tbody>
   </table>
   </div>
+  <pre><code>def area(width: float, height: float = 1.0) -> float:
+    return width * height
+
+area(3)                    # 3.0, default used
+area(height=2, width=3)    # keyword arguments, any order
+
+def min_max(nums):
+    return min(nums), max(nums)      # returns a tuple
+low, high = min_max([3, 1, 4])       # unpacked into two names</code></pre>
+  <ul>
+    <li>Type hints are <b>not enforced</b> when the code runs. They help the IDE, and a checker such as pyright (strict mode here) reads them.</li>
+    <li><b>Truthy and falsy:</b> <code>0</code>, <code>""</code>, <code>[]</code>, <code>{}</code> and <code>None</code> count as false. <code>if items:</code> means "if the list is not empty".</li>
+  </ul>
 
   <h2 id="collections">3. Collections</h2>
-  <pre><code>list [..]   dict {k: v}   set {..} / set()   tuple (..)   len(x), x in y
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Java</th><th>Python</th><th>Literal</th></tr></thead>
+    <tbody>
+      <tr><td><code>ArrayList&lt;T&gt;</code></td><td><code>list</code></td><td><code>[1, 2, 3]</code></td></tr>
+      <tr><td><code>HashMap&lt;K,V&gt;</code></td><td><code>dict</code>, keeps insert order</td><td><code>{"a": 1}</code></td></tr>
+      <tr><td><code>HashSet&lt;T&gt;</code></td><td><code>set</code></td><td><code>{1, 2}</code>; empty is <code>set()</code></td></tr>
+      <tr><td><code>List.of(...)</code> / record</td><td><code>tuple</code>, immutable</td><td><code>(1, "a")</code></td></tr>
+      <tr><td><code>list.size()</code></td><td><code>len(x)</code></td><td>works on all four</td></tr>
+      <tr><td><code>list.contains(x)</code></td><td><code>x in items</code></td><td>fast on set and dict</td></tr>
+      <tr><td><code>map.getOrDefault(k, d)</code></td><td><code>d.get(k, default)</code></td><td></td></tr>
+      <tr><td><code>Collections.sort(l, cmp)</code></td><td><code>sorted(items, key=..., reverse=True)</code></td><td></td></tr>
+      <tr><td><code>stream().map().filter()</code></td><td>comprehension</td><td>see below</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <pre><code>nums = [0, 1, 2, 3, 4, 5]
+nums[1:4]    # [1, 2, 3]   start included, end excluded
+nums[:2]     # [0, 1]
+nums[-2:]    # [4, 5]      negative = from the end
+nums[::2]    # [0, 2, 4]   every 2nd item
 
-nums = [0, 1, 2, 3, 4, 5]
-nums[1:4]    # [1, 2, 3]  start included, end excluded
-nums[-2:]    # [4, 5]     negative = from the end
-squares = [n * n for n in nums if n % 2 == 0]   # a stream in one line</code></pre>
+[n * n for n in nums if n % 2 == 0]      # list comprehension = a stream in one line
+{w: len(w) for w in ["rag", "agent"]}    # dict comprehension
+{w.lower() for w in ["A", "a", "B"]}     # set comprehension</code></pre>
   <ul>
-    <li>Use a <b>set</b> for <code>x in items</code> on big data: fast lookup. A list keeps order and duplicates.</li>
-    <li><b>Trap:</b> <code>def add(item, bucket=[])</code> shares one list between every call. Write <code>bucket=None</code> and create the list inside.</li>
+    <li>Useful built-ins: <code>enumerate</code>, <code>zip</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>any</code>, <code>all</code>, <code>sorted</code>, <code>reversed</code>. From <code>collections</code>: <code>Counter</code> for counting, <code>defaultdict</code> to create values on first use.</li>
+    <li>Pick a <b>set</b> for <code>x in items</code> on big data. A list keeps order and duplicates.</li>
+    <li><b>Trap:</b> <code>def add(item, bucket=[])</code> creates one list that every call shares. Write <code>bucket=None</code>, then <code>bucket = [] if bucket is None else bucket</code>.</li>
   </ul>
 
   <h2 id="classes">4. Classes and dataclasses</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Java</th><th>Python</th></tr></thead>
+    <tbody>
+      <tr><td>constructor</td><td><code>def __init__(self, ...)</code></td></tr>
+      <tr><td><code>this</code></td><td><code>self</code>, always the first parameter, written out</td></tr>
+      <tr><td><code>private int x</code></td><td><code>self._x</code>: "internal" by convention, not enforced</td></tr>
+      <tr><td>getter</td><td><code>@property</code></td></tr>
+      <tr><td><code>toString()</code></td><td><code>__repr__</code> (debug) / <code>__str__</code> (for users)</td></tr>
+      <tr><td><code>equals()</code> / <code>hashCode()</code></td><td><code>__eq__</code> / <code>__hash__</code></td></tr>
+      <tr><td><code>record</code> / Lombok <code>@Data</code></td><td><code>@dataclass</code></td></tr>
+      <tr><td>immutable record</td><td><code>@dataclass(frozen=True)</code></td></tr>
+      <tr><td><code>class B extends A</code></td><td><code>class B(A):</code></td></tr>
+      <tr><td><code>super(...)</code></td><td><code>super().__init__(...)</code></td></tr>
+      <tr><td><code>interface</code></td><td><code>ABC</code> + <code>@abstractmethod</code>, or <code>Protocol</code></td></tr>
+      <tr><td><code>static</code> method</td><td><code>@staticmethod</code> / <code>@classmethod</code></td></tr>
+      <tr><td><code>size()</code> on your class</td><td><code>__len__</code>, so <code>len(obj)</code> works</td></tr>
+    </tbody>
+  </table>
+  </div>
   <pre><code>from dataclasses import dataclass, field
 
-@dataclass
-class Note:                      # a Java record / POJO
-    title: str
-    tags: list[str] = field(default_factory=list)   # "= []" is an error</code></pre>
+class Point:                       # plain class: write it all yourself
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+@dataclass                         # dataclass: __init__, __repr__, __eq__ for free
+class Message:
+    role: str
+    content: str
+    tags: list[str] = field(default_factory=list)    # "= []" is an error here</code></pre>
   <ul>
-    <li><code>self</code> is <code>this</code>, written out. <code>_x</code> means "internal", by convention only.</li>
-    <li><code>@dataclass</code> writes <code>__init__</code>, <code>__repr__</code> and <code>__eq__</code>. Use it for data; a plain class for behaviour.</li>
-    <li><b>Duck typing:</b> anything with a <code>.run()</code> method works. An abstract base class (ABC) is the explicit contract, like a Java interface, and fails early.</li>
+    <li>Use <code>@dataclass</code> for data holders: messages, documents, settings. Use a plain class when the object is mostly behaviour.</li>
+    <li><b>Duck typing:</b> Python needs no <code>implements</code>. If an object has <code>.run()</code>, you can call <code>.run()</code>. An <code>ABC</code> makes the contract explicit and fails early when a method is missing.</li>
   </ul>
 
-  <h2 id="modules">5. Modules, imports, exceptions</h2>
-  <pre><code>import x → search sys.path (script folder, then .venv) → run x top to bottom ONCE → cache
-error → except blocks in order (child before parent) → else (no error) → finally (always)</code></pre>
+  <h2 id="modules">5. Modules and imports</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Java</th><th>Python</th></tr></thead>
+    <tbody>
+      <tr><td>one <code>.java</code> file = one class</td><td>one <code>.py</code> file = one <b>module</b>: many functions, constants, classes</td></tr>
+      <tr><td>package = folder</td><td>package = folder + <code>__init__.py</code></td></tr>
+      <tr><td><code>import a.b.C;</code></td><td><code>from a.b import C</code></td></tr>
+      <tr><td><code>import static a.B.f;</code></td><td><code>from a.b import f</code></td></tr>
+      <tr><td>classpath</td><td><code>sys.path</code></td></tr>
+      <tr><td><code>public static void main</code></td><td><code>if __name__ == "__main__":</code></td></tr>
+    </tbody>
+  </table>
+  </div>
   <ul>
-    <li>Importing a module <b>runs</b> it, so a module should only define things at top level.</li>
-    <li><code>if __name__ == "__main__":</code> runs only when the file is started directly.</li>
-    <li>No checked exceptions: nothing forces a catch, so docstrings list what a function raises.</li>
-    <li><code>raise AppError("...") from error</code> keeps the original as the cause, like <code>new AppException(msg, cause)</code>.</li>
-    <li>Catch at the edge, where you can do something useful.</li>
+    <li><b>Importing runs the file.</b> <code>import prompts</code> runs <code>prompts.py</code> top to bottom <b>once</b>, then caches it; a second import returns the same object. Java runs nothing on import. So a module should only <i>define</i> things at the top level, not <i>do</i> things.</li>
+    <li><b><code>__name__</code></b> is <code>"__main__"</code> when the file is run, and the module's own name when it is imported. That is why checks at the bottom of a file run only when you start that file.</li>
+    <li><b>Where Python looks:</b> first the folder of the file you ran, then <code>.venv</code>. A folder name must be a valid Python name to be imported: <code>01_python_fundamentals</code> starts with a digit, so it can't be.</li>
+  </ul>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Import style</th><th>Then write</th><th>Use when</th></tr></thead>
+    <tbody>
+      <tr><td><code>import prompts</code></td><td><code>prompts.build_messages(...)</code></td><td>many names from one module</td></tr>
+      <tr><td><code>from prompts import build_messages</code></td><td><code>build_messages(...)</code></td><td>one or two names</td></tr>
+      <tr><td><code>import numpy as np</code></td><td><code>np.array(...)</code></td><td>a long name with a common short form</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Never <code>from x import *</code>: you can no longer tell where a name came from.</p>
+
+  <h2 id="exceptions">6. Exceptions</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Java</th><th>Python</th></tr></thead>
+    <tbody>
+      <tr><td><code>try / catch / finally</code></td><td><code>try / except / else / finally</code></td></tr>
+      <tr><td><code>throw new X("msg", cause)</code></td><td><code>raise X("msg") from cause</code></td></tr>
+      <tr><td><code>class X extends RuntimeException</code></td><td><code>class X(Exception):</code></td></tr>
+      <tr><td>checked exceptions (<code>throws</code>)</td><td>none: nothing forces a catch</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Errors I met while calling a local model, and their parents:</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>What happened</th><th>Exception</th><th>Parent</th></tr></thead>
+    <tbody>
+      <tr><td>missing file</td><td><code>FileNotFoundError</code></td><td><code>OSError</code></td></tr>
+      <tr><td>nothing listening on the port</td><td><code>httpx.ConnectTimeout</code></td><td><code>TimeoutException</code> → <code>TransportError</code></td></tr>
+      <tr><td><code>raise_for_status()</code> on a 404</td><td><code>httpx.HTTPStatusError</code></td><td><code>httpx.HTTPError</code></td></tr>
+      <tr><td><code>reply["message"]</code> on an error reply</td><td><code>KeyError</code></td><td><code>LookupError</code></td></tr>
+      <tr><td>my own check: temperature below 0</td><td><code>ValueError</code></td><td><code>Exception</code></td></tr>
+      <tr><td><code>json.loads("{temperature: 0.2}")</code></td><td><code>JSONDecodeError</code></td><td><code>ValueError</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <pre><code>class OllamaError(Exception): ...            # my base error
+class OllamaDownError(OllamaError): ...      # (Parent) = extends
+
+try:
+    reply = httpx.post(url, json=body, timeout=10.0)
+except httpx.TransportError as error:        # parent of ConnectError and ConnectTimeout
+    raise OllamaDownError(f"no Ollama at {url}") from error   # keeps the cause
+else:
+    print("no error")                        # runs only if try had no error
+finally:
+    print("always runs")</code></pre>
+  <ul>
+    <li><code>except</code> blocks are tried <b>in order, first match wins</b>. Put the child before the parent.</li>
+    <li><code>else</code> runs only when the <code>try</code> had no error. Java has no twin.</li>
+    <li><code>from error</code> keeps the original as <code>__cause__</code>. Callers catch <code>OllamaError</code> and get every child.</li>
+    <li>No checked exceptions, so a docstring should list what a function raises.</li>
+    <li><b>Catch at the edge,</b> where you can do something useful: the chat loop prints "Start Ollama: ollama serve", while the function deep inside raises. <b>Don't catch what you can't fix.</b></li>
+    <li>Two styles: look first (<code>if key in d:</code>, the Java way) or just try (<code>try: d[key] except KeyError:</code>, the usual Python way). For dicts, <code>d.get(key, default)</code> does it in one call.</li>
   </ul>
 
-  <h2 id="http">6. Files, JSON, HTTP</h2>
-  <pre><code>from pathlib import Path
-import json, httpx
-
-notes = json.loads(Path("notes.json").read_text(encoding="utf-8"))   # text → dict
-
-reply = httpx.post("http://127.0.0.1:11434/api/chat", json=body, timeout=60)
-reply.raise_for_status()      # a 404 is NOT an exception until you ask
-data = reply.json()</code></pre>
+  <h2 id="files">7. Files and JSON</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Java</th><th>Python</th></tr></thead>
+    <tbody>
+      <tr><td><code>java.nio.file.Path</code></td><td><code>pathlib.Path</code></td></tr>
+      <tr><td><code>path.resolve("a.txt")</code></td><td><code>path / "a.txt"</code></td></tr>
+      <tr><td><code>Files.readString(p)</code> / <code>writeString</code></td><td><code>p.read_text(encoding="utf-8")</code> / <code>write_text</code></td></tr>
+      <tr><td><code>BufferedReader</code> + try-with-resources</td><td><code>with open(p, encoding="utf-8") as f:</code></td></tr>
+      <tr><td>Jackson <code>writeValueAsString</code> / <code>readValue</code></td><td><code>json.dumps(obj)</code> / <code>json.loads(text)</code></td></tr>
+    </tbody>
+  </table>
+  </div>
   <ul>
-    <li><code>open(p, "w")</code> wipes the file first; <code>"a"</code> appends. Open files inside <code>with</code>, like try-with-resources.</li>
-    <li>Catch <code>httpx.TransportError</code>, the parent of both connect errors.</li>
-    <li>On my Windows PC, <code>localhost</code> tried IPv6 first: <b>2.16 s</b> per call, against <b>0.02 s</b> with <code>127.0.0.1</code>.</li>
+    <li>Always write <code>encoding="utf-8"</code>. The Windows default is not UTF-8, so text with <code>ü</code> or <code>—</code> breaks without it.</li>
+    <li><code>with</code> closes the file even on an error, like try-with-resources.</li>
+    <li>Modes: <code>"r"</code> read (default), <code>"w"</code> write (<b>wipes</b> the file first), <code>"a"</code> append. Small file: <code>read_text()</code>. Big file: <code>for line in f:</code>.</li>
+  </ul>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>JSON</th><th>Python</th></tr></thead>
+    <tbody>
+      <tr><td><code>{...}</code> object</td><td><code>dict</code></td></tr>
+      <tr><td><code>[...]</code> array</td><td><code>list</code></td></tr>
+      <tr><td><code>"text"</code></td><td><code>str</code></td></tr>
+      <tr><td><code>1</code>, <code>2.5</code></td><td><code>int</code>, <code>float</code></td></tr>
+      <tr><td><code>true</code> / <code>false</code> / <code>null</code></td><td><code>True</code> / <code>False</code> / <code>None</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>No classes needed: <code>json.loads</code> returns plain dicts and lists. Turning them into
+  typed objects, as Jackson does into a POJO, comes later with pydantic.</p>
+
+  <h2 id="http">8. HTTP with httpx</h2>
+  <pre><code>import httpx
+
+response = httpx.get("http://127.0.0.1:11434/api/version", timeout=10.0)
+response.status_code          # 200
+response.json()               # {"version": "0.40.14"}
+
+response = httpx.post(url, json={"model": "qwen3:4b"}, timeout=10.0)
+response.raise_for_status()   # a 404 is NOT an exception until you ask
+
+with httpx.Client(base_url="http://127.0.0.1:11434", timeout=30.0) as client:
+    client.get("/api/tags")   # many calls, one reused connection</code></pre>
+  <ul>
+    <li><code>json=...</code> turns the dict into JSON and sets <code>Content-Type</code> for you.</li>
+    <li><b>Always give a timeout.</b> A local model can be slow: a 500-token answer took about 70 s on my PC.</li>
+    <li>Nothing listening on a port gave <code>ConnectTimeout</code>, not <code>ConnectError</code>. Catch the parent <code>httpx.TransportError</code> to get both.</li>
+    <li>On Windows, <code>localhost</code> took <b>2.16 s</b> per call and <code>127.0.0.1</code> <b>0.02 s</b>: localhost tries IPv6 first, fails, then waits. One set of exercises went from 25 s to 1.2 s with this change alone.</li>
   </ul>
 
-  <h2 id="pytest">7. Testing with pytest</h2>
-  <pre><code>def test_search_sends_one_batched_call(monkeypatch):
-    sent = []                                   # a spy, kept inside the test
-    def fake_embed(texts):
-        sent.append(texts)
-        return [[1.0, 0.0]] * len(texts)
-    monkeypatch.setattr(search_module, "embed", fake_embed)   # patch where it is looked up
+  <h2 id="pytest">9. Testing with pytest</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Java (JUnit 5 / Mockito)</th><th>Python (pytest)</th></tr></thead>
+    <tbody>
+      <tr><td><code>@Test void average()</code></td><td><code>def test_average():</code> (the name is the marker)</td></tr>
+      <tr><td><code>assertEquals(2.0, x)</code></td><td><code>assert x == 2.0</code></td></tr>
+      <tr><td><code>assertEquals(0.15, x, 1e-6)</code></td><td><code>assert x == pytest.approx(0.15)</code></td></tr>
+      <tr><td><code>assertThrows(X.class, () -&gt; f())</code></td><td><code>with pytest.raises(X): f()</code></td></tr>
+      <tr><td><code>@ParameterizedTest @CsvSource</code></td><td><code>@pytest.mark.parametrize(...)</code></td></tr>
+      <tr><td><code>@BeforeEach</code> filling a field</td><td><code>@pytest.fixture</code> + a parameter with its name</td></tr>
+      <tr><td><code>when(c.get(any())).thenReturn(r)</code></td><td><code>monkeypatch.setattr(httpx, "get", fake_get)</code></td></tr>
+      <tr><td><code>@Tag("slow")</code> + <code>excludeTags</code></td><td><code>@pytest.mark.ollama</code> + <code>-m "not ollama"</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>pytest rewrites a plain <code>assert</code>, so a failure shows both sides:</p>
+  <pre><code>>       assert average([1.0, 2.0, 3.0]) == 2.5
+E       assert 2.0 == 2.5
+E        +  where 2.0 = average([1.0, 2.0, 3.0])</code></pre>
+  <pre><code>@pytest.mark.parametrize(("text", "expected_count"), [("the cat sat", 3), ("", 0)])
+def test_word_count(text: str, expected_count: int) -> None:
+    assert word_count(text) == expected_count       # each row is its own test
 
-    search_module.search("cat", ["a", "b"])
+def test_average_of_nothing_fails() -> None:
+    with pytest.raises(ValueError, match="empty list"):
+        average([])                                 # must raise INSIDE the with
 
-    assert len(sent) == 1</code></pre>
+def test_model_names_fake(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_get(url: str, timeout: float) -> httpx.Response:
+        return httpx.Response(200, json={"models": [{"name": "qwen3:4b"}]},
+                              request=httpx.Request("GET", url))   # needed by raise_for_status
+    monkeypatch.setattr(httpx, "get", fake_get)     # for this test only
+    assert model_names() == ["qwen3:4b"]</code></pre>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>uv run pytest &lt;file&gt; -v</code></td><td>one line per test, PASSED / FAILED</td></tr>
+      <tr><td><code>-q</code></td><td>dots only</td></tr>
+      <tr><td><code>-k cosine</code></td><td>only tests with "cosine" in the name</td></tr>
+      <tr><td><code>-x</code></td><td>stop at the first failure</td></tr>
+      <tr><td><code>-m "not ollama"</code></td><td>skip tests marked <code>ollama</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p><b>Why fakes:</b></p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th></th><th>Real model</th><th>Fake</th></tr></thead>
+    <tbody>
+      <tr><td>Model server off</td><td>fails</td><td>still runs</td></tr>
+      <tr><td>What it tests</td><td>the server + my code</td><td>my code only</td></tr>
+      <tr><td>Error cases (404, 501)</td><td>need a broken setup</td><td>one line</td></tr>
+      <tr><td>Answers</td><td>can shift with a model update</td><td>fixed</td></tr>
+    </tbody>
+  </table>
+  </div>
   <ul>
-    <li>A test with no <code>assert</code> <b>passes</b>. Empty stubs call <code>pytest.fail(...)</code>.</li>
-    <li>A call that should raise goes <b>inside</b> <code>with pytest.raises(...)</code>.</li>
-    <li>Floats are not exact: compare with <code>pytest.approx</code>.</li>
-    <li>Fakes test my logic fast, with no model running. One test marked <code>@pytest.mark.ollama</code> proves the real thing; <code>-m "not ollama"</code> skips it.</li>
+    <li>So: fakes for my own logic, plus one test marked <code>@pytest.mark.ollama</code> that proves the real server agrees. Measured: 3 passed in 0.42 s with the server, 2 passed and 1 deselected in 0.09 s without.</li>
+    <li><b>Patch the name where it is looked up.</b> If <code>search()</code> calls <code>embed</code> from its own module, patch <code>search_module.embed</code>, not a copy you imported.</li>
+    <li>A test with no <code>assert</code> <b>passes</b>. Empty stubs call <code>pytest.fail("not written yet")</code>.</li>
     <li>To know a passing test really tests something, break the code on purpose: it must fail.</li>
   </ul>
 
-  <h2 id="check">8. Check yourself</h2>
+  <h2 id="check">10. Check yourself</h2>
   <details><summary>pyproject.toml, uv.lock and .venv in Java terms?</summary><p>pom.xml, a Gradle lockfile, and a per-project ~/.m2.</p></details>
   <details><summary>7 / 2 vs 7 // 2?</summary><p>3.5 vs 3.</p></details>
+  <details><summary>What does if items: test?</summary><p>That the collection is not empty. 0, "", [], {} and None are false.</p></details>
   <details><summary>What is wrong with def add(item, bucket=[])?</summary><p>One list is shared by every call. Use bucket=None, then make a new list.</p></details>
-  <details><summary>A list default in a dataclass?</summary><p>field(default_factory=list).</p></details>
-  <details><summary>Why can't you import a folder named 01_python_fundamentals?</summary><p>It starts with a digit, so it is not a valid Python name.</p></details>
+  <details><summary>What does @dataclass write for you?</summary><p>__init__, __repr__ and __eq__.</p></details>
+  <details><summary>What is __name__ when a file is run, and when it is imported?</summary><p>"__main__" when run; the module's own name when imported.</p></details>
+  <details><summary>raise OllamaDownError(...) from error keeps what?</summary><p>The original error, as __cause__. Java: new X(msg, cause).</p></details>
   <details><summary>Is a 404 an exception in httpx?</summary><p>No. Check status_code or call raise_for_status().</p></details>
+  <details><summary>Why pytest.approx for 0.1 + 0.2?</summary><p>Floats are not exact: (0.1 + 0.2) / 2 is 0.15000000000000002.</p></details>
   <details><summary>Why keep a spy's list inside the test?</summary><p>At module level it is shared by every test and never emptied, so results depend on test order.</p></details>
 
-  <h2 id="next">9. Coming next</h2>
+  <h2 id="next">11. Coming next</h2>
   <ul>
     <li>Type hints and pydantic.</li>
     <li><code>async</code> / <code>await</code>.</li>
   </ul>
 
-  <h2 id="refs">10. Further reading</h2>
+  <h2 id="refs">12. Further reading</h2>
   <ul>
     <li><a href="https://docs.python.org/3/tutorial/" rel="noopener">The Python tutorial</a></li>
     <li><a href="https://docs.astral.sh/uv/" rel="noopener">uv documentation</a></li>

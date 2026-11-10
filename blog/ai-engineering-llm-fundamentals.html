@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Engineering: LLM Fundamentals — Sudeepta Biswas</title>
-  <meta name="description" content="How an LLM writes an answer, run locally with Ollama: tokens, context window, quantization, the chat API, sampling, and embeddings.">
+  <meta name="description" content="How an LLM writes an answer, run locally with Ollama on a CPU: tokens, context window, quantization, the chat API, sampling, and embeddings, with measured numbers.">
   <meta property="og:title" content="AI Engineering: LLM Fundamentals">
-  <meta property="og:description" content="How an LLM writes an answer, run locally with Ollama: tokens, context window, quantization, the chat API, sampling, and embeddings.">
+  <meta property="og:description" content="How an LLM writes an answer, run locally with Ollama on a CPU: tokens, context window, quantization, the chat API, sampling, and embeddings, with measured numbers.">
   <meta property="og:type" content="article">
   <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
   <meta property="og:url" content="https://sudeeptabiswas.github.io/blog/ai-engineering-llm-fundamentals.html">
@@ -39,11 +39,16 @@
     <div class="toc-head"><span>Contents</span><a class="toc-back" href="./" aria-label="Back to Blog">← Back</a></div>
     <ol>
       <li><a href="#picture">The big picture</a></li>
-      <li><a href="#tokens">Tokens and the context window</a></li>
+      <li><a href="#tokens">Tokens</a></li>
+      <li><a href="#context">Context window and memory</a></li>
+      <li><a href="#logits">From scores to a choice</a></li>
       <li><a href="#ollama">Running models with Ollama</a></li>
+      <li><a href="#size">Size, RAM and speed</a></li>
       <li><a href="#chat">The chat API</a></li>
+      <li><a href="#thinking">Thinking models</a></li>
+      <li><a href="#streaming">Streaming</a></li>
       <li><a href="#sampling">Sampling</a></li>
-      <li><a href="#embeddings">Embeddings and similarity</a></li>
+      <li><a href="#embeddings">Embeddings and search</a></li>
       <li><a href="#check">Check yourself</a></li>
       <li><a href="#next">Coming next</a></li>
       <li><a href="#refs">Further reading</a></li>
@@ -58,8 +63,12 @@
 
   <p class="lead">A large language model only guesses the next token. A loop turns those
   guesses into an answer, and your code does the rest: it keeps the chat history, sets the
-  sampling options and finds related text. Everything here ran locally with Ollama on a
-  PC, on the CPU only.</p>
+  sampling options and finds related text. These notes come from phase 2 of my
+  <a href="../projects/ai-engineering-lab.html">AI Engineering Lab</a>.</p>
+
+  <p>Everything ran locally with <a href="https://ollama.com" rel="noopener">Ollama</a>
+  on two PCs with no GPU (Intel i5-10210U with 31.8 GB RAM, and i5-1135G7 with 11.7 GB).
+  The numbers are single runs unless a range is given; yours will differ.</p>
 
   <h2 id="picture">1. The big picture</h2>
   <figure>
@@ -101,108 +110,306 @@
     </svg>
     <figcaption>The model writes one token per loop. The loop ends at a stop token or at the <code>num_predict</code> limit.</figcaption>
   </figure>
+  <p>Think of IntelliJ autocomplete: you type <code>list.</code> and it suggests <code>add</code>.
+  An LLM does the same for any text. It looks at the text so far and guesses the next piece,
+  then runs again on the longer text:</p>
+  <pre><code>"The cat"          → guess "sat"
+"The cat sat"      → guess "on"
+"The cat sat on"   → guess "the"   ... until it guesses "stop"</code></pre>
+  <p>That loop is the whole trick. It is called <b>autoregressive</b> generation.</p>
 
-  <h2 id="tokens">2. Tokens and the context window</h2>
-  <pre><code>text → tokenizer → token ids → model → logits (one score per token in the vocabulary)
-     → softmax (odds) → pick one → append to the text → repeat until "stop"</code></pre>
+  <h2 id="tokens">2. Tokens</h2>
+  <p>The model can't read letters; it reads numbers. A <b>tokenizer</b> cuts text into
+  pieces (tokens) and gives each an id, like a compiler's lexer cutting <code>int x = 5;</code>.
+  The list of all pieces is the <b>vocabulary</b>, a <code>Map&lt;String, Integer&gt;</code>.
+  qwen3's has 151,936 tokens.</p>
+  <pre><code>"unbelievable"  →  ["un", "believ", "able"]  →  [403, 9182, 512]</code></pre>
   <ul>
-    <li>One token is about 4 characters of English, roughly ¾ of a word.</li>
-    <li><b>The model has no memory.</b> A chatbot "remembers" because your code sends the whole history again on every call.</li>
-    <li>Everything must fit the <b>context window</b>: system message + history + question + answer. Too long? Drop the oldest messages and keep the system one. Too much data? That is what RAG is for.</li>
-    <li>Ollama's default window here was 4096 tokens. Past it, Ollama dropped old messages <b>silently</b>, with no error.</li>
-    <li>A model <b>hallucinates</b> because it picks what sounds right, not what is right.</li>
+    <li>Common words are one token. Rare or unknown words are split into smaller known parts.</li>
+    <li>For English, <b>1 token ≈ 4 characters ≈ ¾ of a word</b>. Other languages and code often need more.</li>
+    <li><b>BPE</b> builds the pieces: start with single letters, glue the pair that appears together most often (<code>t</code> + <code>h</code> → <code>th</code>), and repeat thousands of times.</li>
+    <li>Price, speed and limits are all counted in tokens, like paying per MB on a cloud bill.</li>
   </ul>
 
-  <h2 id="ollama">3. Running models with Ollama</h2>
-  <pre><code>file size (GB) ≈ billions of weights × bits per weight ÷ 8
-RAM needed     ≈ file size × 1.3          (KV cache + overhead)
-time           = load (first call) + read the prompt + write the answer</code></pre>
+  <h2 id="context">3. Context window and memory</h2>
+  <p>Every call has a hard token limit, the <b>context window</b>. It must hold everything:
+  system message + chat history + new question + the answer. Think of a max request body
+  size on a server.</p>
+  <p><b>The model has no memory.</b> Each call is a stateless REST call. A chatbot "remembers"
+  because your code sends the whole chat again, every time:</p>
+  <pre><code>Call 1 sends: [system, user1]
+Call 2 sends: [system, user1, answer1, user2]
+Call 3 sends: [system, user1, answer1, user2, answer2, user3]   ← keeps growing</code></pre>
+  <p>Measured: asked "What is my favourite colour?" with no history, the model said
+  <b>"Blue."</b>, a made-up answer, not "I don't know". With the earlier messages it said
+  <b>"Green."</b>.</p>
+  <ul>
+    <li>History grows every turn, and so do tokens and time.</li>
+    <li>When it gets too big, drop the <b>oldest</b> messages and keep the system one, which holds the rules. Like log rotation: old lines go, the config stays.</li>
+    <li>Too much data to fit at all, like 500 PDFs? Send only the useful parts. That is <b>RAG</b>.</li>
+  </ul>
+
+  <h2 id="logits">4. From scores to a choice</h2>
+  <p>For the next piece, the model gives a raw score to <b>every</b> token in the vocabulary.
+  These scores are <b>logits</b>. <b>Softmax</b> turns them into odds that add up to 100%:</p>
+  <pre><code>scores:   cat 2.0   mat 1.0   rat 0.5
+softmax:  cat 63%   mat 23%   rat 14%</code></pre>
+  <ul>
+    <li>Always taking the top one is <b>greedy</b>. A weighted random pick is <b>sampling</b> (<a href="#sampling">section 10</a>).</li>
+    <li><b>Hallucination:</b> the model picks what <i>sounds</i> right, not what <i>is</i> right. Like autocomplete suggesting a method that doesn't exist. Always check facts.</li>
+  </ul>
+  <p>How a chat model is made, in three steps: <b>pre-training</b> on huge amounts of text to
+  guess the next piece; <b>instruction tuning</b> on (question, good answer) pairs; and
+  <b>preference tuning</b>, where people rank answers and the model learns which they like.</p>
+
+  <h2 id="ollama">5. Running models with Ollama</h2>
+  <p>Ollama downloads models and runs them on your own PC. Think of it as a local database
+  server: it runs in the background, listens on port 11434, and your code talks to it.
+  Models work like Docker images:</p>
   <div class="table-wrap">
   <table>
-    <thead><tr><th>Measured on my PC (CPU only)</th><th>Result</th></tr></thead>
+    <thead><tr><th>Command</th><th>Does</th><th>Docker twin</th></tr></thead>
     <tbody>
-      <tr><td><code>qwen3:4b</code> at Q4_K_M (about 5 bits per weight)</td><td>2.5 GB on disk, 3.2 GB in RAM</td></tr>
-      <tr><td>Same model at FP16</td><td>8.0 GB</td></tr>
-      <tr><td>Writing speed, <code>qwen3:4b</code> vs <code>qwen3:1.7b</code></td><td>About 7 vs 15 tokens/s</td></tr>
-      <tr><td>Model load, first call vs second call</td><td>9.4 s vs 0.009 s (kept in RAM for 5 minutes)</td></tr>
+      <tr><td><code>ollama pull qwen3:4b</code></td><td>download a model</td><td><code>docker pull</code></td></tr>
+      <tr><td><code>ollama list</code></td><td>models on disk + size</td><td><code>docker images</code></td></tr>
+      <tr><td><code>ollama show qwen3:4b</code></td><td>details: size, context, quantization</td><td><code>docker inspect</code></td></tr>
+      <tr><td><code>ollama run qwen3:4b "hi"</code></td><td>load + answer one prompt</td><td><code>docker run</code></td></tr>
+      <tr><td><code>ollama ps</code></td><td>models in RAM now</td><td><code>docker ps</code></td></tr>
+      <tr><td><code>ollama rm qwen3:4b</code></td><td>delete from disk</td><td><code>docker rmi</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p><code>qwen3:4b</code> = family <code>qwen3</code> + tag <code>4b</code>, meaning 4 billion
+  <b>parameters</b> (weights): numbers the model learned in training. No tag means
+  <code>latest</code>. Trust <code>ollama show</code>, not the name: <code>qwen3:1.7b</code>
+  reports 2.0B.</p>
+
+  <h2 id="size">6. Size, RAM and speed</h2>
+  <p><b>Quantization</b> stores each weight in fewer bits: smaller and faster, slightly less
+  precise. Java view: <code>double</code> vs <code>float</code> vs <code>short</code> vs <code>byte</code>.</p>
+  <pre><code>file size (GB) ≈ billions of weights × bits per weight ÷ 8</code></pre>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Format</th><th>Bits per weight</th><th>qwen3:4b size</th><th>Quality</th></tr></thead>
+    <tbody>
+      <tr><td>FP16</td><td>16</td><td>8.0 GB</td><td>original</td></tr>
+      <tr><td>Q8_0</td><td>8.5</td><td>4.2 GB</td><td>almost the same</td></tr>
+      <tr><td>Q4_K_M</td><td>about 5</td><td>2.5 GB (measured)</td><td>small loss; Ollama's usual default</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>A bigger model at 4 bits usually beats a smaller one at 16. In RAM the model also needs
+  the <b>KV cache</b> (memory for the text being read, which grows with the window): the
+  2.5 GB file used 3.2 GB in RAM, so plan with <b>file size × 1.3</b>.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Model</th><th>File</th><th>In RAM</th><th>Load</th><th>Read prompt</th><th>Write answer</th></tr></thead>
+    <tbody>
+      <tr><td><code>qwen3:4b</code></td><td>2.5 GB</td><td>3.2 GB</td><td>9.4 s</td><td>21 tokens/s</td><td>7.1 tokens/s</td></tr>
+      <tr><td><code>qwen3:1.7b</code></td><td>1.4 GB</td><td>1.9 GB</td><td>1.9 s</td><td>63 tokens/s</td><td>15.4 tokens/s</td></tr>
     </tbody>
   </table>
   </div>
   <ul>
-    <li>A CPU is slow because each new token reads <b>all</b> the weights from RAM once. Half the file size gives about twice the writing speed.</li>
-    <li>A bigger model at 4 bits usually beats a smaller one at full precision.</li>
-    <li>Trust <code>ollama show</code>, not the model's name.</li>
+    <li>The writing speed is the one you feel. Half the file size gave about <b>twice</b> the writing speed.</li>
+    <li>Why so slow on a CPU? Every new token reads <b>all</b> the weights from RAM once. A GPU has much faster memory.</li>
+    <li>Ollama keeps a model in RAM for 5 minutes after a call, so the second call skips the load: 9.4 s became 0.009 s.</li>
   </ul>
 
-  <h2 id="chat">4. The chat API</h2>
+  <h2 id="chat">7. The chat API</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Role</th><th>Who</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>system</code></td><td>you, the developer: rules for the whole chat</td><td>"Answer in one short sentence."</td></tr>
+      <tr><td><code>user</code></td><td>the person</td><td>"What is RAG?"</td></tr>
+      <tr><td><code>assistant</code></td><td>the model's earlier answers</td><td>"RAG stands for..."</td></tr>
+    </tbody>
+  </table>
+  </div>
   <pre><code>import httpx
 
 body = {
     "model": "qwen3:1.7b",
     "messages": [
-        {"role": "system", "content": "Answer in one sentence."},
-        {"role": "user", "content": "What is a token?"},
+        {"role": "system", "content": "Answer in one short sentence."},
+        {"role": "user", "content": "What is RAG?"},
     ],
     "stream": False,
-    "think": False,                 # thinking tokens would eat num_predict
-    "options": {"temperature": 0, "num_predict": 200},
+    "think": False,                    # see section 8
+    "options": {"num_predict": 60},    # max tokens to write
 }
-reply = httpx.post("http://127.0.0.1:11434/api/chat", json=body, timeout=120).json()
-print(reply["message"]["content"], reply["done_reason"])</code></pre>
-  <ul>
-    <li><b>Roles:</b> <code>system</code> = your rules, <code>user</code> = the person, <code>assistant</code> = earlier answers.</li>
-    <li><code>done_reason: "length"</code> means the answer hit <code>num_predict</code> and was cut off.</li>
-    <li><b>Thinking models</b> spend most of their tokens thinking. Hiding the thinking doesn't skip it: once, all 60 allowed tokens went to hidden thinking and the answer was empty.</li>
-    <li><b>Streaming</b> sends one JSON line per piece. The total time is the same, but the first words came after 0.13–0.64 s instead of 2.0–3.2 s.</li>
-  </ul>
-
-  <h2 id="sampling">5. Sampling</h2>
-  <pre><code>logits → ÷ temperature → softmax → cut the tail (top_k, top_p) → weighted random pick (seed)</code></pre>
+reply = httpx.post("http://127.0.0.1:11434/api/chat", json=body, timeout=120.0).json()
+reply["message"]["content"]            # the answer text</code></pre>
   <div class="table-wrap">
   <table>
-    <thead><tr><th>Option</th><th>What it does</th></tr></thead>
+    <thead><tr><th>Reply field</th><th>Means</th></tr></thead>
     <tbody>
-      <tr><td><code>temperature</code></td><td>Reshapes the odds. Low = safe and repetitive; high = bold. 0 acts greedy: the same answer 10 times out of 10</td></tr>
-      <tr><td><code>top_k</code>, <code>top_p</code></td><td>Remove unlikely tokens before the pick</td></tr>
-      <tr><td><code>seed</code></td><td>Makes the random pick repeatable, so tests stop being flaky</td></tr>
-      <tr><td><code>num_predict</code></td><td>A hard cut, not "be short". Ask for short answers in the prompt</td></tr>
+      <tr><td><code>message.content</code></td><td>the answer</td></tr>
+      <tr><td><code>done_reason</code></td><td><code>"stop"</code> = finished; <code>"length"</code> = hit <code>num_predict</code>, cut off</td></tr>
+      <tr><td><code>prompt_eval_count</code> / <code>eval_count</code></td><td>tokens read / tokens written</td></tr>
+      <tr><td><code>load_duration</code>, <code>eval_duration</code>, <code>total_duration</code></td><td>in <b>nanoseconds</b></td></tr>
     </tbody>
   </table>
   </div>
-  <p>qwen3's defaults are temperature 0.6, top_k 20, top_p 0.95. For JSON output, tool calls or
-  an LLM judge, use temperature 0: one "creative" token breaks parsing. Answers too samey? Fix
-  the prompt first; it sets the odds, and temperature only reshapes them.</p>
 
-  <h2 id="embeddings">6. Embeddings and similarity</h2>
-  <pre><code>notes + question → POST /api/embed (one batched call) → vectors (768 numbers each)
-  → cosine(question, each note) → sort best first → keep the top k
+  <h2 id="thinking">8. Thinking models</h2>
+  <p>qwen3 writes hidden reasoning before the answer. Better on hard questions, but every
+  thinking token costs the same time, and it counts against <code>num_predict</code>.
+  Asked "What is 2+2? Answer with one number.", the answer was <code>4</code>, but 99% of
+  the tokens written were thinking.</p>
+  <p>"What is RAG?" with <code>num_predict</code> 60, over the API:</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Model</th><th><code>think</code></th><th>Time</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td><code>qwen3:1.7b</code></td><td>not sent</td><td>12.8 s (6.3 s load)</td><td>content <b>empty</b>: all 60 tokens were thinking</td></tr>
+      <tr><td><code>qwen3:1.7b</code></td><td><code>False</code></td><td>2.5 s</td><td>a clean one-sentence answer</td></tr>
+      <tr><td><code>qwen3:4b</code></td><td>not sent</td><td>19.2 s (9.2 s load)</td><td>content empty</td></tr>
+      <tr><td><code>qwen3:4b</code></td><td><code>False</code></td><td>8.5 s</td><td>thinking <b>leaks</b> into the answer</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Hiding the thinking doesn't skip it. On the command line, <code>--hidethinking</code>
+  still wrote 236 tokens to show just <code>4</code>. So the chat code here uses
+  <code>qwen3:1.7b</code> with <code>"think": False</code>.</p>
 
-cosine(a, b) = dot(a, b) / (norm(a) × norm(b))</code></pre>
+  <h2 id="streaming">9. Streaming</h2>
+  <p><code>"stream": True</code> is Ollama's default. The reply is <b>NDJSON</b>: one JSON
+  object per line, each with a few characters of the answer.</p>
+  <pre><code>{"message":{"role":"assistant","content":"R"},"done":false}
+{"message":{"role":"assistant","content":"AG"},"done":false}
+...
+{"message":{"role":"assistant","content":""},"done":true,"done_reason":"length","eval_count":30,...}</code></pre>
   <ul>
-    <li>An embedding is a list of numbers. Similar meaning = vectors pointing the same way.</li>
-    <li>Use the <b>same model</b> for the notes and the question. Mixed models give nonsense scores and no error.</li>
-    <li>"Unrelated" is not 0 with real embeddings: cat vs invoice scored 0.40. Compare scores; never hard-code "0.5 = match".</li>
-    <li>Embeddings measure what a text is <b>about</b>, not whether it is positive: "I love this movie" vs "I hate this movie" scored 0.69.</li>
-    <li>Batch the call: 5 notes took 0.38–0.60 s in one call, against 1.34–1.92 s in five.</li>
+    <li>The <b>last</b> line has <code>done: true</code> and the same stats as a non-streamed reply.</li>
+    <li>The total time is the same, but the first words came after <b>0.13–0.64 s</b> instead of 2.0–3.2 s. The user reads while the model writes.</li>
+    <li>Read it with <code>httpx.stream("POST", url, json=body)</code> and <code>iter_lines()</code>. A plain <code>httpx.post</code> waits for the whole body.</li>
+    <li>Forget <code>"stream": False</code> with <code>httpx.post</code> and you get all the lines in one string: <code>.json()</code> fails with "Extra data".</li>
   </ul>
-  <p>This search by meaning is the base of RAG, the next big part of the lab.</p>
 
-  <h2 id="check">7. Check yourself</h2>
-  <details><summary>How does a chatbot remember if the model has no memory?</summary><p>Your code sends the whole history again on every call.</p></details>
-  <details><summary>Why is the second call much faster to start?</summary><p>The model stays loaded in RAM for 5 minutes after a call.</p></details>
-  <details><summary>Logits vs softmax?</summary><p>Logits are raw scores. Softmax turns them into odds that add up to 100%.</p></details>
-  <details><summary>top_p 0.8 on cat 0.63, mat 0.23, rat 0.14 keeps what?</summary><p>cat and mat: 0.63 + 0.23 = 0.86, which reaches 0.8.</p></details>
-  <details><summary>Why stream if the total time is the same?</summary><p>The user starts reading while the model is still writing.</p></details>
-  <details><summary>Cosine 1, 0 and -1 mean?</summary><p>Same direction, unrelated (right angle), opposite.</p></details>
-
-  <h2 id="next">8. Coming next</h2>
+  <h2 id="sampling">10. Sampling</h2>
+  <p>Five calls, the same prompt, "Invent an unusual name for a pet cat.":</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Setting</th><th>Answers</th></tr></thead>
+    <tbody>
+      <tr><td>temperature 0</td><td>Zephyrclaw, Zephyrclaw, Zephyrclaw, Zephyrclaw, Zephyrclaw</td></tr>
+      <tr><td>temperature 0.6 (default)</td><td>Squidlepus, Squidooch, Whiskerwisp, Zestraught, Zephyrclaw</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>The model never "chooses"; it outputs odds. Sampling then picks one, like a loot table in
+  a game. Four settings control the pick:</p>
+  <pre><code>logits → ÷ temperature → softmax → cut the tail (top_k, top_p) → weighted random pick (seed)</code></pre>
+  <p><b>Temperature</b> divides the scores before softmax. Same cat / mat / rat scores:</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>T</th><th>cat</th><th>mat</th><th>rat</th><th>Feels like</th></tr></thead>
+    <tbody>
+      <tr><td>0.2</td><td>0.99</td><td>0.01</td><td>0.00</td><td>almost greedy: safe, repeats</td></tr>
+      <tr><td>1.0</td><td>0.63</td><td>0.23</td><td>0.14</td><td>the model's own odds</td></tr>
+      <tr><td>2.0</td><td>0.48</td><td>0.29</td><td>0.23</td><td>flatter: rare words come up often</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>T = 0 would divide by zero; in Ollama it acts greedy, the same answer 10 times out of 10.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Job</th><th>Temperature</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>JSON output</td><td>0</td><td>one "creative" brace and parsing fails</td></tr>
+      <tr><td>Tool calls</td><td>0</td><td>the tool name must match exactly</td></tr>
+      <tr><td>RAG answers</td><td>low</td><td>stick to the found text, don't invent</td></tr>
+      <tr><td>LLM as a judge</td><td>0</td><td>same answer, same score, every run</td></tr>
+      <tr><td>Chatbot small talk</td><td>default</td><td>some variety feels human</td></tr>
+      <tr><td>Names, ideas</td><td>1 or more</td><td>you want surprises</td></tr>
+    </tbody>
+  </table>
+  </div>
   <ul>
-    <li>A command-line chatbot with memory.</li>
-    <li>Prompting and tool calling.</li>
+    <li><b>top_k and top_p cut the junk first.</b> At T 1.5, one "name" came back as <code>'Zigguratův Nárit\n\n(Note'</code>: thousands of odd tokens each have a tiny chance, and a high T makes them bigger. <b>top_k 2</b> keeps the 2 best (SQL: <code>ORDER BY prob DESC LIMIT 2</code>). <b>top_p 0.8</b> keeps the best ones until they cover 80%: cat (0.63) + mat (0.86, stop). T 1.5 + top_p 0.1 gave Zephyrclaw five times: calm again.</li>
+    <li>qwen3's defaults are <b>temperature 0.6, top_k 20, top_p 0.95</b>. Send nothing and you get these.</li>
+    <li><b>Seed</b> makes randomness repeatable, like <code>new Random(42)</code> in a JUnit test: T 1.5 + seed 42 gave "Fizzluff" five times. That is how a test with an open prompt stops being flaky.</li>
+    <li><b>The prompt sets the odds; temperature only reshapes them.</b> Ten calls at T 1.5: "Invent a name" gave 6 different names ("Whiskers" 4 times); "Invent an unusual name" gave 9; "Name a colour" gave only Red and Blue. Answers too samey or too wild? Fix the prompt first.</li>
+    <li><b><code>num_predict</code> is a hard cut, not "be short".</b> 12 tokens gave <code>'Once upon a time, in a quiet village nestled between rolling'</code>. For short answers, ask in the system prompt and keep a high limit.</li>
+  </ul>
+
+  <h2 id="embeddings">11. Embeddings and search</h2>
+  <p>A user types "I can't log in to my account". A note says "To reset your password, click
+  'Forgot password' on the login page." That is the right answer, but a keyword match
+  (<code>LIKE '%log in%'</code>) fails: the only shared word is "to". The fix is to find text
+  by <b>meaning</b>, the core of RAG.</p>
+  <p>An <b>embedding</b> turns text into a list of numbers (a vector) chosen so that similar
+  meanings get similar numbers. With <code>nomic-embed-text</code> it is always 768 numbers,
+  for one word or a whole page. A chat model can't do it: <code>qwen3:1.7b</code> on
+  <code>/api/embed</code> returned HTTP 501.</p>
+  <pre><code>"The cat sat on the mat." → [0.05, 0.062, -0.117, -0.024, 0.052, ...]   768 numbers</code></pre>
+  <p>Picture two numbers per text, [about animals, about money]: animal [0.9, 0.1] and
+  kitten [0.8, 0.2] point nearly the same way; invoice [0.1, 0.9] points elsewhere.
+  <b>Similar meaning = arrows pointing the same way.</b> 768 numbers is the same idea with
+  768 directions.</p>
+  <pre><code>dot(a, b)    = a0*b0 + a1*b1 + ...
+norm(a)      = sqrt(dot(a, a))                  # arrow length
+cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposite</code></pre>
+  <p>Dividing by the lengths makes a long note and a short note on the same topic score the
+  same: dot gave 0.74 vs 7.40, cosine 1.00 for both. nomic's vectors already have length 1.0,
+  so for them cosine = dot.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Pair</th><th>Cosine</th></tr></thead>
+    <tbody>
+      <tr><td>cat vs kitten</td><td>0.84</td></tr>
+      <tr><td>I love this movie vs I hate this movie</td><td>0.69</td></tr>
+      <tr><td>happy vs sad</td><td>0.66</td></tr>
+      <tr><td>cat vs dog</td><td>0.60</td></tr>
+      <tr><td>cat vs invoice</td><td>0.40</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul>
+    <li><b>Unrelated is about 0.3–0.45, not 0.</b> Read scores as "higher than the others"; never hard-code "0.5 = match".</li>
+    <li><b>Love vs hate scores high.</b> Embeddings measure what a text is <i>about</i>, not whether it is positive or true. That is why RAG still needs the LLM to read the text it found.</li>
+  </ul>
+  <p>Search is three steps: embed every note once and keep the vectors; embed the question;
+  score it against each note, sort best first and keep the top k.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Question</th><th>Best note</th><th>Score</th><th>Next best</th></tr></thead>
+    <tbody>
+      <tr><td>I can't log in to my account</td><td>reset password</td><td>0.68</td><td>0.42</td></tr>
+      <tr><td>When do I get my bill?</td><td>invoices by email</td><td>0.58</td><td>0.44</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p><b>Things that bite:</b></p>
+  <ul>
+    <li><b>Use the same model</b> for notes and question. Vectors from two models live on different maps: nonsense scores, no error.</li>
+    <li><b>Batch the call.</b> <code>"input"</code> takes a list: 5 notes took 0.38–0.60 s in one call, against 1.34–1.92 s in five.</li>
+    <li><b>Different lengths are a bug.</b> Python's <code>zip</code> stops at the shorter list without an error, so you get a wrong score. Make <code>dot</code> raise instead.</li>
+    <li><b>Prefixes.</b> nomic's docs suggest <code>search_query: </code> / <code>search_document: </code> in front of texts. On 5 notes the result was mixed, so it needs a proper test set before deciding.</li>
+  </ul>
+
+  <h2 id="check">12. Check yourself</h2>
+  <details><summary>How does a chatbot remember if the model has no memory?</summary><p>Your code sends the whole history again on every call. It grows each turn.</p></details>
+  <details><summary>1 token is about how much English text?</summary><p>About 4 characters, roughly ¾ of a word.</p></details>
+  <details><summary>Logits vs softmax?</summary><p>Logits are raw scores. Softmax turns them into odds that add up to 100%.</p></details>
+  <details><summary>qwen3:4b at FP16 vs Q4_K_M: what size?</summary><p>8.0 GB vs 2.5 GB.</p></details>
+  <details><summary>Why is the second call much faster to start?</summary><p>The model stays in RAM for 5 minutes: load 9.4 s became 0.009 s.</p></details>
+  <details><summary>done_reason "length" means?</summary><p>The answer hit num_predict and was cut off.</p></details>
+  <details><summary>Why was the answer empty with num_predict 60 and no think flag?</summary><p>All 60 tokens went to hidden thinking.</p></details>
+  <details><summary>top_p 0.8 on cat 0.63, mat 0.23, rat 0.14 keeps what?</summary><p>cat and mat: 0.63 + 0.23 = 0.86, which reaches 0.8.</p></details>
+  <details><summary>Which temperature for JSON output or tool calls?</summary><p>0. One "creative" token breaks parsing.</p></details>
+  <details><summary>"I love this movie" vs "I hate this movie" scores 0.69. Why?</summary><p>Embeddings measure what a text is about, not whether it is positive.</p></details>
+
+  <h2 id="next">13. Coming next</h2>
+  <ul>
+    <li>A command-line chatbot with memory: the first version of the lab's app.</li>
+    <li>Prompting, structured output and tool calling.</li>
     <li>RAG: chunking, a vector database, hybrid search and reranking.</li>
   </ul>
 
-  <h2 id="refs">9. Further reading</h2>
+  <h2 id="refs">14. Further reading</h2>
   <ul>
     <li><a href="https://github.com/ollama/ollama/blob/main/docs/api.md" rel="noopener">Ollama API reference</a></li>
     <li><a href="https://ollama.com/library" rel="noopener">Ollama model library</a></li>
