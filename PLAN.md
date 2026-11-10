@@ -250,3 +250,24 @@ Pyodide caching (measured, same browser profile, cache on): jsDelivr sends `Cach
 
 The start time on a repeat visit is the browser preparing Python, not a download. Inside one page,
 Python stays loaded after the first Run, so later Runs take milliseconds.
+
+## 12. More popup pages: candidates (2026-11-10, owner to pick)
+Done: BPE, Softmax and temperature, Quantization, Cosine similarity (AI post).
+"Runnable" = can get a Run button (standard library or numpy, no Ollama).
+
+| # | Page | Post, section | Source lesson | Runnable | Why |
+|---|---|---|---|---|---|
+| 1 | Python traps for Java developers: `/` vs `//`, `==` vs `is`, truthy values, mutable default, `zip` stopping short | Python, 2-3 | 1.2, 1.3, 2.5 | yes | Short demos a Java reader can break and rerun |
+| 2 | Exceptions: try / except / else / finally, `raise ... from` | Python, 6 | 1.5 | yes | Shows `__cause__` and the order of blocks live |
+| 3 | Dataclasses vs Java records | Python, 4 | 1.4 | yes | `@dataclass`, `frozen=True`, `field(default_factory=list)` side by side with Java |
+| 4 | Streaming: reading NDJSON lines | AI, 9 | 2.3 | yes (sample lines, no Ollama) | Parse the stream the way the chat code does |
+| 5 | Comprehensions and slicing | Python, 3 | 1.3 | yes | Stream → comprehension, with output |
+| 6 | Thinking models | AI, 8 | 2.2, 2.3 | no | Measured tables only; less to gain |
+| 7 | pytest fakes with monkeypatch | Python, 9 | 1.9 | not checked (needs pytest in Pyodide) | Strong topic; Run support unknown |
+| 8 | Chat memory and trimming the history | AI, 3 | 2.6 | yes | Wait: owner said 2.6 not now |
+| 9 | Kafka partitions + consumer groups; RabbitMQ exchange routing | Kafka, RabbitMQ | (study notes) | toy only | Diagrams more than code |
+
+Recommended next: 1, 2, 3, 4.
+
+Projects panel (left panel on project pages): 13 of 19 titles wrap (measured). Fix needs a short
+name per project in `tools/projects_data.py` (new field, used only by the panel). Proposed names in chat 2026-11-10; owner to confirm.
