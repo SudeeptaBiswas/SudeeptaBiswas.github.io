@@ -33,7 +33,7 @@ const origin = DISK ? undefined : new URL(BASE).origin;
 await B.send("Browser.grantPermissions", { permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"], ...(origin ? { origin } : {}) }).catch(() => {});
 
 // 1. Every code block in every post gets the buttons
-const posts = { "ai-engineering-llm-fundamentals.html": 10, "python-for-java-developers.html": 7, "jenkins-docker-cicd.html": 1, "kafka-for-java-developers.html": 4, "rabbitmq-for-java-developers.html": 1 };
+const posts = { "ai-engineering-llm-fundamentals.html": 12, "python-for-java-developers.html": 7, "jenkins-docker-cicd.html": 1, "kafka-for-java-developers.html": 4, "rabbitmq-for-java-developers.html": 1 };
 for (const [p, n] of Object.entries(posts)) {
   await go(BASE + p);
   const c = await js(`({wraps: document.querySelectorAll(".code-wrap").length, copy: document.querySelectorAll('.code-btn[aria-label="Copy code"]').length, dl: document.querySelectorAll('.code-btn[aria-label="Download code"]').length, run: document.querySelectorAll('.code-btn[aria-label^="Run"]').length})`);

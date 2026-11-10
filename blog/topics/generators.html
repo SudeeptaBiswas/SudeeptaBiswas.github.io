@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generators: yield — Sudeepta Biswas</title>
+  <meta name="description" content="A function with yield hands out values one by one, like a Java Iterator. How the chatbot uses one to print a streamed answer as it arrives. Runnable Python.">
+  <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/generators.html">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<main id="main" class="page-solo">
+  <p class="solo-back"><a href="../ai-engineering-llm-fundamentals.html#chatbot">← AI Engineering: LLM Fundamentals</a></p>
+  <article class="article" data-popup-content>
+    <p class="label">AI · Chatbot</p>
+    <h1>Generators: yield</h1>
+
+    <p class="lead">The chatbot must print each piece of the answer the moment it arrives. A
+    <b>generator</b> does that: a function with <code>yield</code> hands out values one at a time.
+    Java view: an <code>Iterator</code> whose <code>next()</code> runs until the next value.</p>
+
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Java</th><th>Python</th></tr></thead>
+      <tbody>
+        <tr><td><code>Iterator&lt;String&gt;</code> + <code>next()</code></td><td>a function with <code>yield</code></td></tr>
+        <tr><td><code>hasNext()</code> is false</td><td>the function returns: the <code>for</code> loop ends</td></tr>
+        <tr><td>return type <code>Iterator&lt;Integer&gt;</code></td><td><code>-&gt; Iterator[int]</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>Made on demand</h2>
+    <pre data-run="python" data-file="gen_lazy.py"><code>from collections.abc import Iterator
+
+def count_up(limit: int) -&gt; Iterator[int]:
+    for number in range(1, limit + 1):
+        print(f"  making {number}")
+        yield number                         # pause here; the loop gets number
+
+numbers = count_up(3)                        # nothing printed: the body has not started
+print("called count_up(3)")
+for number in numbers:
+    print(f"  got {number}")
+
+leftover = list(numbers)                     # one pass only, like a Java Iterator
+print("second loop got:", leftover)</code></pre>
+    <p>Output:</p>
+    <pre><code>called count_up(3)
+  making 1
+  got 1
+  making 2
+  got 2
+  making 3
+  got 3
+second loop got: []</code></pre>
+    <ul>
+      <li>Calling <code>count_up(3)</code> runs nothing. It returns a generator.</li>
+      <li>Each loop step runs the body up to the next <code>yield</code> and pauses there, so
+      "making" and "got" take turns.</li>
+      <li>One pass only: a second loop gets nothing, as with a used Java <code>Iterator</code>.</li>
+    </ul>
+
+    <h2>The chatbot's case: stream lines to text</h2>
+    <p>Ollama sends the answer as JSON lines (see
+    <a href="streaming.html" data-popup>reading a streamed reply</a>). The generator turns them
+    into text pieces; the loop prints each one at once and keeps it for the chat history.</p>
+    <pre data-run="python" data-file="gen_stream.py"><code>import json
+from collections.abc import Iterator
+
+# Stream lines in the shape qwen3:1.7b sent them; the last one has content "".
+STREAM_LINES = [
+    '{"message":{"role":"assistant","content":"R"},"done":false}',
+    '{"message":{"role":"assistant","content":"AG"},"done":false}',
+    "",
+    '{"message":{"role":"assistant","content":" helps"},"done":false}',
+    '{"message":{"role":"assistant","content":""},"done":true,"done_reason":"stop"}',
+]
+
+def text_chunks(lines: list[str]) -&gt; Iterator[str]:
+    for line in lines:
+        if not line.strip():                 # blank line: nothing to parse
+            continue
+        text = json.loads(line)["message"]["content"]
+        if text:                             # the last line's "" is not a chunk
+            yield text
+
+parts = []
+print("bot&gt; ", end="")
+for chunk in text_chunks(STREAM_LINES):
+    print(chunk, end="", flush=True)         # show each piece at once
+    parts.append(chunk)
+print()
+print("saved to memory:", repr("".join(parts)), "from", parts)</code></pre>
+    <p>Output:</p>
+    <pre><code>bot&gt; RAG helps
+saved to memory: 'RAG helps' from ['R', 'AG', ' helps']</code></pre>
+    <p>Two bugs from the earlier stream code are handled here: blank lines are skipped, and the last
+    line's empty content is not handed out as a piece.</p>
+  </article>
+</main>
+<script src="../../assets/js/code.js"></script>
+</body>
+</html>

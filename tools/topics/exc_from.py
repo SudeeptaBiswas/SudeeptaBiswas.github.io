@@ -9,7 +9,7 @@ def ask(url):
         raise OllamaDownError(f"no Ollama at {url}") from error   # keep the cause
 
 try:
-    ask("http://localhost:11434")
+    ask("http://127.0.0.1:11434")
 except OllamaError as error:                 # the parent catches every child
     print("caught:", type(error).__name__, "-", error)
     print("cause: ", type(error.__cause__).__name__, "-", error.__cause__)

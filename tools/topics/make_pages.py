@@ -425,3 +425,38 @@ page("streaming", "Reading a streamed reply (NDJSON)",
     <p>Forget <code>"stream": False</code> with a plain <code>httpx.post</code>, and the body is many
     JSON objects in one string. <code>.json()</code> reads the first one and stops at the second:</p>
     {run("stream_extra.py")}""")
+
+page("generators", "Generators: yield",
+     "A function with yield hands out values one by one, like a Java Iterator. How the chatbot uses one to print a streamed answer as it arrives. Runnable Python.",
+     "AI · Chatbot", "chatbot", f"""
+    <p class="lead">The chatbot must print each piece of the answer the moment it arrives. A
+    <b>generator</b> does that: a function with <code>yield</code> hands out values one at a time.
+    Java view: an <code>Iterator</code> whose <code>next()</code> runs until the next value.</p>
+
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Java</th><th>Python</th></tr></thead>
+      <tbody>
+        <tr><td><code>Iterator&lt;String&gt;</code> + <code>next()</code></td><td>a function with <code>yield</code></td></tr>
+        <tr><td><code>hasNext()</code> is false</td><td>the function returns: the <code>for</code> loop ends</td></tr>
+        <tr><td>return type <code>Iterator&lt;Integer&gt;</code></td><td><code>-&gt; Iterator[int]</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>Made on demand</h2>
+    {run("gen_lazy.py")}
+    <ul>
+      <li>Calling <code>count_up(3)</code> runs nothing. It returns a generator.</li>
+      <li>Each loop step runs the body up to the next <code>yield</code> and pauses there, so
+      "making" and "got" take turns.</li>
+      <li>One pass only: a second loop gets nothing, as with a used Java <code>Iterator</code>.</li>
+    </ul>
+
+    <h2>The chatbot's case: stream lines to text</h2>
+    <p>Ollama sends the answer as JSON lines (see
+    <a href="streaming.html" data-popup>reading a streamed reply</a>). The generator turns them
+    into text pieces; the loop prints each one at once and keeps it for the chat history.</p>
+    {run("gen_stream.py")}
+    <p>Two bugs from the earlier stream code are handled here: blank lines are skipped, and the last
+    line's empty content is not handed out as a piece.</p>""")

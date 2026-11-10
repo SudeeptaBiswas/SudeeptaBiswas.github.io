@@ -82,14 +82,14 @@ def ask(url):
         raise OllamaDownError(f"no Ollama at {url}") from error   # keep the cause
 
 try:
-    ask("http://localhost:11434")
+    ask("http://127.0.0.1:11434")
 except OllamaError as error:                 # the parent catches every child
     print("caught:", type(error).__name__, "-", error)
     print("cause: ", type(error.__cause__).__name__, "-", error.__cause__)
     print("tip:    start Ollama: ollama serve")</code></pre>
     <p>Output:</p>
-    <pre><code>caught: OllamaDownError - no Ollama at http://localhost:11434
-cause:  ConnectionRefusedError - nothing is listening on http://localhost:11434
+    <pre><code>caught: OllamaDownError - no Ollama at http://127.0.0.1:11434
+cause:  ConnectionRefusedError - nothing is listening on http://127.0.0.1:11434
 tip:    start Ollama: ollama serve</code></pre>
     <ul>
       <li>Callers catch <code>OllamaError</code> and get every child.</li>

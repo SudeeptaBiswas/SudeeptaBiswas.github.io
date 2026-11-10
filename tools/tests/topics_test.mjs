@@ -17,7 +17,7 @@ await send("Emulation.setDeviceMetricsOverride", { width: 1400, height: 900, dev
 
 const POSTS = {
   "ai-engineering-llm-fundamentals.html": { softmax: "Softmax and temperature", quantization: "Quantization", cosine: "Cosine similarity",
-    bpe: "Byte Pair Encoding (BPE)", streaming: "Reading a streamed reply (NDJSON)" },
+    bpe: "Byte Pair Encoding (BPE)", streaming: "Reading a streamed reply (NDJSON)", generators: "Generators: yield" },
   "python-for-java-developers.html": { "python-traps": "Python traps for Java developers", exceptions: "Exceptions: try, except, else, finally",
     dataclasses: "Dataclasses vs Java records" },
 };

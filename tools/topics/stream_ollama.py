@@ -5,7 +5,7 @@ import httpx
 body = {"model": "qwen3:1.7b", "stream": True, "think": False,
         "messages": [{"role": "user", "content": "Why do chat apps stream their answers?"}]}
 
-with httpx.stream("POST", "http://localhost:11434/api/chat", json=body, timeout=120.0) as response:
+with httpx.stream("POST", "http://127.0.0.1:11434/api/chat", json=body, timeout=120.0) as response:
     for line in response.iter_lines():       # one JSON object per line, as it arrives
         if not line:
             continue

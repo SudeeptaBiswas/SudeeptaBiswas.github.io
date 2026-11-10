@@ -76,6 +76,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 57 | Owner OK'd popup candidates 1–4 (10 Nov 2026). New pages from lessons 1.2–1.5 and 2.3: Python traps for Java developers (5 traps), Exceptions: try, except, else, finally, Dataclasses vs Java records (Python post); Reading a streamed reply (NDJSON) (AI post, sample lines, no Ollama). 14 runnable blocks, each output = real CPython output and = Pyodide output (`topics_test.mjs` 32/32 http + disk). Generator takes the post per page (`post=PY`). Links inside a popup to another popup work (http: same dialog; disk: inside the frame). Demo bars also got one colour per row (owner asked). |
 | 58 | Runnable blocks are editable in place (owner OK, 10 Nov 2026): `contenteditable="plaintext-only"` on the block's code, added only when a Run plugin attaches. Run, Copy and Download use the edited code; Reset (shows once edited) restores; nothing is saved. Keys: Tab = 4 spaces, Ctrl/Cmd+Enter = Run, Esc = leave (in the popup the first Esc leaves the editor, the second closes the popup). Old browsers without plaintext-only keep read-only blocks. `edit_test.mjs` 18/18 http, 11/11 disk. Fixes the Python traps lead ("change it and run it again"), which was not true before. |
 | 59 | Commit rules changed (owner, 10 Nov 2026). Was: one concern per commit, which gave many small commits plus a "push done up to <hash>" commit right after a push. Now: one commit per feature, with code, tests, docs and Section 13 together, so every pushed commit holds the full state for the other PC. No commits that only record a push or a hash; the one made was undone before it was pushed. Written in `CLAUDE.md` ("Start and finish work") and the owner's global rules. |
+| 60 | Lesson coverage check (owner asked, 10 Nov 2026): all 13 lab lessons vs the two posts. Gaps filled: 1.7 Ollama HTTP endpoints (AI post section 5), 1.9 fixture example + `capsys` + `pythonpath` (Python post section 9), 2.1 "new Python" idioms table (Python post section 3), 2.2 `ollama show` output + `--verbose` (AI post section 5). 1.1 trivia (VS Code interpreter, `uv tree`) left out. Lesson 2.6 (assistant v1, owner: "prepare the document") added as AI post section 12 "A chatbot with memory" from LESSON_2_6 measured numbers only (lab code not solved yet, so no test results claimed), plus runnable popup "Generators: yield". Bug fixed: Streaming and Exceptions popups used `localhost:11434`; lesson 1.7 measured 2.16 s vs 0.02 s for `127.0.0.1`, so now `127.0.0.1`. |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -278,7 +279,7 @@ Next, if wanted: 5 (comprehensions and slicing), 7 (pytest, Run support not chec
 Projects panel (left panel on project pages): done, decision 56 (`short=` names, 0 of 19 wrap).
 
 ## 13. Where we stopped (handoff, updated 2026-11-10)
-Read this first in a new session (on either PC: `git pull` first), then `CLAUDE.md` and decisions 37–59 in Section 3.
+Read this first in a new session (on either PC: `git pull` first), then `CLAUDE.md` and decisions 37–60 in Section 3.
 Updated inside every feature commit, so the pushed repo always holds the current state. No push status or commit hashes here: `git log` has them.
 
 **Done in the 2026-11-10 session** (details in the decisions):
@@ -292,6 +293,9 @@ Updated inside every feature commit, so the pushed repo always holds the current
 - Generator and browser tests saved in `tools/topics/` and `tools/tests/` (were only in a temp folder).
 - Demo bars one colour per row; popup pages Python traps, Exceptions, Dataclasses, Streaming (57).
 - Runnable blocks editable in place, with Reset (58).
+- Commit rules: one commit per feature, handoff in each (59).
+- All 13 lab lessons covered; 2.6 chatbot section + Generators popup; `127.0.0.1` fix (60).
+  When the owner finishes lab 2.6 (tests pass), add the real results to AI post section 12.
 
 **Open: owner to answer**
 1. Check the 13 short project names (decision 56). Change any in `tools/projects_data.py`, rerun the build.

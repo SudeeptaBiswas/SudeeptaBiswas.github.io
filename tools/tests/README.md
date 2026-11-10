@@ -22,7 +22,7 @@ OUT="$TEMP/shots"; mkdir -p "$OUT"     # screenshots go here, never in the repo
 | `popup_test.mjs` | `node popup_test.mjs $OUT $H` | popup opens, closes, theme, focus, links | 18/18, 18/18 |
 | `code_test.mjs` | `node code_test.mjs $OUT $H` | Copy / Download buttons | 12/12, 9/9 |
 | `runner_test.mjs` | `node runner_test.mjs $H` | Run plugins (needs internet: Pyodide) | 12/12, 10/10 |
-| `topics_test.mjs` | `node topics_test.mjs $H $OUT` | popup pages: panel links, every Run output = shown output | 32/32, 32/32 |
+| `topics_test.mjs` | `node topics_test.mjs $H $OUT` | popup pages: panel links, every Run output = shown output | 35/35, 35/35 |
 | `demo_test.mjs` | `node demo_test.mjs $H $OUT` | sliders (demos.js): values, both themes, phone | 22/22, 22/22 |
 | `edit_test.mjs` | `node edit_test.mjs $H $OUT` | editable Run blocks: real typing, Tab, Run, Ctrl+Enter, Esc, Download, Reset, popup, phone | 18/18, 11/11 |
 | `toc_lines.mjs` | `node toc_lines.mjs ai-engineering-llm-fundamentals.html ...` | left-panel titles that wrap (blog pages, http only) | 0 wrap |

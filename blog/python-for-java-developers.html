@@ -163,6 +163,21 @@ nums[::2]    # [0, 2, 4]   every 2nd item
     <li>Pick a <b>set</b> for <code>x in items</code> on big data. A list keeps order and duplicates.</li>
     <li><b>Trap:</b> <code>def add(item, bucket=[])</code> creates one list that every call shares. Write <code>bucket=None</code>, then <code>bucket = [] if bucket is None else bucket</code>.</li>
   </ul>
+  <p>Small idioms that replace a Java loop or helper (met while writing the tokenizer code):</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Python</th><th>What it does</th><th>Java</th></tr></thead>
+    <tbody>
+      <tr><td><code>zip(a, a[1:])</code></td><td>pairs of neighbours: (a0, a1), (a1, a2)…</td><td>loop with <code>i</code> and <code>i + 1</code></td></tr>
+      <tr><td><code>enumerate(xs, start=1)</code></td><td>gives (index, item)</td><td><code>for (int i = 1; ...)</code></td></tr>
+      <tr><td><code>Counter(xs).most_common(1)</code></td><td>the top item and its count; a tie keeps the first one seen</td><td><code>Map&lt;K, Integer&gt;</code> + sort</td></tr>
+      <tr><td><code>d.setdefault(k, [])</code></td><td>get, or create if missing</td><td><code>map.computeIfAbsent(k, ...)</code></td></tr>
+      <tr><td><code>def f() -&gt; str | None</code></td><td>may return <code>None</code></td><td><code>Optional&lt;String&gt;</code></td></tr>
+      <tr><td><code>reversed(xs)</code></td><td>loop from the end</td><td><code>for (int i = n - 1; i &gt;= 0; i--)</code></td></tr>
+      <tr><td><code>math.ceil</code>, <code>math.exp</code></td><td>round up, e to the power</td><td><code>Math.ceil</code>, <code>Math.exp</code></td></tr>
+    </tbody>
+  </table>
+  </div>
 
   <h2 id="classes">4. Classes and dataclasses</h2>
   <div class="table-wrap">
@@ -357,6 +372,13 @@ E        +  where 2.0 = average([1.0, 2.0, 3.0])</code></pre>
 def test_word_count(text: str, expected_count: int) -> None:
     assert word_count(text) == expected_count       # each row is its own test
 
+@pytest.fixture
+def exam_scores() -> list[float]:                   # runs before each test that asks for it
+    return [70.0, 80.0, 90.0]
+
+def test_average_of_scores(exam_scores: list[float]) -> None:   # matched by the name
+    assert average(exam_scores) == 80.0
+
 def test_average_of_nothing_fails() -> None:
     with pytest.raises(ValueError, match="empty list"):
         average([])                                 # must raise INSIDE the with
@@ -394,6 +416,8 @@ def test_model_names_fake(monkeypatch: pytest.MonkeyPatch) -> None:
   <ul>
     <li>So: fakes for my own logic, plus one test marked <code>@pytest.mark.ollama</code> that proves the real server agrees. Measured: 3 passed in 0.42 s with the server, 2 passed and 1 deselected in 0.09 s without.</li>
     <li><b>Patch the name where it is looked up.</b> If <code>search()</code> calls <code>embed</code> from its own module, patch <code>search_module.embed</code>, not a copy you imported.</li>
+    <li><code>monkeypatch</code> is itself a fixture that comes with pytest. So is <code>capsys</code>, which captures <code>print()</code> (Java: a fake <code>System.out</code>). <code>monkeypatch.setattr("builtins.input", fake_input)</code> types lines for a command-line app with no keyboard.</li>
+    <li>Lesson folders start with a digit, so they can't be imported as packages. <code>pyproject.toml</code> adds the folder under test to pytest's <code>pythonpath</code> instead.</li>
     <li>A test with no <code>assert</code> <b>passes</b>. Empty stubs call <code>pytest.fail("not written yet")</code>.</li>
     <li>To know a passing test really tests something, break the code on purpose: it must fail.</li>
   </ul>

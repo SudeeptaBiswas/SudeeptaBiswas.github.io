@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Engineering: LLM Fundamentals — Sudeepta Biswas</title>
-  <meta name="description" content="How an LLM writes an answer, run locally with Ollama on a CPU: tokens, context window, quantization, the chat API, sampling, and embeddings, with measured numbers.">
+  <meta name="description" content="How an LLM writes an answer, run locally with Ollama on a CPU: tokens, context window, quantization, the chat API, sampling, embeddings and a chatbot with memory, with measured numbers.">
   <meta property="og:title" content="AI Engineering: LLM Fundamentals">
-  <meta property="og:description" content="How an LLM writes an answer, run locally with Ollama on a CPU: tokens, context window, quantization, the chat API, sampling, and embeddings, with measured numbers.">
+  <meta property="og:description" content="How an LLM writes an answer, run locally with Ollama on a CPU: tokens, context window, quantization, the chat API, sampling, embeddings and a chatbot with memory, with measured numbers.">
   <meta property="og:type" content="article">
   <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
   <meta property="og:url" content="https://sudeeptabiswas.github.io/blog/ai-engineering-llm-fundamentals.html">
@@ -58,6 +58,9 @@
       <li><a href="#sampling">Sampling</a></li>
       <li><a href="#embeddings">Embeddings</a>
         <ol><li><a href="topics/cosine.html" data-popup>Cosine similarity</a></li></ol>
+      </li>
+      <li><a href="#chatbot">Chatbot with memory</a>
+        <ol><li><a href="topics/generators.html" data-popup>Generators</a></li></ol>
       </li>
       <li><a href="#check">Check yourself</a></li>
       <li><a href="#next">Coming next</a></li>
@@ -194,6 +197,15 @@ softmax:  cat 63%   mat 23%   rat 14%</code></pre>
   <b>parameters</b> (weights): numbers the model learned in training. No tag means
   <code>latest</code>. Trust <code>ollama show</code>, not the name: <code>qwen3:1.7b</code>
   reports 2.0B.</p>
+  <pre><code>$ ollama show qwen3:4b      (cut)
+parameters          4.0B
+context length      262144      &lt;- the most tokens it CAN see (section 3)
+quantization        Q4_K_M      &lt;- how each weight is stored (section 6)</code></pre>
+  <p>Add <code>--verbose</code> to <code>ollama run</code> to see the timing: <code>eval rate</code>
+  is the writing speed in tokens per second (section 6). Your code reaches the same things over
+  HTTP: <code>GET /api/tags</code> = <code>ollama list</code>, <code>POST /api/show</code> =
+  <code>ollama show</code> (404 if the model is missing), <code>GET /api/ps</code> =
+  <code>ollama ps</code>, <code>GET /api/version</code> = <code>ollama --version</code>.</p>
 
   <h2 id="size">6. Size, RAM and speed</h2>
   <p><b>Quantization</b> stores each weight in fewer bits: smaller and faster, slightly less
@@ -405,7 +417,71 @@ cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposi
     <li><b>Prefixes.</b> nomic's docs suggest <code>search_query: </code> / <code>search_document: </code> in front of texts. On 5 notes the result was mixed, so it needs a proper test set before deciding.</li>
   </ul>
 
-  <h2 id="check">12. Check yourself</h2>
+  <h2 id="chatbot">12. A chatbot with memory</h2>
+  <p>The lab's one real app starts here: <code>assistant</code> v1, a command-line chatbot. Later
+  versions add tools, RAG and agents. The question for v1: every turn adds two messages, your
+  question and the answer. Who keeps that list, how big may it get, and what happens when it is
+  too big? Measured with qwen3:1.7b on the i5-1135G7 laptop.</p>
+  <p><b>Memory = resend the history.</b> The model keeps nothing between calls, so each turn
+  sends everything again. <code>prompt_eval_count</code> in the reply is the tokens the model
+  really read:</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Turn</th><th>Question</th><th>Tokens read</th><th>Estimate (characters ÷ 4)</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>My favourite colour is green.</td><td>33</td><td>16</td></tr>
+      <tr><td>2</td><td>What is RAG?</td><td>53</td><td>24</td></tr>
+      <tr><td>3</td><td>Name one fruit.</td><td>101</td><td>79</td></tr>
+      <tr><td>4</td><td>What is my favourite colour?</td><td>122</td><td>91 → "Green."</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ul>
+    <li>Every turn costs more tokens and more time: a 4131-token prompt took <b>91.5 s</b>.</li>
+    <li>The estimate is low: the real count was 1.2–2.2 times higher, because roles and chat
+    markers cost tokens too. A budget must leave room.</li>
+  </ul>
+  <p><b>Too big? Ollama cuts, and says nothing.</b> The same fact, then about 1,600 tokens of
+  filler, then the question, with two context sizes (<code>num_ctx</code>):</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th><code>num_ctx</code></th><th>Tokens read</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>4096</td><td>1611</td><td>"green" ✔</td></tr>
+      <tr><td>1024</td><td><b>35</b></td><td>"Blue" ✘, made up</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>No error and no warning: Ollama dropped the long message and kept only the system message and
+  the last question. The default here was 4096, and a 4131-token prompt got a made-up "Red." the
+  same way. So the app trims the history <b>itself</b>, on purpose, and sends
+  <code>num_ctx</code> in every call, so the limit lives in the code and not in a hidden default.</p>
+  <pre><code>you type ──> cli.py         loop, /reset and /exit, errors
+               │  answer()    one turn: add → stream → print → add
+               ▼
+           memory.py          ChatMemory: history + trim to 2000 tokens
+               │  messages()
+               ▼
+           ollama_client.py   POST /api/chat → yield text pieces</code></pre>
+  <ul>
+    <li><b>Three files, one job each.</b> Java view: a controller, a repository and a client.</li>
+    <li>The system message is kept <b>apart</b> from the history, so trimming can never drop the rules.
+    Trimming never drops the newest message: sending nothing is worse.</li>
+    <li><b>Budget:</b> 2000 estimated tokens of history plus 300 for the answer. The long chat
+    measured 1.17 times the estimate, so about 2350 real + 300 fits in <code>num_ctx</code> 4096.</li>
+    <li><b>TypedDict</b> gives a message its keys: <code>{"role": "user", "contnet": "hi"}</code>
+    is flagged by pyright while typing, yet it is still a plain dict that httpx sends as JSON.
+    Java: <code>record Message(String role, String content)</code>.</li>
+    <li>A <b>generator</b> (<code>yield</code>) hands out each piece of the answer as it arrives, so
+    the chat prints it at once. Java: an <code>Iterator</code>.
+    <a href="topics/generators.html" data-popup>See how generators work</a>, with code you can run.</li>
+    <li>This time the tests come first and are the spec: the code is written until they pass.</li>
+  </ul>
+  <p>Known limits of v1, fixed in later versions: token counts are estimates; trimming drops single
+  messages, so an answer can lose its question; if Ollama fails mid-answer the question stays in
+  memory; and quitting forgets the chat.</p>
+
+  <h2 id="check">13. Check yourself</h2>
   <details><summary>How does a chatbot remember if the model has no memory?</summary><p>Your code sends the whole history again on every call. It grows each turn.</p></details>
   <details><summary>1 token is about how much English text?</summary><p>About 4 characters, roughly ¾ of a word.</p></details>
   <details><summary>Logits vs softmax?</summary><p>Logits are raw scores. Softmax turns them into odds that add up to 100%.</p></details>
@@ -416,15 +492,15 @@ cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposi
   <details><summary>top_p 0.8 on cat 0.63, mat 0.23, rat 0.14 keeps what?</summary><p>cat and mat: 0.63 + 0.23 = 0.86, which reaches 0.8.</p></details>
   <details><summary>Which temperature for JSON output or tool calls?</summary><p>0. One "creative" token breaks parsing.</p></details>
   <details><summary>"I love this movie" vs "I hate this movie" scores 0.69. Why?</summary><p>Embeddings measure what a text is about, not whether it is positive.</p></details>
+  <details><summary>The chat is longer than num_ctx. What does Ollama do?</summary><p>It drops messages without an error, and the model may make up an answer. Trim the history yourself.</p></details>
 
-  <h2 id="next">13. Coming next</h2>
+  <h2 id="next">14. Coming next</h2>
   <ul>
-    <li>A command-line chatbot with memory: the first version of the lab's app.</li>
     <li>Prompting, structured output and tool calling.</li>
     <li>RAG: chunking, a vector database, hybrid search and reranking.</li>
   </ul>
 
-  <h2 id="refs">14. Further reading</h2>
+  <h2 id="refs">15. Further reading</h2>
   <ul>
     <li><a href="https://github.com/ollama/ollama/blob/main/docs/api.md" rel="noopener">Ollama API reference</a></li>
     <li><a href="https://ollama.com/library" rel="noopener">Ollama model library</a></li>
