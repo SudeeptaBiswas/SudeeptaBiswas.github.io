@@ -6,6 +6,13 @@ Personal portfolio + blog. Plain HTML + CSS, served by GitHub Pages from `main`.
 Open `index.html` in a browser. No build step, except project pages (below). Optional local server:
 `python -m http.server 8000` then http://localhost:8000
 
+## Start and finish work (two PCs)
+- Start: `git pull`, then read `PLAN.md` Section 13 "Where we stopped".
+- Finish a feature: update Section 13 (done, open questions, how to continue, anything that lives only
+  on this PC), then make **one commit** for the whole feature: code, pages, tests, docs and Section 13 together.
+- Scripts or notes needed later go in the repo (`tools/`), never only in a temp folder.
+- No commits that only record a push or a hash.
+
 ## Change a project
 Project pages are generated. Never hand-edit `projects/*.html`.
 1. Edit `tools/projects_data.py` (markup: `**bold**`, `` `code` ``, `[text](url)`).

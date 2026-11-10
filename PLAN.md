@@ -75,6 +75,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 56 | Projects panel: optional `short=` per project, used only in the left panel (full title as hover tip). 13 set: AI Requirements Docs, RIMS Migration, Release Management, PLM Platform (V6), ENOVIA PLM (V5), Omron Testing, ShopBook Migration, HRMS, Food Navi, NTT Data Trial, SMS VAS, DB Copy Tool, FleetCheck. Measured at 1400px: 0 of 19 pages wrap (was 13 titles). Owner: "yes, need to check" the names. |
 | 57 | Owner OK'd popup candidates 1–4 (10 Nov 2026). New pages from lessons 1.2–1.5 and 2.3: Python traps for Java developers (5 traps), Exceptions: try, except, else, finally, Dataclasses vs Java records (Python post); Reading a streamed reply (NDJSON) (AI post, sample lines, no Ollama). 14 runnable blocks, each output = real CPython output and = Pyodide output (`topics_test.mjs` 32/32 http + disk). Generator takes the post per page (`post=PY`). Links inside a popup to another popup work (http: same dialog; disk: inside the frame). Demo bars also got one colour per row (owner asked). |
 | 58 | Runnable blocks are editable in place (owner OK, 10 Nov 2026): `contenteditable="plaintext-only"` on the block's code, added only when a Run plugin attaches. Run, Copy and Download use the edited code; Reset (shows once edited) restores; nothing is saved. Keys: Tab = 4 spaces, Ctrl/Cmd+Enter = Run, Esc = leave (in the popup the first Esc leaves the editor, the second closes the popup). Old browsers without plaintext-only keep read-only blocks. `edit_test.mjs` 18/18 http, 11/11 disk. Fixes the Python traps lead ("change it and run it again"), which was not true before. |
+| 59 | Commit rules changed (owner, 10 Nov 2026). Was: one concern per commit, which gave many small commits plus a "push done up to <hash>" commit right after a push. Now: one commit per feature, with code, tests, docs and Section 13 together, so every pushed commit holds the full state for the other PC. No commits that only record a push or a hash; the one made was undone before it was pushed. Written in `CLAUDE.md` ("Start and finish work") and the owner's global rules. |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -277,7 +278,8 @@ Next, if wanted: 5 (comprehensions and slicing), 7 (pytest, Run support not chec
 Projects panel (left panel on project pages): done, decision 56 (`short=` names, 0 of 19 wrap).
 
 ## 13. Where we stopped (handoff, updated 2026-11-10)
-Read this first in a new session, then `CLAUDE.md` and decisions 37–56 in Section 3.
+Read this first in a new session (on either PC: `git pull` first), then `CLAUDE.md` and decisions 37–59 in Section 3.
+Updated inside every feature commit, so the pushed repo always holds the current state. No push status or commit hashes here: `git log` has them.
 
 **Done in the 2026-11-10 session** (details in the decisions):
 - CI/CD (Jenkins + Docker) post; Blog page order, dates, cards (37–44).
@@ -292,13 +294,12 @@ Read this first in a new session, then `CLAUDE.md` and decisions 37–56 in Sect
 - Runnable blocks editable in place, with Reset (58).
 
 **Open: owner to answer**
-1. Push: check `git log origin/main..HEAD` (12 commits when written, e378e8a onwards).
-2. Check the 13 short project names (decision 56). Change any in `tools/projects_data.py`, rerun the build.
-3. Popup pages 1–4 done (57). More from Section 12 only if the owner asks.
-4. AI posts growth plan, Section 10: owner said "we will check later".
-5. Make every code sample runnable where possible? Not answered.
-6. A Claude Doc about the CI/CD post was made on claude.ai by mistake: keep or delete? Not answered.
-7. `jenkins_docker_cicd` repo (private, `D:\Workspace\2026_lab_portfolio\Code\jenkins_docker_cicd`):
+1. Check the 13 short project names (decision 56). Change any in `tools/projects_data.py`, rerun the build.
+2. Popup pages 1–4 done (57). More from Section 12 only if the owner asks.
+3. AI posts growth plan, Section 10: owner said "we will check later".
+4. Make every code sample runnable where possible? Not answered.
+5. A Claude Doc about the CI/CD post was made on claude.ai by mistake: keep or delete? Not answered.
+6. `jenkins_docker_cicd` repo (private, `D:\Workspace\2026_lab_portfolio\Code\jenkins_docker_cicd`):
    review with 10 findings saved there as `docs/review-2026-11-10.md` (not committed). Only #1 checked:
    rollback of the frontend never passes `--force`. Fix it? Not answered. Never add the client's name to that repo.
 
@@ -306,3 +307,4 @@ Read this first in a new session, then `CLAUDE.md` and decisions 37–56 in Sect
 - Popup pages: edit `tools/topics/make_pages.py` or the `.py` files there, run it; output under each code block is real.
 - Tests: `tools/tests/README.md` (headless Edge + local server; run http and disk).
 - Python on 10284Sudee: `C:\Users\BJIT\AppData\Local\Programs\Python\Python314\python.exe` (no numpy; do not install).
+- Python on BISWAS: `C:\apps\python-3.13.14-embed-amd64\python.exe` (no pip). Node and Edge there, for `tools/tests`: not checked.
