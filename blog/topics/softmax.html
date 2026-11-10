@@ -48,6 +48,9 @@
       </tbody>
     </table>
     </div>
+    <div data-demo="temperature" data-words="cat,mat,rat" data-logits="2.0,1.0,0.5">
+      <p>Interactive demo (needs JavaScript): a slider from T 0.2 to 3.0 that redraws the odds above.</p>
+    </div>
     <p>T = 0 would divide by zero; Ollama treats it as greedy (always the top token). Measured with
     qwen3:1.7b, "Invent an unusual name for a pet cat", five calls: at T 0 it said Zephyrclaw five
     times; at T 0.6 it gave five different names.</p>
@@ -108,5 +111,6 @@ top_p 0.8 keeps: ['cat', 'mat']
   </article>
 </main>
 <script src="../../assets/js/code.js"></script>
+<script src="../../assets/js/demos.js"></script>
 </body>
 </html>

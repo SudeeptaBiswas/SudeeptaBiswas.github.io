@@ -67,6 +67,7 @@
         article.replaceChildren.apply(article, Array.prototype.slice.call(content.childNodes));
         body.replaceChildren(article);
         if (window.enhanceCode) window.enhanceCode(article);   // copy / download buttons
+        if (window.enhanceDemos) window.enhanceDemos(article); // interactive demos (sliders)
         dialog.removeAttribute("aria-label");
         dialog.setAttribute("aria-labelledby", "popup-title");
         open(url);
