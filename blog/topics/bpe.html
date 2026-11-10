@@ -69,7 +69,16 @@ def merge_pair(tokens: list[str], pair: tuple[str, str]) -> list[str]:
 tokens = list("the cat sat on the mat")      # 22 tokens
 for merge_number in range(1, 5):
     best_pair = count_pairs(tokens).most_common(1)[0][0]
-    tokens = merge_pair(tokens, best_pair)</code></pre>
+    tokens = merge_pair(tokens, best_pair)
+    print(f"merge {merge_number}: {best_pair!r:12} -> {len(tokens)} tokens")
+
+print("after BPE:", tokens)</code></pre>
+    <p>Save it as <code>bpe.py</code> and run <code>python bpe.py</code>. Output:</p>
+    <pre><code>merge 1: ('a', 't')   -> 19 tokens
+merge 2: ('t', 'h')   -> 17 tokens
+merge 3: ('th', 'e')  -> 15 tokens
+merge 4: ('the', ' ') -> 13 tokens
+after BPE: ['the ', 'c', 'at', ' ', 's', 'at', ' ', 'o', 'n', ' ', 'the ', 'm', 'at']</code></pre>
     <p>Java view: the pair <code>(left, right)</code> is a small record used as a map key, and
     <code>Counter</code> is a <code>Map&lt;Pair, Integer&gt;</code> that counts for you.</p>
 
