@@ -53,6 +53,8 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 34 | Panel height measured in toc.js, not fixed CSS numbers: list fills the free space (window bottom, or end of the content column if sooner). Thin scrollbar. At 800px window: 699px mid-page (was 580px) | 2026-11-10 | 31's fixed caps (100vh minus 140px / 210px) |
 | 35 | Panel height changes only on resize, never on scroll (scroll-time resizing made it flicker and get pushed by the footer). Height = window minus header, footer and two 20px gaps; 20px above the footer, same as under the header | 2026-11-10 | 34's scroll-time resizing |
 | 36 | Phones: every page gets the 1-row header with a ☰ menu (home, projects list and 404 too; site links only there) | 2026-11-10 | 33 (pages with the panel only) |
+| 37 | CI/CD card: new text "Jenkins + Docker Compose pipeline: 4 environments, blue/green backend, promotion by image digest, rollback." Repo stays private but is linked, marked "(private)": owner wants the link, visitors get GitHub 404 | 2026-11-10 | 27 (no link, "details coming") |
+| 38 | Post `blog/jenkins-docker-cicd.html` published (study notes, sample repo, no client named). Card stays in In Progress with a link to it, because the repo is still being worked on; post also listed under Published, label CI/CD. Section 8 shares 3 lessons from the 2026-11-10 code review of the repo (only the FORCE bug checked by hand) | 2026-11-10 | — |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -166,6 +168,7 @@ Retest: 26/26 new checks, 46/46 blog/menu, 11/11 groups, phone checks, panel nev
 |---|---|---|
 | kafka.md | Messaging | done |
 | rabbitmq.md | Messaging | done |
+| repo `jenkins_docker_cicd` (docs/) | CI/CD | done |
 | design_patterns.md + design_patterns_tutorial.md | Java | todo (merge into one) |
 | database_scaling.md | System design | todo |
 | nosql_design.md | System design | todo |
