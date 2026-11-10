@@ -58,6 +58,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 39 | Private repo link: "(private)" / "(private for now)" → "(request access)", a mailto to the site's contact email with a subject. GitHub has no access-request button for private repos | 2026-11-10 | 37's "(private)" label |
 | 40 | CI/CD post: no "Study notes" label or box (owner). Label "CI/CD"; repo line kept under the lead. No client named; not labelled "From work" either (FACTS: client Jenkins configured by DevOps team). CLAUDE.md rule narrowed to study posts | 2026-11-10 | 38 (study notes box) |
 | 41 | CI/CD post date: 10 September 2026 (owner) | 2026-11-10 | 10 November 2026 |
+| 42 | Blog In Progress: CI/CD card removed (post is under Published; same as decision 24). Published line: "Jenkins + Docker Compose: 4 environments, blue/green backend, promotion by image digest, rollback and backups." Repo link now only in the post. AI Engineering card alone now spans the full width | 2026-11-10 | 37, 38 (card kept with post link) |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
