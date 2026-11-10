@@ -26,7 +26,7 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 ## Never break
 - Every claim must trace to FACTS.md / master.md / Java CV, and obey FACTS.md "never claim" rules. No phone number.
 - No client internals beyond what a CV shows (team names, server layouts, module names, security controls).
-- Blog posts NEVER get a "study notes" box, label or tag (owner, 2026-11-10, decision 45). The Blog is a blog. Do not add one, do not recommend one. Study topics still stay off Home skills/experience.
+- Blog posts NEVER get a "study notes" box, label or tag (owner, 2026-11-10, decision 45). The Blog is a blog. Do not add one, do not recommend one. A blog post is not a work-experience claim. Study topics still stay off Home skills/experience.
 - No client screenshots, client code or internal data.
 - Header/footer are copied in every page: change all pages together. For `projects/`,
   edit `page()` in `tools/build_projects.py` and rerun (hand edits there are lost).
