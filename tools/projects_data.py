@@ -21,6 +21,7 @@ PROJECTS = [
 dict(
     slug="rims-legacy-migration", group="lead", kind="work", filters=["java", "testing", "frontend", "ai"],
     title="RIMS — Legacy Migration to Spring Boot & React.js",
+    short="RIMS Migration",   # left panel only (one line)
     org="BJIT Limited — Client: Shin-Etsu Chemical Co., Ltd. (Japan)",
     role="Tech Lead & Architect", designation="Senior Project Manager",
     dates="Mar 2025 – May 2026", team="10+ in frontend, backend and SRS teams; coordinated UI/UX, QA and DevOps teams",
@@ -82,6 +83,7 @@ dict(
 dict(
     slug="ai-requirements-platform", group="lead", kind="work", filters=["ai", "frontend"],
     title="AI Requirements Documentation Platform",
+    short="AI Requirements Docs",   # left panel only (one line)
     org="BJIT Limited — AI Transformation department",
     role="Tech Lead & Architect", designation="Senior Project Manager",
     dates="Jun 2026 – now", team="Team of 5",
@@ -116,6 +118,7 @@ dict(
 dict(
     slug="ericsson-release-management", group="lead", kind="work", filters=["devops", "plm"],
     title="Release Management for a 12-App PLM Platform",
+    short="Release Management",   # left panel only (one line)
     org="BJIT Limited — Client: Ericsson (Sweden), CPD team",
     role="Release & DevOps Consultant (one of 5 release managers)", designation="Project Manager → Senior Project Manager (Jul 2023)",
     dates="Aug 2021 – Feb 2025", team="One of 5 peer release managers; supported 2–3 of 6 teams at a time",
@@ -144,6 +147,7 @@ dict(
 dict(
     slug="valmet-plm-platform", group="lead", kind="work", filters=["java", "plm", "devops", "frontend", "data"],
     title="Enterprise PLM Platform (CATIA V6)",
+    short="PLM Platform (V6)",   # left panel only (one line)
     org="BJIT Limited — Client: Valmet Technologies Oy (Finland)",
     role="Tech Lead & Architect", designation="Project Manager",
     dates="Oct 2017 – Aug 2021", team="Team of 5",
@@ -201,6 +205,7 @@ dict(
 dict(
     slug="valmet-enovia-platform", group="lead", kind="work", filters=["java", "plm", "frontend", "data"],
     title="ENOVIA PLM Platform (CATIA V5)",
+    short="ENOVIA PLM (V5)",   # left panel only (one line)
     org="BJIT Limited — Client: Valmet Technologies Oy (Finland)",
     role="Tech Lead", designation="Senior Software Engineer",
     dates="Nov 2015 – Sep 2017", team="Team of 5",
@@ -242,6 +247,7 @@ dict(
 dict(
     slug="omron-test-automation", group="early", kind="work", filters=["testing", "java"],
     title="Omron Wellness — Test Automation",
+    short="Omron Testing",   # left panel only (one line)
     org="BJIT Limited — Client: Omron (US)",
     role="Senior Software Engineer", designation=None,
     dates="Aug 2015 – Oct 2015", team=None,
@@ -260,6 +266,7 @@ dict(
 dict(
     slug="shopbook-db-migration", group="early", kind="work", filters=["data"],
     title="ShopBook — Oracle to PostgreSQL Migration R&D",
+    short="ShopBook Migration",   # left panel only (one line)
     org="BJIT Limited",
     role="Senior Software Engineer", designation=None,
     dates="Jun 2015 – Aug 2015", team=None,
@@ -294,6 +301,7 @@ dict(
 dict(
     slug="hrms", group="early", kind="work", filters=["java", "frontend"],
     title="HRMS — HR Management System",
+    short="HRMS",   # left panel only (one line)
     org="BJIT Limited — Client: NTT Data (Myanmar)",
     role="Software Engineer", designation=None,
     dates="Jun 2013 – Jun 2014", team=None,
@@ -311,6 +319,7 @@ dict(
 dict(
     slug="food-navi", group="early", kind="work", filters=["java", "testing"],
     title="Food Navi — Food Navigation System",
+    short="Food Navi",   # left panel only (one line)
     org="BJIT Limited",
     role="Software Engineer", designation=None,
     dates="Mar 2013 – May 2013", team=None,
@@ -328,6 +337,7 @@ dict(
 dict(
     slug="ntt-offshore-trial", group="early", kind="work", filters=["java", "testing"],
     title="NTT Data Offshore Trial",
+    short="NTT Data Trial",   # left panel only (one line)
     org="BJIT Limited — Client: NTT Data (Japan)",
     role="Software Engineer", designation=None,
     dates="Jan 2013 – Feb 2013", team=None,
@@ -344,6 +354,7 @@ dict(
 dict(
     slug="sms-vas", group="early", kind="work", filters=["java"],
     title="SMS Value-Added Services",
+    short="SMS VAS",   # left panel only (one line)
     org="True Services (Pvt.) Limited, Bangladesh",
     role="Software Engineer", designation=None,
     dates="Aug 2012 – Dec 2012", team=None,
@@ -361,6 +372,7 @@ dict(
 dict(
     slug="database-copy-tool", group="early", kind="work", filters=["java", "data", "testing"],
     title="Dynamic Relational Database Copy Tool",
+    short="DB Copy Tool",   # left panel only (one line)
     org="Therap (BD) Ltd",
     role="Programmer", designation=None,
     dates="Nov 2011 – Mar 2012", team=None,
@@ -378,6 +390,7 @@ dict(
 dict(
     slug="fleetcheck", group="personal", kind="personal", filters=["testing"],
     title="FleetCheck — Quarterly Random Pick",
+    short="FleetCheck",   # left panel only (one line)
     org="Personal case study",
     role="Designer and reviewer (code drafted with Claude Code)", designation=None,
     dates="2026", team=None,

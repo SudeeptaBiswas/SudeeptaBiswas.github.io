@@ -34,7 +34,7 @@ Project pages are generated. Never hand-edit `projects/*.html`.
   edit `page()` in `tools/build_projects.py` and rerun (hand edits there are lost).
 - `.nojekyll` stays (stops GitHub running Jekyll).
 - Left panel (Contents) titles: short, one line (panel link is ~150px, about 20 characters). The section
-  heading can be longer; only the panel text is short.
+  heading can be longer; only the panel text is short. Projects: set `short="..."` in `tools/projects_data.py` (panel only; full title on hover).
 
 ## Add a popup page (detail shown over a post)
 1. New file `blog/topics/<slug>.html`: copy `blog/topics/bpe.html`, or add a `page(...)` to `tools/topics/make_pages.py` (keeps the shown output true). Content goes inside

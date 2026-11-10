@@ -239,7 +239,10 @@ def project_list(current):
             if p["kind"] != k:
                 continue
             cur = ' class="active" aria-current="page"' if p is current else ""
-            items.append(f'        <li><a href="{p["slug"]}.html"{cur}>{e(p["title"])}</a></li>')
+            # "short" (optional): panel text that fits one line; the full title shows on hover.
+            name = p.get("short", p["title"])
+            tip = f' title="{e(p["title"])}"' if name != p["title"] else ""
+            items.append(f'        <li><a href="{p["slug"]}.html"{tip}{cur}>{e(name)}</a></li>')
         # The group holding the current page starts open; the other opens on click.
         is_open = " open" if current["kind"] == k else ""
         groups.append(f'      <li class="toc-group"><details{is_open}><summary>{label}</summary>\n'
