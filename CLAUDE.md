@@ -26,7 +26,7 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 ## Never break
 - Every claim must trace to FACTS.md / master.md / Java CV, and obey FACTS.md "never claim" rules. No phone number.
 - No client internals beyond what a CV shows (team names, server layouts, module names, security controls).
-- Study topics never shown as work experience; posts keep the "study notes" box.
+- Study topics never shown as work experience; study posts keep the "study notes" box (the CI/CD post has none: owner, 2026-11-10, decision 40).
 - No client screenshots, client code or internal data.
 - Header/footer are copied in every page: change all pages together. For `projects/`,
   edit `page()` in `tools/build_projects.py` and rerun (hand edits there are lost).
