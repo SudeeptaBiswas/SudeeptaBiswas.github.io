@@ -457,9 +457,21 @@ dict(
     role="Learner and builder", designation=None,
     dates="Nov 2026 – now", team=None,
     card="Learning AI engineering by building: RAG, agents and MCP, ending with Spring Boot calling a Python AI service.",
-    stats=[("10", "phases"), ("10", "projects planned")],
+    stats=[("12 of 68", "topics done"), ("~9%", "of a ~200 h plan"), ("10", "phases")],
     sections=[
-        ("Status", "Just started. The plan is written and reviewed; the code comes next."),
+        ("Status", "Phases 1 (Python for Java developers) and 2 (LLM fundamentals) are under way: 12 of 68 topics done, about 9% of the plan by hours (updated 9 Nov 2026). Next: the first version of the lab's app, a command-line chatbot with memory."),
+        ("Done so far", [
+            "**Python for Java developers:** setup with uv, syntax, collections, classes, modules and exceptions, files, JSON and HTTP, pytest.",
+            "**LLM fundamentals:** tokens and the context window, Ollama and quantization, the chat API and streaming, sampling, embeddings and search.",
+            "Every topic ends with exercises that must pass, e.g. 14/14 tests for pytest, 17/17 for embeddings.",
+            "Everything runs locally with Ollama on a CPU, no GPU. Times and sizes are measured, not guessed.",
+            "Notes on the blog: [Python for Java Developers](../blog/python-for-java-developers.html) and [AI Engineering: LLM Fundamentals](../blog/ai-engineering-llm-fundamentals.html).",
+        ]),
+        ("How it is built", [
+            "**One growing app** (`assistant/`, v1 to v10): each phase adds to the same app, instead of 10 separate projects.",
+            "Python topics come just before the AI lesson that first needs them.",
+            "Strict type checks (pyright, 0 errors), and a script that checks every lesson file against the lab's rules.",
+        ]),
         ("Goal", "Learn RAG, agents and MCP by building each idea by hand first, then with a framework. Free and open-source tools first."),
         ("Plan", [
             "Python for Java developers (typing, async, pydantic, pytest, uv).",
@@ -474,7 +486,7 @@ dict(
             "Capstone: an enterprise assistant with RAG, agents and MCP.",
         ]),
     ],
-    stack=["Python", "Ollama", "LangChain", "LangGraph", "Chroma", "MCP", "FastAPI", "Spring Boot"],
+    stack=["Python", "uv", "pytest", "Ollama", "LangChain", "LangGraph", "Chroma", "MCP", "FastAPI", "Spring Boot"],
     note="Self-study. Not work experience.",
 ),
 ]
