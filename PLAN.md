@@ -55,6 +55,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 36 | Phones: every page gets the 1-row header with a ☰ menu (home, projects list and 404 too; site links only there) | 2026-11-10 | 33 (pages with the panel only) |
 | 37 | CI/CD card: new text "Jenkins + Docker Compose pipeline: 4 environments, blue/green backend, promotion by image digest, rollback." Repo stays private but is linked, marked "(private)": owner wants the link, visitors get GitHub 404 | 2026-11-10 | 27 (no link, "details coming") |
 | 38 | Post `blog/jenkins-docker-cicd.html` published (study notes, sample repo, no client named). Card stays in In Progress with a link to it, because the repo is still being worked on; post also listed under Published, label CI/CD. Section 8 shares 3 lessons from the 2026-11-10 code review of the repo (only the FORCE bug checked by hand) | 2026-11-10 | — |
+| 39 | Private repo link: "(private)" / "(private for now)" → "(request access)", a mailto to the site's contact email with a subject. GitHub has no access-request button for private repos | 2026-11-10 | 37's "(private)" label |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
