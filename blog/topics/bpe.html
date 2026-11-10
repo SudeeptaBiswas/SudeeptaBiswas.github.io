@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BPE, step by step — Sudeepta Biswas</title>
+  <meta name="description" content="How Byte Pair Encoding builds a tokenizer's pieces: count neighbour pairs, glue the most common, repeat. A worked example in Python.">
+  <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/bpe.html">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<main id="main" class="page-solo">
+  <p><a href="../ai-engineering-llm-fundamentals.html#tokens">← AI Engineering: LLM Fundamentals</a></p>
+  <article class="article" data-popup-content>
+    <p class="label">AI · Tokens</p>
+    <h1>BPE, step by step</h1>
+
+    <p class="lead">A tokenizer needs a list of pieces to cut text into. <b>BPE</b> (Byte Pair
+    Encoding) builds that list from text: start with single characters, find the two
+    neighbours that appear together most often, glue them into one piece, and repeat.</p>
+
+    <h2>The steps</h2>
+    <ol>
+      <li><b>Start</b> with one token per character. Spaces are tokens too.</li>
+      <li><b>Count</b> every pair of neighbour tokens.</li>
+      <li><b>Merge</b> the pair with the highest count into one new token, everywhere it appears. A tie keeps the first pair seen.</li>
+      <li><b>Repeat</b> from step 2. Each merge adds one piece to the vocabulary and makes the text shorter.</li>
+    </ol>
+
+    <h2>Worked example</h2>
+    <p>Text: <code>"the cat sat on the mat"</code>. It starts as 22 tokens, one per character.
+    Four merges, as printed by the lab's example script:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Merge</th><th>Most common pair</th><th>New token</th><th>Tokens left</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>'a'</code> + <code>'t'</code></td><td><code>'at'</code></td><td>19</td></tr>
+        <tr><td>2</td><td><code>'t'</code> + <code>'h'</code></td><td><code>'th'</code></td><td>17</td></tr>
+        <tr><td>3</td><td><code>'th'</code> + <code>'e'</code></td><td><code>'the'</code></td><td>15</td></tr>
+        <tr><td>4</td><td><code>'the'</code> + <code>' '</code></td><td><code>'the '</code></td><td>13</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <pre><code>after BPE: ['the ', 'c', 'at', ' ', 's', 'at', ' ', 'o', 'n', ' ', 'the ', 'm', 'at']</code></pre>
+    <p><code>at</code> came first because it appears 3 times (c<b>at</b>, s<b>at</b>, m<b>at</b>).
+    Merges build on earlier ones: <code>th</code> + <code>e</code> only became possible after
+    merge 2.</p>
+
+    <h2>The code</h2>
+    <pre><code>from collections import Counter
+
+def count_pairs(tokens: list[str]) -> Counter[tuple[str, str]]:
+    # zip(a, a[1:]) walks neighbours: ('t','h'), ('h','e'), ...
+    return Counter(zip(tokens, tokens[1:]))
+
+def merge_pair(tokens: list[str], pair: tuple[str, str]) -> list[str]:
+    merged, position = [], 0
+    while position &lt; len(tokens):
+        if position + 1 &lt; len(tokens) and (tokens[position], tokens[position + 1]) == pair:
+            merged.append(tokens[position] + tokens[position + 1])   # 'a' + 't' = 'at'
+            position += 2                                            # both halves used up
+        else:
+            merged.append(tokens[position])
+            position += 1
+    return merged
+
+tokens = list("the cat sat on the mat")      # 22 tokens
+for merge_number in range(1, 5):
+    best_pair = count_pairs(tokens).most_common(1)[0][0]
+    tokens = merge_pair(tokens, best_pair)</code></pre>
+    <p>Java view: the pair <code>(left, right)</code> is a small record used as a map key, and
+    <code>Counter</code> is a <code>Map&lt;Pair, Integer&gt;</code> that counts for you.</p>
+
+    <h2>Why it matters</h2>
+    <ul>
+      <li><b>No unknown words.</b> A word the tokenizer never saw is still cut into smaller known pieces, down to single characters if needed.</li>
+      <li><b>Common words become one token</b>, rare words several. That is why 1 token is about 4 characters of English, and why other languages and code often need more tokens.</li>
+      <li><b>Real tokenizers</b> run tens of thousands of merges on huge amounts of text. qwen3's vocabulary has 151,936 tokens.</li>
+    </ul>
+  </article>
+</main>
+</body>
+</html>

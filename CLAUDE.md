@@ -18,9 +18,9 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 | What | Where |
 |---|---|
 | Plan, decisions, backlog | `PLAN.md` |
-| Pages | `index.html`, `404.html`, `blog/`, `projects/` (index + one page per project) |
+| Pages | `index.html`, `404.html`, `blog/`, `blog/topics/` (popup pages), `projects/` (index + one page per project) |
 | Project content + generator | `tools/projects_data.py`, `tools/build_projects.py` |
-| Styles / scripts | `assets/css/style.css`, `assets/js/theme.js` (dark mode), `assets/js/filter.js` (project filter), `assets/js/toc.js` (left Contents / All projects panel and its height; header ☰ menu below 1100px; on phones every page's site links sit in the ☰ menu) |
+| Styles / scripts | `assets/css/style.css`, `assets/js/theme.js` (dark mode), `assets/js/filter.js` (project filter), `assets/js/popup.js` (popup viewer for `blog/topics/` pages), `assets/js/toc.js` (left Contents / All projects panel and its height; header ☰ menu below 1100px; on phones every page's site links sit in the ☰ menu) |
 | Fact sources | `PLAN.md` Section 2 (FACTS.md, master.md, Java CV) |
 
 ## Never break
@@ -28,6 +28,13 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 - No client internals beyond what a CV shows (team names, server layouts, module names, security controls).
 - Blog posts NEVER get a "study notes" box, label or tag (owner, 2026-11-10, decision 45). The Blog is a blog. Do not add one, do not recommend one. A blog post is not a work-experience claim. Study topics still stay off Home skills/experience.
 - No client screenshots, client code or internal data.
-- Header/footer are copied in every page: change all pages together. For `projects/`,
+- Header/footer are copied in every page (except `blog/topics/` popup pages, which have none): change all pages together. For `projects/`,
   edit `page()` in `tools/build_projects.py` and rerun (hand edits there are lost).
 - `.nojekyll` stays (stops GitHub running Jekyll).
+
+## Add a popup page (detail shown over a post)
+1. New file `blog/topics/<slug>.html`: copy `blog/topics/bpe.html`. Content goes inside
+   `<article class="article" data-popup-content>`; keep the "← post" link above it. No header, footer or panel.
+2. In the post: link it with `<a href="topics/<slug>.html" data-popup>`, optionally as a sub-item
+   under its section in the Contents panel, and add `<script src="../assets/js/popup.js"></script>`.
+3. Test over http (`python -m http.server`), not file:// (there the link just opens the page).
