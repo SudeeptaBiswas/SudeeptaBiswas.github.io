@@ -61,6 +61,9 @@
       <li><b>top_p 0.8</b> keeps the most likely tokens until they cover 80%: cat (0.63), then mat (0.86), stop.</li>
       <li>The <b>pick</b> is a weighted random choice, like a loot table. A <b>seed</b> makes it repeatable, like <code>new Random(42)</code> in a JUnit test.</li>
     </ul>
+    <div data-demo="topk" data-words="cat,mat,rat" data-logits="2.0,1.0,0.5">
+      <p>Interactive demo (needs JavaScript): sliders for top_k and top_p that show which words are kept.</p>
+    </div>
 
     <h2>The code</h2>
     <pre data-run="python" data-file="softmax.py"><code>import math

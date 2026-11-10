@@ -100,6 +100,9 @@ page("softmax", "Softmax and temperature",
       <li><b>top_p 0.8</b> keeps the most likely tokens until they cover 80%: cat (0.63), then mat (0.86), stop.</li>
       <li>The <b>pick</b> is a weighted random choice, like a loot table. A <b>seed</b> makes it repeatable, like <code>new Random(42)</code> in a JUnit test.</li>
     </ul>
+    <div data-demo="topk" data-words="cat,mat,rat" data-logits="2.0,1.0,0.5">
+      <p>Interactive demo (needs JavaScript): sliders for top_k and top_p that show which words are kept.</p>
+    </div>
 
     <h2>The code</h2>
     {code("softmax.py")}
@@ -162,7 +165,10 @@ page("quantization", "Quantization",
     {output("quantization.py")}
     <p>8 bits barely changes the weights; 2 bits moves one of them by 0.27. Real formats such as
     Q4_K_M work on small blocks of weights, each block with its own scale, so the error stays lower
-    than in this toy.</p>""")
+    than in this toy.</p>
+    <div data-demo="quant" data-weights="0.82,-0.41,0.07,-0.93,0.55,0.13" data-billions="4">
+      <p>Interactive demo (needs JavaScript): a bits-per-weight slider that shows the file size and the toy weights.</p>
+    </div>""", demos=True)
 
 page("cosine", "Cosine similarity",
      "How embeddings are compared: dot product, length, and cosine, with a toy search in plain Python and in numpy.",
@@ -190,6 +196,27 @@ norm(a)      = sqrt(dot(a, a))                     (arrow length, Pythagoras)
 cosine(a, b) = dot(a, b) / (norm(a) * norm(b))</code></pre>
     <p><b>Why divide by the lengths?</b> A long note and a short note about the same thing point the
     same way but have different lengths. <code>dot</code> grows with length; cosine doesn't.</p>
+
+    <h2>Step by step</h2>
+    <p>Question "a small pet" = [0.7, 0.3], note "kitten" = [0.8, 0.2].</p>
+    <ol>
+      <li><b>dot</b>: multiply the numbers in the same position, then add.
+        <code>0.7×0.8 + 0.3×0.2 = 0.56 + 0.06 = 0.62</code>.
+        In Java: <code>for (int i = 0; i &lt; a.length; i++) sum += a[i] * b[i];</code>
+        It is big when both arrows point the same way, but also when they are long.</li>
+      <li><b>norm</b>: the length of one arrow, by Pythagoras: √(x² + y²).
+        Question: <code>√(0.49 + 0.09) = √0.58 = 0.762</code>. Kitten: <code>√(0.64 + 0.04) = √0.68 = 0.825</code>.
+        With 768 numbers it is the same: square all 768, add, take the square root.
+        <code>sqrt(dot(a, a))</code> is that sum of squares, reused.</li>
+      <li><b>cosine</b>: dot divided by both lengths, so only the direction is left.
+        <code>0.62 / (0.762 × 0.825) = 0.62 / 0.629 = 0.99</code>.</li>
+    </ol>
+    <p>It is called cosine because the result is the cosine of the angle between the two arrows.
+    The question points 23° up from "animals", kitten 14°: 9° apart, and cos 9° = 0.99.
+    Same arrow direction gives 1 (0°), a right angle gives 0 (90°), opposite gives -1 (180°).</p>
+    <div data-demo="angle" data-a="0.9,0.1" data-a-name="animal">
+      <p>Interactive demo (needs JavaScript): turn and stretch an arrow and watch dot, norm and cosine change.</p>
+    </div>
 
     <h2>The code</h2>
     {code("cosine.py")}
@@ -224,4 +251,4 @@ invoice  0.49</code></pre>
       <li><b>Love vs hate scores high:</b> embeddings measure what a text is about, not whether it is positive or true.</li>
       <li><b>Use the same model</b> for notes and question. Vectors from two models give nonsense scores, with no error.</li>
       <li>nomic's vectors already have length 1.0, so for them cosine equals dot.</li>
-    </ul>""")
+    </ul>""", demos=True)
