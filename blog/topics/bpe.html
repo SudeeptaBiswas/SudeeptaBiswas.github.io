@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BPE, step by step — Sudeepta Biswas</title>
   <meta name="description" content="How Byte Pair Encoding builds a tokenizer's pieces: count neighbour pairs, glue the most common, repeat. A worked example in Python.">
-  <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+  <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
   <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/bpe.html">
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body>
 <main id="main" class="page-solo">
-  <p><a href="../ai-engineering-llm-fundamentals.html#tokens">← AI Engineering: LLM Fundamentals</a></p>
+  <p class="solo-back"><a href="../ai-engineering-llm-fundamentals.html#tokens">← AI Engineering: LLM Fundamentals</a></p>
   <article class="article" data-popup-content>
     <p class="label">AI · Tokens</p>
     <h1>BPE, step by step</h1>

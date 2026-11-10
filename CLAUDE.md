@@ -37,4 +37,6 @@ Project pages are generated. Never hand-edit `projects/*.html`.
    `<article class="article" data-popup-content>`; keep the "← post" link above it. No header, footer or panel.
 2. In the post: link it with `<a href="topics/<slug>.html" data-popup>`, optionally as a sub-item
    under its section in the Contents panel, and add `<script src="../assets/js/popup.js"></script>`.
-3. Test over http (`python -m http.server`), not file:// (there the link just opens the page).
+3. Test both ways: from disk (file://, the popup shows the page in a frame) and over http
+   (`python -m http.server`, the content is copied in). Keep the `.solo-back` link and the head script
+   from `bpe.html`: they hide the back link and set the theme inside the frame.

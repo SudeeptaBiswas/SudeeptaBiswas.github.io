@@ -1,34 +1,43 @@
-// Popup viewer. A link with data-popup opens another page's [data-popup-content]
-// part in a dialog over the current page, so the reader never leaves the post.
-// Pages for it live in blog/topics/ and also work on their own (no JS, a direct
-// link, a new tab). If loading fails (e.g. a file:// preview), the link just
-// opens the page.
+// Popup viewer. A link with data-popup opens another page in a dialog over the
+// current page, so the reader never leaves the post. Pages for it live in
+// blog/topics/ and also work on their own (no JS, a direct link, a new tab).
+// Online (http): the page's [data-popup-content] part is loaded into the dialog,
+// so it uses this page's styles and theme. Opened from disk (file://) the
+// browser blocks that load, so the page is shown in a frame inside the dialog.
 (function () {
-  if (typeof HTMLDialogElement !== "function" || !window.fetch || !window.DOMParser) return;
+  if (typeof HTMLDialogElement !== "function") return;
   var root = document.documentElement;
-  var dialog = null, body = null, pageLink = null, trigger = null;
+  var dialog = null, body = null, pageLink = null, closeButton = null, trigger = null;
 
   function build() {
     dialog = document.createElement("dialog");
     dialog.className = "popup";
-    dialog.setAttribute("aria-labelledby", "popup-title");
     dialog.innerHTML =
       '<div class="popup-bar">' +
       '<a class="popup-page-link" href="#">Open as a page ↗</a>' +
       '<button type="button" class="popup-close" aria-label="Close">×</button>' +
       "</div>" +
-      '<div class="popup-body"><div class="article popup-article"></div></div>';
+      '<div class="popup-body"></div>';
     document.body.appendChild(dialog);
-    body = dialog.querySelector(".popup-article");
+    body = dialog.querySelector(".popup-body");
     pageLink = dialog.querySelector(".popup-page-link");
-    dialog.querySelector(".popup-close").addEventListener("click", function () { dialog.close(); });
+    closeButton = dialog.querySelector(".popup-close");
+    closeButton.addEventListener("click", function () { dialog.close(); });
     // A click on the dark area around the box closes it.
     dialog.addEventListener("click", function (e) { if (e.target === dialog) dialog.close(); });
     dialog.addEventListener("close", function () {
       root.classList.remove("popup-open");
+      body.replaceChildren();
       if (trigger) trigger.focus();
       trigger = null;
     });
+  }
+
+  function open(url) {
+    pageLink.href = url;
+    if (!dialog.open) { root.classList.add("popup-open"); dialog.showModal(); }
+    body.scrollTop = 0;
+    closeButton.focus();
   }
 
   // Relative links in the loaded part point from ITS folder, not ours: make them absolute.
@@ -41,7 +50,9 @@
     });
   }
 
-  function show(url) {
+  // Online: copy the page's content part into the dialog.
+  function showContent(url) {
+    if (!window.fetch || !window.DOMParser || location.protocol === "file:") return Promise.reject();
     return fetch(url)
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
       .then(function (html) {
@@ -49,16 +60,29 @@
         var content = doc.querySelector("[data-popup-content]");
         if (!content) throw new Error("no [data-popup-content] in " + url);
         absolute(content, url);
-        var old = document.getElementById("popup-title");
-        if (old) old.removeAttribute("id");
         var title = content.querySelector("h1");
         if (title) title.id = "popup-title";
-        body.replaceChildren.apply(body, Array.prototype.slice.call(content.childNodes));
-        pageLink.href = url;
-        if (!dialog.open) { root.classList.add("popup-open"); dialog.showModal(); }
-        dialog.querySelector(".popup-body").scrollTop = 0;
-        dialog.querySelector(".popup-close").focus();
+        var article = document.createElement("div");
+        article.className = "article popup-article";
+        article.replaceChildren.apply(article, Array.prototype.slice.call(content.childNodes));
+        body.replaceChildren(article);
+        dialog.removeAttribute("aria-label");
+        dialog.setAttribute("aria-labelledby", "popup-title");
+        open(url);
       });
+  }
+
+  // From disk: show the whole page in a frame. The page hides its own back link
+  // when framed and takes the theme from the "#theme=" part of the address.
+  function showFrame(url, label) {
+    var frame = document.createElement("iframe");
+    frame.className = "popup-frame";
+    frame.title = label;
+    frame.src = url.split("#")[0] + "#theme=" + (root.getAttribute("data-theme") || "light");
+    body.replaceChildren(frame);
+    dialog.removeAttribute("aria-labelledby");
+    dialog.setAttribute("aria-label", label);
+    open(url);
   }
 
   document.addEventListener("click", function (e) {
@@ -68,6 +92,7 @@
     e.preventDefault();
     if (!dialog) build();
     if (!dialog.open) trigger = a;
-    show(a.href).catch(function () { window.location.href = a.href; });
+    var label = a.textContent.trim();
+    showContent(a.href).catch(function () { showFrame(a.href, label); });
   });
 })();

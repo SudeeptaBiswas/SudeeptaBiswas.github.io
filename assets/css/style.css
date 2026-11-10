@@ -351,6 +351,10 @@ html.popup-open { overflow: hidden; }
   color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
 }
 .popup-body { overflow-y: auto; }
+/* From disk (file://) the page is shown in a frame; it scrolls itself */
+.popup-frame { display: block; width: 100%; height: calc(100vh - 110px); border: 0; }
+.in-frame .page-solo { padding-top: 8px; }
+.in-frame .page-solo > .solo-back { display: none; }
 .popup-article { padding: 8px 24px 28px; max-width: none; }
 .popup-article p a, .popup-article li a, .popup-article td a { text-decoration: underline; text-underline-offset: 2px; }
 /* Sub-items in the Contents panel (e.g. a popup page under its section) */
