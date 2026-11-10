@@ -211,3 +211,26 @@ The lab has 10 phases, 68 topics. One post per card would grow past 3,000 lines.
 | When to update | A lab topic is done + its review section exists → add one section to the post (source: LESSON md + review) |
 | Every post keeps | big-picture diagram, Java mapping, measured numbers with the PC named, Check yourself, Coming next, links |
 | In progress → Published | A phase post moves to Published when its lab phase is 100% done |
+
+## 11. Run button: which online runner (analysis 2026-11-10, owner to decide)
+Measured on 10284Sudee: headless Edge, cache off, the BPE code (stdlib), then `numpy`. Each option was
+tested from disk (file://) and over http. "MB" = bytes the page downloaded (first run; the browser caches after).
+
+| Option | From disk | Over http | Correct output | numpy | First run | Download | Code leaves the PC | Ads |
+|---|---|---|---|---|---|---|---|---|
+| **Pyodide 314.0.7** (CPython in the browser, from jsDelivr) | yes | yes | yes | yes (+1.9–2.0 s) | 4.6 s start, 5 ms run | 8.8 MB | no | no |
+| Python Tutor (link, new tab) | yes | yes | yes, after removing `Counter.most_common` | **no**: "Only these modules can be imported" (no numpy, no dataclasses, no pathlib) | site load ~6 s | 0 MB on our side | yes (runs on their server) | **yes** |
+| Codapi 0.12 + WASI Python 3.12 | yes | yes | yes | **no**: `ModuleNotFoundError: numpy` | 7.9–10.9 s | 11.3 MB | no | no |
+| PyScript 2026.7.3 `py-editor` (Pyodide) | **no** (nothing ran in 120 s) | yes | yes | yes (docs) | 5.2 s | not measured (runs in a worker) | no | no |
+| PyScript `mpy-editor` (MicroPython) | **no** | yes | **NO**: merge 2 gave `('h', 'e')`, not `('t', 'h')` (MicroPython breaks `max` ties differently) | not checked | 0.5 s | 0.2 MB | no | no |
+
+Docs read: [Pyodide](https://pyodide.org/en/stable/usage/downloading-and-deploying.html),
+[PyScript editor](https://docs.pyscript.net/2026.7.3/user-guide/editor/),
+[Codapi in-browser](https://antonz.org/in-browser-code-playgrounds/), [Python Tutor](https://pythontutor.com/).
+
+Recommendation: **Pyodide**, loaded only when the reader clicks Run, output shown under the code
+block on the page. The only option that is real CPython, works from disk and online, runs numpy
+(needed from lab phase 04), shows no ads and keeps the code in the reader's browser. Cost: 8.8 MB
+and ~5 s on the first Run per visit. Python Tutor could stay as a second "step through" link for
+stdlib-only code (its visualiser is good for learning), but it has ads and a short module list.
+Not possible anywhere: code that calls a local Ollama (most lab code). Those blocks get Copy/Download only.
