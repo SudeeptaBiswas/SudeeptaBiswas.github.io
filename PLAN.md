@@ -234,3 +234,15 @@ block on the page. The only option that is real CPython, works from disk and onl
 and ~5 s on the first Run per visit. Python Tutor could stay as a second "step through" link for
 stdlib-only code (its visualiser is good for learning), but it has ads and a short module list.
 Not possible anywhere: code that calls a local Ollama (most lab code). Those blocks get Copy/Download only.
+
+Pyodide caching (measured, same browser profile, cache on): jsDelivr sends `Cache-Control: public, max-age=31536000`
+(1 year) on `pyodide.js`, `pyodide.asm.wasm`, `python_stdlib.zip`, `pyodide-lock.json`.
+
+| Visit | Downloaded | Python start | BPE run | numpy load |
+|---|---|---|---|---|
+| 1st | 8.76 MB | 6.3 s | 6 ms | 4.1 s |
+| 2nd (reload) | 0.00 MB | 2.6 s | 8 ms | 1.4 s |
+| 3rd (reload) | 0.00 MB | 2.6 s | 7 ms | 1.8 s |
+
+The start time on a repeat visit is the browser preparing Python, not a download. Inside one page,
+Python stays loaded after the first Run, so later Runs take milliseconds.
