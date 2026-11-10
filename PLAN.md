@@ -272,5 +272,33 @@ Done: BPE, Softmax and temperature, Quantization, Cosine similarity (AI post).
 
 Recommended next: 1, 2, 3, 4.
 
-Projects panel (left panel on project pages): 13 of 19 titles wrap (measured). Fix needs a short
-name per project in `tools/projects_data.py` (new field, used only by the panel). Proposed names in chat 2026-11-10; owner to confirm.
+Projects panel (left panel on project pages): done, decision 56 (`short=` names, 0 of 19 wrap).
+
+## 13. Where we stopped (handoff, updated 2026-11-10)
+Read this first in a new session, then `CLAUDE.md` and decisions 37–56 in Section 3.
+
+**Done in the 2026-11-10 session** (details in the decisions):
+- CI/CD (Jenkins + Docker) post; Blog page order, dates, cards (37–44).
+- No "study notes" box on any blog post (45; also in `CLAUDE.md` and owner memory).
+- AI and Python In Progress posts from the 14 lab lessons (46–47).
+- Popup viewer + BPE page (48); Copy / Download / Run on code blocks; Run plugins, Pyodide default (49–50).
+- One-line left-panel titles on blog posts (51) and project pages (56).
+- Popup pages Softmax, Quantization, Cosine (52); AI Engineering Lab project page (53).
+- Sliders: temperature (54), top_k/top_p, bits per weight, cosine angle; cosine step by step (55).
+- Generator and browser tests saved in `tools/topics/` and `tools/tests/` (were only in a temp folder).
+
+**Open: owner to answer**
+1. Push: check `git log origin/main..HEAD` (9 commits when written, e378e8a onwards).
+2. Check the 13 short project names (decision 56). Change any in `tools/projects_data.py`, rerun the build.
+3. Next popup pages: Section 12 recommends 1–4 (Python traps, Exceptions, Dataclasses vs records, NDJSON streaming).
+4. AI posts growth plan, Section 10: owner said "we will check later".
+5. Make every code sample runnable where possible? Not answered.
+6. A Claude Doc about the CI/CD post was made on claude.ai by mistake: keep or delete? Not answered.
+7. `jenkins_docker_cicd` repo (private, `D:\Workspace\2026_lab_portfolio\Code\jenkins_docker_cicd`):
+   review with 10 findings saved there as `docs/review-2026-11-10.md` (not committed). Only #1 checked:
+   rollback of the frontend never passes `--force`. Fix it? Not answered. Never add the client's name to that repo.
+
+**How to work here**
+- Popup pages: edit `tools/topics/make_pages.py` or the `.py` files there, run it; output under each code block is real.
+- Tests: `tools/tests/README.md` (headless Edge + local server; run http and disk).
+- Python on 10284Sudee: `C:\Users\BJIT\AppData\Local\Programs\Python\Python314\python.exe` (no numpy; do not install).
