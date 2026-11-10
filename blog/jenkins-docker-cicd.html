@@ -45,7 +45,6 @@
       <li><a href="#promotion">Promotion, not rebuild</a></li>
       <li><a href="#rollback">Rollback and the configuration trap</a></li>
       <li><a href="#safety">Backups and host safety</a></li>
-      <li><a href="#lessons">What a review found</a></li>
       <li><a href="#check">Check yourself</a></li>
       <li><a href="#refs">Further reading</a></li>
     </ol>
@@ -270,15 +269,7 @@ docker inspect --format '{{.Image}}' myapp-test-backend-green-api-1
   <p>Jenkins holds the Docker socket, which is root on the host. So it stays on the LAN, takes
   no webhooks, and gets as few plugins as possible.</p>
 
-  <h2 id="lessons">8. What a review found</h2>
-  <p>A code review of the sample found 10 bugs, most of them in rollback. Three lessons:</p>
-  <ul>
-    <li><b>Test every path a parameter can take.</b> The job's <code>FORCE</code> option was never passed to the frontend rollback script, so it did nothing there, and the job still reported success.</li>
-    <li><b>Snapshot what is running, not what is on disk.</b> Settings copied from the env file at deploy time may already be edited. <code>docker inspect</code> on the running container is the true record.</li>
-    <li><b>"The check failed" is not "the check passed".</b> Handle every exit code a guard can return, not just the one you expect.</li>
-  </ul>
-
-  <h2 id="check">9. Check yourself</h2>
+  <h2 id="check">8. Check yourself</h2>
   <details><summary>Why promote an image instead of rebuilding it?</summary><p>A rebuild gives different bytes, so the sign-off would cover a binary nobody tested.</p></details>
   <details><summary>How does blue/green avoid downtime on the backend?</summary><p>The new colour starts on a spare port. nginx is pointed at it only after its health check passes.</p></details>
   <details><summary>Why doesn't the frontend use blue/green too?</summary><p>It owns the fixed public port. A second copy on another port would be a URL nobody visits.</p></details>
@@ -286,7 +277,7 @@ docker inspect --format '{{.Image}}' myapp-test-backend-green-api-1
   <details><summary>Why keep secrets out of the Compose env file?</summary><p>Compose interpolates it, so a <code>$</code> in a password is silently mangled.</p></details>
   <details><summary>Why is <code>docker image prune</code> dangerous here?</summary><p>The frontend's rollback image is named only in an env file, not held by a container, so prune deletes it.</p></details>
 
-  <h2 id="refs">10. Further reading</h2>
+  <h2 id="refs">9. Further reading</h2>
   <ul>
     <li><a href="https://www.jenkins.io/doc/book/pipeline/" rel="noopener">Jenkins Pipeline documentation</a></li>
     <li><a href="https://docs.docker.com/compose/" rel="noopener">Docker Compose documentation</a></li>
