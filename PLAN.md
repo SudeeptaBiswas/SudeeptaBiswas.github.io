@@ -77,7 +77,7 @@ learning project; v1 ships fast in plain HTML/CSS.
 | # | Issue | Risk |
 |---|---|---|
 | R1 | Study notes contain interview prep and client-project notes (e.g. "where it fits RIMS") | Leaks client context, reads as prep, not articles |
-| R2 | RabbitMQ / Kafka have no work experience behind them | Looks like a false claim |
+| R2 | RabbitMQ / Kafka have no work experience behind them | Looks like a false claim. SUPERSEDED by decision 45: a blog is not work experience, no box needed |
 | R3 | Notes use Mermaid diagrams | Needs a JS library; not plain HTML/CSS |
 | R4 | Client systems: no screenshots allowed | Projects look empty |
 | R5 | avocabulary + pc_organizer repos are private | Dead links |
