@@ -57,6 +57,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 38 | Post `blog/jenkins-docker-cicd.html` published (study notes, sample repo, no client named). Card stays in In Progress with a link to it, because the repo is still being worked on; post also listed under Published, label CI/CD. Review-lessons section dropped (owner: no) | 2026-11-10 | — |
 | 39 | Private repo link: "(private)" / "(private for now)" → "(request access)", a mailto to the site's contact email with a subject. GitHub has no access-request button for private repos | 2026-11-10 | 37's "(private)" label |
 | 40 | CI/CD post: no "Study notes" label or box (owner). Label "CI/CD"; repo line kept under the lead. No client named; not labelled "From work" either (FACTS: client Jenkins configured by DevOps team). CLAUDE.md rule narrowed to study posts | 2026-11-10 | 38 (study notes box) |
+| 41 | CI/CD post date: 10 September 2026 (owner) | 2026-11-10 | 10 November 2026 |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
