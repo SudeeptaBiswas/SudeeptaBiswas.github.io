@@ -1,0 +1,22 @@
+// Opens the Run link in Python Tutor, runs it, prints the language and the program output.
+import { readFileSync, writeFileSync } from "node:fs";
+const OUT = process.argv[2];
+const url = readFileSync(`${OUT}/tutor-url.txt`, "utf8");
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const t = await (await fetch("http://127.0.0.1:9333/json/new?about:blank", { method: "PUT" })).json();
+const ws = new WebSocket(t.webSocketDebuggerUrl); await new Promise((r) => ws.addEventListener("open", r));
+let id = 0; const p = new Map();
+ws.addEventListener("message", (m) => { const d = JSON.parse(m.data); if (d.id && p.has(d.id)) { p.get(d.id)(d); p.delete(d.id); } });
+const send = (method, params = {}) => new Promise((r) => { const i = ++id; p.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
+const js = async (e) => (await send("Runtime.evaluate", { expression: e, returnByValue: true, awaitPromise: true })).result.result.value;
+await send("Page.enable"); await send("Runtime.enable");
+await send("Emulation.setDeviceMetricsOverride", { width: 1300, height: 1000, deviceScaleFactor: 1, mobile: false });
+await send("Page.navigate", { url }); await sleep(6000);
+console.log("LANG:", await js(`[...document.querySelectorAll("select")].map(s => s.options[s.selectedIndex].text).join(" | ")`));
+await js(`(document.querySelector("#executeBtn") || {click(){}}).click()`); await sleep(10000);
+await js(`(document.querySelector("#jmpLastInstr") || {click(){}}).click()`); await sleep(2000);
+console.log("STDOUT:\n" + await js(`(document.querySelector("#pyStdout") || {}).value || "(none) " + document.body.innerText.slice(0, 300)`));
+const r = await send("Page.captureScreenshot", { format: "png" });
+writeFileSync(`${OUT}/tutor-run.png`, Buffer.from(r.result.data, "base64"));
+await send("Page.close").catch(() => {});
+process.exit(0);
