@@ -120,6 +120,7 @@ h3 { font-size: 1.15rem; margin: 0 0 6px; }
 /* Cards */
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
 .grid.two { grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); }
+.grid.fill { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .card {
   background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column;
