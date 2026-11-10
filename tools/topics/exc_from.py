@@ -3,7 +3,7 @@ class OllamaDownError(OllamaError): ...      # (Parent) = extends
 
 def ask(url):
     try:
-        # stands in for httpx.ConnectError: no network in this demo
+        # stands in for httpx's ConnectTimeout (a TransportError): no network in this demo
         raise ConnectionRefusedError("nothing is listening on " + url)
     except OSError as error:
         raise OllamaDownError(f"no Ollama at {url}") from error   # keep the cause

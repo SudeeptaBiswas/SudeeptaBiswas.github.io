@@ -77,6 +77,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 58 | Runnable blocks are editable in place (owner OK, 10 Nov 2026): `contenteditable="plaintext-only"` on the block's code, added only when a Run plugin attaches. Run, Copy and Download use the edited code; Reset (shows once edited) restores; nothing is saved. Keys: Tab = 4 spaces, Ctrl/Cmd+Enter = Run, Esc = leave (in the popup the first Esc leaves the editor, the second closes the popup). Old browsers without plaintext-only keep read-only blocks. `edit_test.mjs` 18/18 http, 11/11 disk. Fixes the Python traps lead ("change it and run it again"), which was not true before. |
 | 59 | Commit rules changed (owner, 10 Nov 2026). Was: one concern per commit, which gave many small commits plus a "push done up to <hash>" commit right after a push. Now: one commit per feature, with code, tests, docs and Section 13 together, so every pushed commit holds the full state for the other PC. No commits that only record a push or a hash; the one made was undone before it was pushed. Written in `CLAUDE.md` ("Start and finish work") and the owner's global rules. |
 | 60 | Lesson coverage check (owner asked, 10 Nov 2026): all 13 lab lessons vs the two posts. Gaps filled: 1.7 Ollama HTTP endpoints (AI post section 5), 1.9 fixture example + `capsys` + `pythonpath` (Python post section 9), 2.1 "new Python" idioms table (Python post section 3), 2.2 `ollama show` output + `--verbose` (AI post section 5). 1.1 trivia (VS Code interpreter, `uv tree`) left out. Lesson 2.6 (assistant v1, owner: "prepare the document") added as AI post section 12 "A chatbot with memory" from LESSON_2_6 measured numbers only (lab code not solved yet, so no test results claimed), plus runnable popup "Generators: yield". Bug fixed: Streaming and Exceptions popups used `localhost:11434`; lesson 1.7 measured 2.16 s vs 0.02 s for `127.0.0.1`, so now `127.0.0.1`. |
+| 61 | Review of all changes since ca7a17f (owner asked, 10 Nov 2026), by two separate reviewers. **Code, fixed:** Run ignored `if __name__ == "__main__":` (globals had no `__name__`); two Runs at once mixed their output (one queue now); old browsers threw on `plaintext-only` and lost every Run button (try/catch); hint now says "Esc leaves" (Tab is captured), key part hidden on phones; "dropped" text in the top_k demo was 2.7:1 contrast (only the bar fades now); a late popup reply could reopen a closed popup (request id); `runner: "off"` kept collecting blocks; `make_pages.py` reads output as UTF-8; a download test could pass on a stale file. The two Run bugs were reproduced with the old plugin (2 FAIL) before the fix. **Content, fixed:** cosine "1.00 for both" mixed two comparisons (now 0.99, as the popup prints); Generators popup named the wrong earlier bugs; pytest "0.09 s without" now "with `-m \"not ollama\"`"; Exceptions demo comment said ConnectError (lesson 1.7: ConnectTimeout); stream bullet now has `timeout=120.0`; `is` only for None (PEP 8); "spy", `num_ctx` and pyright explained; "at Q4" not "at 4 bits"; BPE merge count claim removed; "laptop" → "PC". **Left open:** endless loop in edited code freezes the tab (needs a Web Worker). |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -279,7 +280,7 @@ Next, if wanted: 5 (comprehensions and slicing), 7 (pytest, Run support not chec
 Projects panel (left panel on project pages): done, decision 56 (`short=` names, 0 of 19 wrap).
 
 ## 13. Where we stopped (handoff, updated 2026-11-10)
-Read this first in a new session (on either PC: `git pull` first), then `CLAUDE.md` and decisions 37–60 in Section 3.
+Read this first in a new session (on either PC: `git pull` first), then `CLAUDE.md` and decisions 37–61 in Section 3.
 Updated inside every feature commit, so the pushed repo always holds the current state. No push status or commit hashes here: `git log` has them.
 
 **Done in the 2026-11-10 session** (details in the decisions):
@@ -296,6 +297,14 @@ Updated inside every feature commit, so the pushed repo always holds the current
 - Commit rules: one commit per feature, handoff in each (59).
 - All 13 lab lessons covered; 2.6 chatbot section + Generators popup; `127.0.0.1` fix (60).
   When the owner finishes lab 2.6 (tests pass), add the real results to AI post section 12.
+- Review of all changes since ca7a17f (two reviewers: code, content) and fixes (61).
+  Known limit left open: edited code with an endless loop freezes the tab (Python runs on the
+  page's main thread; a Web Worker + Stop button would fix it).
+
+**Queue (owner approved, in this order)**
+1. Stop button for Run: run Pyodide in a Web Worker, so an endless loop can be stopped (decision 61).
+2. `jenkins_docker_cicd`: frontend rollback never passes `--force` (item 6 below; fix not yet approved).
+3. AI posts growth plan (Section 10), when the owner is ready.
 
 **Open: owner to answer**
 1. Check the 13 short project names (decision 56). Change any in `tools/projects_data.py`, rerun the build.

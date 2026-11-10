@@ -39,7 +39,7 @@ async function suite(scope, label) {
   const W = `${scope} .code-wrap:has(pre[data-run])`;
   const s0 = await js(`(()=>{const w=document.querySelector('${W}'), c=w.querySelector('pre code');
     return {mode:c.contentEditable, hint:(w.querySelector('.code-hint')||{}).textContent, reset:w.querySelector('.code-btn[aria-label^="Reset"]').hidden}})()`);
-  check(`${label}: runnable block is editable, hint shown, Reset hidden`, s0.mode === "plaintext-only" && s0.hint === "editable · Ctrl+Enter runs" && s0.reset === true, s0);
+  check(`${label}: runnable block is editable, hint shown, Reset hidden`, s0.mode === "plaintext-only" && s0.hint === "editable · Ctrl+Enter runs · Esc leaves" && s0.reset === true, s0);
 
   // select all the code, then type new code with real key input
   await js(`(()=>{const c=document.querySelector('${W} pre code'); c.focus(); const r=document.createRange(); r.selectNodeContents(c); const s=getSelection(); s.removeAllRanges(); s.addRange(r);})()`);
@@ -49,7 +49,7 @@ async function suite(scope, label) {
   await send("Input.insertText", { text: "print(i * 7)" });
   const s1 = await js(`(()=>{const w=document.querySelector('${W}'); return {code:w.querySelector('pre code').textContent, hint:w.querySelector('.code-hint').textContent, reset:w.querySelector('.code-btn[aria-label^="Reset"]').hidden}})()`);
   check(`${label}: typing replaces the code; Tab = 4 spaces; hint says edited; Reset shows`,
-    s1.code === "for i in range(3):\n    print(i * 7)" && s1.hint === "edited · Ctrl+Enter runs" && s1.reset === false, s1);
+    s1.code === "for i in range(3):\n    print(i * 7)" && s1.hint === "edited · Ctrl+Enter runs · Esc leaves" && s1.reset === false, s1);
 
   await js(`document.querySelector('${W} .code-btn[aria-label^="Run"]').click()`);
   let o = await waitOutput(W);
@@ -77,6 +77,28 @@ async function suite(scope, label) {
   return W;
 }
 
+// 0. Fresh page: two Run clicks at once (while Python still loads) must not mix their output
+await send("Page.navigate", { url: BASE + "topics/python-traps.html" }); await sleep(1500);
+await js(`(()=>{const b=document.querySelectorAll('.code-btn[aria-label^="Run"]'); b[0].click(); b[1].click();})()`);
+const both = [];
+for (const i of [0, 1]) {
+  let got = null;
+  for (let k = 0; k < 200 && !got; k++) {
+    await sleep(300);
+    got = await js(`(()=>{const w=[...document.querySelectorAll('.code-wrap')].filter(w=>w.querySelector('pre[data-run]'))[${i}], o=w.querySelector('.code-output');
+      if(!o||o.hidden||o.classList.contains("busy")) return null; let n=w.nextElementSibling; while(n && !n.classList.contains("code-wrap")) n=n.nextElementSibling;
+      return {got:o.textContent.trim(), shown:n.querySelector("pre").textContent.trim()}})()`);
+  }
+  both.push(got);
+}
+check("two Runs at once: each block shows only its own output", both.every((b) => b && b.got === b.shown), both);
+
+// 0b. Code that uses if __name__ == "__main__": runs, as it would from a file
+await js(`(()=>{const c=document.querySelector('pre[data-run] code'); c.textContent='if __name__ == "__main__":\\n    print("main", __name__)'; c.dispatchEvent(new Event("input"));})()`);
+await js(`document.querySelector('.code-btn[aria-label^="Run"]').click()`);
+const mo = await waitOutput(`.code-wrap:has(pre[data-run])`);
+check('__name__ == "__main__" block runs', mo && mo.text === "main __main__", mo);
+
 // 1. Topic page on its own
 await send("Page.navigate", { url: BASE + "topics/python-traps.html" }); await sleep(1500);
 const W = await suite("article", "page");
@@ -87,7 +109,7 @@ check(`page: Download saves the edited code (${name})`, saved === "for i in rang
 const original = readFileSync(new URL(`../topics/${name}`, import.meta.url), "utf8").replace(/\r\n/g, "\n").replace(/\n$/, "");
 await js(`document.querySelector('${W} .code-btn[aria-label^="Reset"]').click()`);
 const r = await js(`(()=>{const w=document.querySelector('${W}'); return {same: w.querySelector('pre code').textContent, reset:w.querySelector('.code-btn[aria-label^="Reset"]').hidden, hint:w.querySelector('.code-hint').textContent}})()`);
-check("page: Reset brings back the original, hides itself", r.same === original && r.reset === true && r.hint === "editable · Ctrl+Enter runs", { ...r, same: r.same.slice(0, 60) });
+check("page: Reset brings back the original, hides itself", r.same === original && r.reset === true && r.hint === "editable · Ctrl+Enter runs · Esc leaves", { ...r, same: r.same.slice(0, 60) });
 await js(`document.querySelector('${W} .code-btn[aria-label^="Run"]').click()`);
 const o = await waitOutput(W);
 const shown = await js(`(()=>{let n=document.querySelector('${W}').nextElementSibling; while(n && !n.classList.contains("code-wrap")) n=n.nextElementSibling; return n.querySelector("pre").textContent.trim()})()`);

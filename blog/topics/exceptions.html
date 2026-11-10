@@ -17,8 +17,9 @@
     <p class="label">Python · Errors</p>
     <h1>Exceptions: try, except, else, finally</h1>
 
-    <p class="lead">Python exceptions work like Java's unchecked ones, with two extras: an
-    <code>else</code> block and <code>raise ... from</code>. These blocks run in your browser.</p>
+    <p class="lead">Python exceptions work like Java's unchecked ones, with one extra: an
+    <code>else</code> block. <code>raise ... from</code> keeps the cause, as Java's
+    <code>new X(msg, cause)</code> does. These blocks run in your browser.</p>
 
     <h2>Which block runs when</h2>
     <pre data-run="python" data-file="exc_order.py"><code>def parse(text):
@@ -76,7 +77,7 @@ class OllamaDownError(OllamaError): ...      # (Parent) = extends
 
 def ask(url):
     try:
-        # stands in for httpx.ConnectError: no network in this demo
+        # stands in for httpx's ConnectTimeout (a TransportError): no network in this demo
         raise ConnectionRefusedError("nothing is listening on " + url)
     except OSError as error:
         raise OllamaDownError(f"no Ollama at {url}") from error   # keep the cause

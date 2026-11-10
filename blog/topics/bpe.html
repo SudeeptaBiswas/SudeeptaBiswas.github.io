@@ -89,7 +89,7 @@ after BPE: ['the ', 'c', 'at', ' ', 's', 'at', ' ', 'o', 'n', ' ', 'the ', 'm', 
     <ul>
       <li><b>No unknown words.</b> A word the tokenizer never saw is still cut into smaller known pieces, down to single characters if needed.</li>
       <li><b>Common words become one token</b>, rare words several. That is why 1 token is about 4 characters of English, and why other languages and code often need more tokens.</li>
-      <li><b>Real tokenizers</b> run tens of thousands of merges on huge amounts of text. qwen3's vocabulary has 151,936 tokens.</li>
+      <li><b>Real tokenizers</b> learn their vocabulary the same way, from huge amounts of text. qwen3's vocabulary has 151,936 tokens.</li>
     </ul>
   </article>
 </main>

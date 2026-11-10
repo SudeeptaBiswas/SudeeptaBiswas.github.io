@@ -67,6 +67,7 @@ await go(BASE + "topics/bpe.html");
 await sleep(800);
 const solo = await js(`({wraps: document.querySelectorAll(".code-wrap").length, run: document.querySelectorAll('.code-btn[aria-label^="Run"]').length})`);
 check("BPE page: 3 blocks, 1 Run button", solo.wraps === 3 && solo.run === 1, solo);
+rmSync(`${DL}/bpe.py`, { force: true });   // the popup step saved one already: start clean
 await js(`document.querySelector('pre[data-file] ~ .code-bar .code-btn[aria-label="Download code"]').click()`); await sleep(1500);
 check("BPE page: download saves bpe.py", existsSync(`${DL}/bpe.py`), DL);
 if (existsSync(`${DL}/bpe.py`)) writeFileSync(`${OUT}/bpe-downloaded-${TAG}.py`, readFileSync(`${DL}/bpe.py`));

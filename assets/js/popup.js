@@ -8,6 +8,7 @@
   if (typeof HTMLDialogElement !== "function") return;
   var root = document.documentElement;
   var dialog = null, body = null, pageLink = null, closeButton = null, trigger = null;
+  var latest = 0;   // id of the newest request; a slower, older reply is dropped
 
   function build() {
     dialog = document.createElement("dialog");
@@ -26,6 +27,7 @@
     // A click on the dark area around the box closes it.
     dialog.addEventListener("click", function (e) { if (e.target === dialog) dialog.close(); });
     dialog.addEventListener("close", function () {
+      latest++;   // a reply that arrives after closing must not reopen the popup
       root.classList.remove("popup-open");
       body.replaceChildren();
       if (trigger) trigger.focus();
@@ -51,11 +53,12 @@
   }
 
   // Online: copy the page's content part into the dialog.
-  function showContent(url) {
+  function showContent(url, id) {
     if (!window.fetch || !window.DOMParser || location.protocol === "file:") return Promise.reject();
     return fetch(url)
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
       .then(function (html) {
+        if (id !== latest) return;
         var doc = new DOMParser().parseFromString(html, "text/html");
         var content = doc.querySelector("[data-popup-content]");
         if (!content) throw new Error("no [data-popup-content] in " + url);
@@ -95,6 +98,7 @@
     if (!dialog) build();
     if (!dialog.open) trigger = a;
     var label = a.textContent.trim();
-    showContent(a.href).catch(function () { showFrame(a.href, label); });
+    var id = ++latest;
+    showContent(a.href, id).catch(function () { if (id === latest) showFrame(a.href, label); });
   });
 })();

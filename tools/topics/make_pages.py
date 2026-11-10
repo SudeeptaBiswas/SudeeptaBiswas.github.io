@@ -19,7 +19,8 @@ def code(name: str, runnable: bool = True) -> str:
 
 
 def output(name: str) -> str:
-    result = subprocess.run([sys.executable, "-I", str(HERE / name)], capture_output=True, text=True, check=True)
+    result = subprocess.run([sys.executable, "-X", "utf8", "-I", str(HERE / name)],
+                            capture_output=True, text=True, encoding="utf-8", check=True)
     return f"<pre><code>{html.escape(result.stdout.rstrip(), quote=False)}</code></pre>"
 
 
@@ -277,7 +278,8 @@ page("python-traps", "Python traps for Java developers",
     <p>Java's <code>==</code> on objects asks "same object?" and <code>.equals()</code> asks "same
     value?". Python uses <code>==</code> for the value and <code>is</code> for the same object.</p>
     {run("traps_is.py")}
-    <p>Use <code>is</code> only for <code>None</code> (and <code>True</code> / <code>False</code>).</p>
+    <p>Use <code>is</code> only for <code>None</code>. For <code>True</code> / <code>False</code>, write
+    <code>if ok:</code>, not <code>if ok is True:</code>.</p>
 
     <h2>3. Truthy and falsy</h2>
     <p><code>if x:</code> works on any value. Zero and empty things count as false.</p>
@@ -293,7 +295,7 @@ page("python-traps", "Python traps for Java developers",
 
     <h2>5. zip stops at the shorter list</h2>
     <p><code>zip</code> pairs up items from two lists. If one is shorter, the extra items are dropped
-    with no error. A Java loop with an index would throw <code>IndexOutOfBoundsException</code>.</p>
+    with no error. A Java loop with an index over the longer list would throw <code>IndexOutOfBoundsException</code>.</p>
     {run("traps_zip.py")}
     <p>Use <code>strict=True</code> when both lists must match, for example texts and their embeddings.</p>""",
      post=PY)
@@ -301,8 +303,9 @@ page("python-traps", "Python traps for Java developers",
 page("exceptions", "Exceptions: try, except, else, finally",
      "Which block runs when, first match wins, your own errors with raise ... from, and look first vs just try. Runnable Python.",
      "Python · Errors", "exceptions", f"""
-    <p class="lead">Python exceptions work like Java's unchecked ones, with two extras: an
-    <code>else</code> block and <code>raise ... from</code>. These blocks run in your browser.</p>
+    <p class="lead">Python exceptions work like Java's unchecked ones, with one extra: an
+    <code>else</code> block. <code>raise ... from</code> keeps the cause, as Java's
+    <code>new X(msg, cause)</code> does. These blocks run in your browser.</p>
 
     <h2>Which block runs when</h2>
     {run("exc_order.py")}
@@ -458,5 +461,5 @@ page("generators", "Generators: yield",
     <a href="streaming.html" data-popup>reading a streamed reply</a>). The generator turns them
     into text pieces; the loop prints each one at once and keeps it for the chat history.</p>
     {run("gen_stream.py")}
-    <p>Two bugs from the earlier stream code are handled here: blank lines are skipped, and the last
-    line's empty content is not handed out as a piece.</p>""")
+    <p>The last line's empty content is not handed out as a piece: that was a bug in the earlier
+    stream code, and the chatbot's tests now check it. Blank lines are skipped too.</p>""")

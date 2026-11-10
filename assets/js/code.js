@@ -18,6 +18,7 @@
   var runner = null;       // the plugin, once loaded
   var waiting = [];        // runnable blocks seen before the plugin arrived
   var loading = false;
+  var noRunner = false;    // "off", a missing plugin or a load error: stop collecting blocks
 
   function icon(name) {
     return '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" ' +
@@ -51,13 +52,14 @@
     var start = window.SITE_CONFIG ? Promise.resolve() : loadScript(here + "config.js");
     start.then(function () {
       var name = (window.SITE_CONFIG || {}).runner || "off";
-      if (name === "off") return;
+      if (name === "off") { noRunner = true; waiting = []; return; }
       return loadScript(here + "runners/" + name + ".js").then(function () {
         runner = (window.CodeRunners || {})[name] || null;
+        if (!runner) noRunner = true;   // the plugin did not register
         waiting.forEach(function (ctx) { if (runner) attach(ctx); });
         waiting = [];
       });
-    }).catch(function () { waiting = []; });   // no Run button; Copy and Download still work
+    }).catch(function () { noRunner = true; waiting = []; });   // no Run button; Copy and Download still work
   }
 
   function copyText(text) {
@@ -96,7 +98,7 @@
   // in the popup a second Esc closes it).
   function editable(ctx) {
     var el = ctx.pre.querySelector("code") || ctx.pre;
-    el.contentEditable = "plaintext-only";
+    try { el.contentEditable = "plaintext-only"; } catch (e) { /* old browsers throw on an unknown value */ }
     if (el.contentEditable !== "plaintext-only") { el.removeAttribute("contenteditable"); return; }   // old browser: read-only
     var original = el.textContent;
     el.spellcheck = false;
@@ -107,9 +109,11 @@
     el.setAttribute("aria-label", "Python code, editable. Ctrl+Enter runs it, Esc leaves the editor.");
     ctx.wrap.classList.add("code-editable");
 
+    // Visible hint. The key part is hidden on phones (no Tab or Ctrl there), see style.css.
     var hint = document.createElement("span");
     hint.className = "code-hint";
-    hint.textContent = "editable · Ctrl+Enter runs";
+    hint.innerHTML = '<span class="code-hint-state">editable</span><span class="code-hint-keys"> · Ctrl+Enter runs · Esc leaves</span>';
+    var state = hint.firstChild;
     ctx.wrap.appendChild(hint);
 
     var reset = button("reset", "Reset to the original code", function () {
@@ -124,7 +128,7 @@
       var edited = el.textContent !== original;
       reset.hidden = !edited;
       ctx.wrap.classList.toggle("code-edited", edited);
-      hint.textContent = (edited ? "edited" : "editable") + " · Ctrl+Enter runs";
+      state.textContent = edited ? "edited" : "editable";
     }
     el.addEventListener("input", changed);
     el.addEventListener("keydown", function (e) {
@@ -176,7 +180,7 @@
       var ctx = { pre: pre, wrap: wrap, bar: bar, code: text, icon: icon, button: button,
                   get config() { return window.SITE_CONFIG || {}; } };   // read live: config.js may load later
       if (runner) attach(ctx);
-      else { waiting.push(ctx); loadRunner(); }
+      else if (!noRunner) { waiting.push(ctx); loadRunner(); }
     }
   }
 

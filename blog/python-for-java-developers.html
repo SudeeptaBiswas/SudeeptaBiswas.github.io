@@ -414,7 +414,7 @@ def test_model_names_fake(monkeypatch: pytest.MonkeyPatch) -> None:
   </table>
   </div>
   <ul>
-    <li>So: fakes for my own logic, plus one test marked <code>@pytest.mark.ollama</code> that proves the real server agrees. Measured: 3 passed in 0.42 s with the server, 2 passed and 1 deselected in 0.09 s without.</li>
+    <li>So: fakes for my own logic, plus one test marked <code>@pytest.mark.ollama</code> that proves the real server agrees. Measured: 3 passed in 0.42 s with the server, 2 passed and 1 deselected in 0.09 s with <code>-m "not ollama"</code>.</li>
     <li><b>Patch the name where it is looked up.</b> If <code>search()</code> calls <code>embed</code> from its own module, patch <code>search_module.embed</code>, not a copy you imported.</li>
     <li><code>monkeypatch</code> is itself a fixture that comes with pytest. So is <code>capsys</code>, which captures <code>print()</code> (Java: a fake <code>System.out</code>). <code>monkeypatch.setattr("builtins.input", fake_input)</code> types lines for a command-line app with no keyboard.</li>
     <li>Lesson folders start with a digit, so they can't be imported as packages. <code>pyproject.toml</code> adds the folder under test to pytest's <code>pythonpath</code> instead.</li>
@@ -432,7 +432,7 @@ def test_model_names_fake(monkeypatch: pytest.MonkeyPatch) -> None:
   <details><summary>raise OllamaDownError(...) from error keeps what?</summary><p>The original error, as __cause__. Java: new X(msg, cause).</p></details>
   <details><summary>Is a 404 an exception in httpx?</summary><p>No. Check status_code or call raise_for_status().</p></details>
   <details><summary>Why pytest.approx for 0.1 + 0.2?</summary><p>Floats are not exact: (0.1 + 0.2) / 2 is 0.15000000000000002.</p></details>
-  <details><summary>Why keep a spy's list inside the test?</summary><p>At module level it is shared by every test and never emptied, so results depend on test order.</p></details>
+  <details><summary>Why keep a spy's list inside the test?</summary><p>A spy is a fake that records what it was called with. At module level it is shared by every test and never emptied, so results depend on test order.</p></details>
 
   <h2 id="next">11. Coming next</h2>
   <ul>

@@ -24,7 +24,7 @@ OUT="$TEMP/shots"; mkdir -p "$OUT"     # screenshots go here, never in the repo
 | `runner_test.mjs` | `node runner_test.mjs $H` | Run plugins (needs internet: Pyodide) | 12/12, 10/10 |
 | `topics_test.mjs` | `node topics_test.mjs $H $OUT` | popup pages: panel links, every Run output = shown output | 35/35, 35/35 |
 | `demo_test.mjs` | `node demo_test.mjs $H $OUT` | sliders (demos.js): values, both themes, phone | 22/22, 22/22 |
-| `edit_test.mjs` | `node edit_test.mjs $H $OUT` | editable Run blocks: real typing, Tab, Run, Ctrl+Enter, Esc, Download, Reset, popup, phone | 18/18, 11/11 |
+| `edit_test.mjs` | `node edit_test.mjs $H $OUT` | editable Run blocks: two Runs at once, `__main__`, real typing, Tab, Run, Ctrl+Enter, Esc, Download, Reset, popup, phone | 20/20, 13/13 |
 | `toc_lines.mjs` | `node toc_lines.mjs ai-engineering-llm-fundamentals.html ...` | left-panel titles that wrap (blog pages, http only) | 0 wrap |
 | `toc_lines_proj.mjs` | `node toc_lines_proj.mjs projects/index.html projects/fleetcheck.html ...` | left-panel titles that wrap (projects) | see PLAN.md |
 | `tutor_test.mjs` | `node tutor_test.mjs $OUT` | Python Tutor runner (only if `runner: "pythontutor"`) | — |

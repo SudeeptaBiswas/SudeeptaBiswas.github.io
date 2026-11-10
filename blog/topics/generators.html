@@ -97,8 +97,8 @@ print("saved to memory:", repr("".join(parts)), "from", parts)</code></pre>
     <p>Output:</p>
     <pre><code>bot&gt; RAG helps
 saved to memory: 'RAG helps' from ['R', 'AG', ' helps']</code></pre>
-    <p>Two bugs from the earlier stream code are handled here: blank lines are skipped, and the last
-    line's empty content is not handed out as a piece.</p>
+    <p>The last line's empty content is not handed out as a piece: that was a bug in the earlier
+    stream code, and the chatbot's tests now check it. Blank lines are skipped too.</p>
   </article>
 </main>
 <script src="../../assets/js/code.js"></script>

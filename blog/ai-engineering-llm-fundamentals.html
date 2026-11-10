@@ -222,7 +222,7 @@ quantization        Q4_K_M      &lt;- how each weight is stored (section 6)</cod
     </tbody>
   </table>
   </div>
-  <p>A bigger model at 4 bits usually beats a smaller one at 16. In RAM the model also needs
+  <p>A bigger model at Q4 usually beats a smaller one at FP16. In RAM the model also needs
   the <b>KV cache</b> (memory for the text being read, which grows with the window): the
   2.5 GB file used 3.2 GB in RAM, so plan with <b>file size × 1.3</b>.</p>
   <div class="table-wrap">
@@ -308,7 +308,7 @@ reply["message"]["content"]            # the answer text</code></pre>
   <ul>
     <li>The <b>last</b> line has <code>done: true</code> and the same stats as a non-streamed reply.</li>
     <li>The total time is the same, but the first words came after <b>0.13–0.64 s</b> instead of 2.0–3.2 s. The user reads while the model writes.</li>
-    <li>Read it with <code>httpx.stream("POST", url, json=body)</code> and <code>iter_lines()</code>. A plain <code>httpx.post</code> waits for the whole body.</li>
+    <li>Read it with <code>httpx.stream("POST", url, json=body, timeout=120.0)</code> and <code>iter_lines()</code>. A plain <code>httpx.post</code> waits for the whole body.</li>
     <li>Forget <code>"stream": False</code> with <code>httpx.post</code> and you get all the lines in one string: <code>.json()</code> fails with "Extra data".</li>
   </ul>
   <p><a href="topics/streaming.html" data-popup>See how to read a stream</a>, with sample lines you can run.</p>
@@ -380,7 +380,7 @@ norm(a)      = sqrt(dot(a, a))                  # arrow length
 cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposite</code></pre>
   <p><a href="topics/cosine.html" data-popup>See how cosine similarity works</a>, with a toy search in Python and numpy.</p>
   <p>Dividing by the lengths makes a long note and a short note on the same topic score the
-  same: dot gave 0.74 vs 7.40, cosine 1.00 for both. nomic's vectors already have length 1.0,
+  same: against "animal", kitten and a 10 times longer kitten got dot 0.74 vs 7.40, but cosine 0.99 for both. nomic's vectors already have length 1.0,
   so for them cosine = dot.</p>
   <div class="table-wrap">
   <table>
@@ -421,7 +421,7 @@ cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposi
   <p>The lab's one real app starts here: <code>assistant</code> v1, a command-line chatbot. Later
   versions add tools, RAG and agents. The question for v1: every turn adds two messages, your
   question and the answer. Who keeps that list, how big may it get, and what happens when it is
-  too big? Measured with qwen3:1.7b on the i5-1135G7 laptop.</p>
+  too big? Measured with qwen3:1.7b on the i5-1135G7 PC.</p>
   <p><b>Memory = resend the history.</b> The model keeps nothing between calls, so each turn
   sends everything again. <code>prompt_eval_count</code> in the reply is the tokens the model
   really read:</p>
@@ -441,8 +441,10 @@ cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposi
     <li>The estimate is low: the real count was 1.2–2.2 times higher, because roles and chat
     markers cost tokens too. A budget must leave room.</li>
   </ul>
-  <p><b>Too big? Ollama cuts, and says nothing.</b> The same fact, then about 1,600 tokens of
-  filler, then the question, with two context sizes (<code>num_ctx</code>):</p>
+  <p><b>Too big? Ollama cuts, and says nothing.</b> <code>num_ctx</code> is how many tokens
+  Ollama lets the model see. qwen3 could take 262,144 (section 5), but Ollama uses a smaller
+  default unless you send <code>num_ctx</code>. Test: the favourite-colour fact, then about 1,600
+  tokens of filler, then the question, with two context sizes:</p>
   <div class="table-wrap">
   <table>
     <thead><tr><th><code>num_ctx</code></th><th>Tokens read</th><th>Answer</th></tr></thead>
@@ -470,7 +472,7 @@ cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposi
     <li><b>Budget:</b> 2000 estimated tokens of history plus 300 for the answer. The long chat
     measured 1.17 times the estimate, so about 2350 real + 300 fits in <code>num_ctx</code> 4096.</li>
     <li><b>TypedDict</b> gives a message its keys: <code>{"role": "user", "contnet": "hi"}</code>
-    is flagged by pyright while typing, yet it is still a plain dict that httpx sends as JSON.
+    is flagged by pyright (Python's type checker) while typing, yet it is still a plain dict that httpx sends as JSON.
     Java: <code>record Message(String role, String content)</code>.</li>
     <li>A <b>generator</b> (<code>yield</code>) hands out each piece of the answer as it arrives, so
     the chat prints it at once. Java: an <code>Iterator</code>.

@@ -61,7 +61,8 @@ a is b: False
 a is c: True
 a after c.append(4): [1, 2, 3, 4]
 x is None: True</code></pre>
-    <p>Use <code>is</code> only for <code>None</code> (and <code>True</code> / <code>False</code>).</p>
+    <p>Use <code>is</code> only for <code>None</code>. For <code>True</code> / <code>False</code>, write
+    <code>if ok:</code>, not <code>if ok is True:</code>.</p>
 
     <h2>3. Truthy and falsy</h2>
     <p><code>if x:</code> works on any value. Zero and empty things count as false.</p>
@@ -116,7 +117,7 @@ print(add("b"))</code></pre>
 
     <h2>5. zip stops at the shorter list</h2>
     <p><code>zip</code> pairs up items from two lists. If one is shorter, the extra items are dropped
-    with no error. A Java loop with an index would throw <code>IndexOutOfBoundsException</code>.</p>
+    with no error. A Java loop with an index over the longer list would throw <code>IndexOutOfBoundsException</code>.</p>
     <pre data-run="python" data-file="traps_zip.py"><code>words = ["cat", "mat", "rat"]
 scores = [2.0, 1.0]                # one score is missing
 

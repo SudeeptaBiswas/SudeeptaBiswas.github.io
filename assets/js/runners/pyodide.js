@@ -31,6 +31,14 @@
     box.textContent = text;
   }
 
+  // One run at a time: stdout/stderr are global in Pyodide, so two runs at once would mix output.
+  var queue = Promise.resolve();
+  function oneAtATime(job) {
+    var next = queue.then(job, job);
+    queue = next.catch(function () {});
+    return next;
+  }
+
   window.CodeRunners = window.CodeRunners || {};
   window.CodeRunners.pyodide = {
     attach: function (ctx) {
@@ -46,15 +54,18 @@
         var lines = [];
         python(ctx.config)
           .then(function (py) {
-            show(box, "Running…", "busy");
-            py.setStdout({ batched: function (s) { lines.push(s); } });
-            py.setStderr({ batched: function (s) { lines.push(s); } });
-            show(box, "Running… (loading packages the code imports, first time only)", "busy");
-            // messageCallback: keep Pyodide's "Loading numpy" notes out of the reader's output
-            return py.loadPackagesFromImports(ctx.code(), { messageCallback: function () {} }).then(function () {
-              var scope = py.globals.get("dict")();   // fresh names for every run
-              return py.runPythonAsync(ctx.code(), { globals: scope })
-                .finally(function () { scope.destroy(); });
+            return oneAtATime(function () {
+              show(box, "Running…", "busy");
+              py.setStdout({ batched: function (s) { lines.push(s); } });
+              py.setStderr({ batched: function (s) { lines.push(s); } });
+              show(box, "Running… (loading packages the code imports, first time only)", "busy");
+              // messageCallback: keep Pyodide's "Loading numpy" notes out of the reader's output
+              return py.loadPackagesFromImports(ctx.code(), { messageCallback: function () {} }).then(function () {
+                var scope = py.globals.get("dict")();   // fresh names for every run
+                scope.set("__name__", "__main__");       // so `if __name__ == "__main__":` runs, as from a file
+                return py.runPythonAsync(ctx.code(), { globals: scope })
+                  .finally(function () { scope.destroy(); });
+              });
             });
           })
           .then(function () { show(box, lines.join("\n") || "(no output)", "done"); })
