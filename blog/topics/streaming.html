@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reading a streamed reply (NDJSON) — Sudeepta Biswas</title>
+  <meta name="description" content="How a streamed Ollama reply arrives as one JSON object per line, how to read it, and why .json() fails with Extra data. Runnable, no Ollama needed.">
+  <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/streaming.html">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<main id="main" class="page-solo">
+  <p class="solo-back"><a href="../ai-engineering-llm-fundamentals.html#streaming">← AI Engineering: LLM Fundamentals</a></p>
+  <article class="article" data-popup-content>
+    <p class="label">AI · Chat API</p>
+    <h1>Reading a streamed reply (NDJSON)</h1>
+
+    <p class="lead">With <code>"stream": True</code> (Ollama's default) the reply is <b>NDJSON</b>,
+    newline-delimited JSON: one small JSON object per line. Each line holds a few characters of the
+    answer; the last line holds the stats.</p>
+
+    <h2>Why stream</h2>
+    <p>Measured with qwen3:1.7b on a PC with no GPU:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>First words on screen</th><th>Whole answer</th></tr></thead>
+      <tbody>
+        <tr><td>streamed</td><td>0.13–0.64 s</td><td>2.0–3.2 s</td></tr>
+        <tr><td>not streamed</td><td>when it is all done</td><td>about the same</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>Same total time, but the user reads while the model writes.</p>
+
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Java</th><th>Python</th></tr></thead>
+      <tbody>
+        <tr><td><code>BodyHandlers.ofLines()</code></td><td><code>with httpx.stream(...) as r:</code> + <code>r.iter_lines()</code></td></tr>
+        <tr><td><code>System.out.print(x); System.out.flush()</code></td><td><code>print(x, end="", flush=True)</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>The real code (needs Ollama)</h2>
+    <pre data-file="stream_ollama.py"><code>import json
+
+import httpx
+
+body = {"model": "qwen3:1.7b", "stream": True, "think": False,
+        "messages": [{"role": "user", "content": "Why do chat apps stream their answers?"}]}
+
+with httpx.stream("POST", "http://localhost:11434/api/chat", json=body, timeout=120.0) as response:
+    for line in response.iter_lines():       # one JSON object per line, as it arrives
+        if not line:
+            continue
+        data = json.loads(line)
+        print(data["message"]["content"], end="", flush=True)   # show now, no newline
+        if data["done"]:                     # last line: empty content + the stats
+            print()
+            print(data["eval_count"], "tokens")</code></pre>
+
+    <h2>Try it without Ollama</h2>
+    <p>The same loop over sample lines in the same shape:</p>
+    <pre data-run="python" data-file="stream_parse.py"><code>import json
+
+# Sample lines in the shape Ollama sends with "stream": True: one JSON object per line.
+body = """{"message":{"role":"assistant","content":"RAG"},"done":false}
+{"message":{"role":"assistant","content":" looks up"},"done":false}
+{"message":{"role":"assistant","content":" documents first."},"done":false}
+{"message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","eval_count":5,"eval_duration":330000000}"""
+
+pieces = []
+for line in body.splitlines():               # real code: for line in response.iter_lines():
+    if not line:
+        continue
+    data = json.loads(line)
+    piece = data["message"]["content"]
+    print(f"line -&gt; {piece!r}")              # real code: print(piece, end="", flush=True)
+    pieces.append(piece)
+    if data["done"]:                         # last line: empty content + the stats
+        stats = data
+
+print("answer:", "".join(pieces))
+seconds = stats["eval_duration"] / 1_000_000_000    # Ollama times are nanoseconds
+print(f"done_reason {stats['done_reason']}, {stats['eval_count']} tokens, "
+      f"{stats['eval_count'] / seconds:.1f} tokens/s")</code></pre>
+    <p>Output:</p>
+    <pre><code>line -&gt; 'RAG'
+line -&gt; ' looks up'
+line -&gt; ' documents first.'
+line -&gt; ''
+answer: RAG looks up documents first.
+done_reason stop, 5 tokens, 15.2 tokens/s</code></pre>
+    <p>The last line has <code>done: true</code>, empty content, and the same stats as a reply without
+    streaming. Ollama's times are in nanoseconds.</p>
+
+    <h2>Why .json() fails with "Extra data"</h2>
+    <p>Forget <code>"stream": False</code> with a plain <code>httpx.post</code>, and the body is many
+    JSON objects in one string. <code>.json()</code> reads the first one and stops at the second:</p>
+    <pre data-run="python" data-file="stream_extra.py"><code>import json
+
+body = """{"message":{"content":"R"},"done":false}
+{"message":{"content":"AG"},"done":false}"""
+
+try:
+    json.loads(body)                         # what .json() does with the whole body
+except json.JSONDecodeError as error:
+    print("JSONDecodeError:", error)
+
+print([json.loads(line)["message"]["content"] for line in body.splitlines()])   # one line at a time</code></pre>
+    <p>Output:</p>
+    <pre><code>JSONDecodeError: Extra data: line 2 column 1 (char 41)
+['R', 'AG']</code></pre>
+  </article>
+</main>
+<script src="../../assets/js/code.js"></script>
+</body>
+</html>

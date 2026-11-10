@@ -15,21 +15,42 @@ const js = async (e) => { const r = await send("Runtime.evaluate", { expression:
 await send("Page.enable"); await send("Runtime.enable"); await send("Network.enable"); await send("Network.setCacheDisabled", { cacheDisabled: true });
 await send("Emulation.setDeviceMetricsOverride", { width: 1400, height: 900, deviceScaleFactor: 1, mobile: false });
 
-const pages = { softmax: "Softmax and temperature", quantization: "Quantization", cosine: "Cosine similarity", bpe: "Byte Pair Encoding (BPE)" };
+const POSTS = {
+  "ai-engineering-llm-fundamentals.html": { softmax: "Softmax and temperature", quantization: "Quantization", cosine: "Cosine similarity",
+    bpe: "Byte Pair Encoding (BPE)", streaming: "Reading a streamed reply (NDJSON)" },
+  "python-for-java-developers.html": { "python-traps": "Python traps for Java developers", exceptions: "Exceptions: try, except, else, finally",
+    dataclasses: "Dataclasses vs Java records" },
+};
+const pages = Object.assign({}, ...Object.values(POSTS));
 
-// 1. Panel: sub-items open the right popup; every panel link is one line
-await send("Page.navigate", { url: BASE + "ai-engineering-llm-fundamentals.html" }); await sleep(1500);
-const wrapped = await js(`[...document.querySelectorAll(".toc .toc-body ol a")].filter(a => a.getBoundingClientRect().height > parseFloat(getComputedStyle(a).lineHeight) * 1.5).map(a => a.textContent)`);
-check("panel: every title on one line (incl. sub-items)", wrapped.length === 0, wrapped);
-for (const [slug, title] of Object.entries(pages)) {
-  await js(`document.querySelector('.toc a[href="topics/${slug}.html"]').click()`); await sleep(1200);
-  const s = await js(`({open: !!document.querySelector("dialog.popup[open]"), title: (document.getElementById("popup-title")||{}).textContent || document.querySelector("dialog.popup").getAttribute("aria-label")})`);
-  check(`panel '${slug}' opens its popup`, s.open && (DISK ? true : s.title === title), s);
-  if (slug === "cosine" && OUT) { await sleep(500); const r = await send("Page.captureScreenshot", { format: "png" }); writeFileSync(`${OUT}/topic-${DISK ? "disk" : "http"}-cosine.png`, Buffer.from(r.result.data, "base64")); }
-  await js(`document.querySelector(".popup-close").click()`); await sleep(300);
+// 1. Panel: sub-items open the right popup; every panel link is one line; in-text links exist
+for (const [post, own] of Object.entries(POSTS)) {
+  await send("Page.navigate", { url: BASE + post }); await sleep(1500);
+  const wrapped = await js(`[...document.querySelectorAll(".toc .toc-body ol a")].filter(a => a.getBoundingClientRect().height > parseFloat(getComputedStyle(a).lineHeight) * 1.5).map(a => a.textContent)`);
+  check(`${post} panel: every title on one line (incl. sub-items)`, wrapped.length === 0, wrapped);
+  for (const [slug, title] of Object.entries(own)) {
+    await js(`document.querySelector('.toc a[href="topics/${slug}.html"]').click()`); await sleep(1200);
+    const s = await js(`({open: !!document.querySelector("dialog.popup[open]"), title: (document.getElementById("popup-title")||{}).textContent || document.querySelector("dialog.popup").getAttribute("aria-label")})`);
+    check(`panel '${slug}' opens its popup`, s.open && (DISK ? true : s.title === title), s);
+    if (slug === "cosine" && OUT) { await sleep(500); const r = await send("Page.captureScreenshot", { format: "png" }); writeFileSync(`${OUT}/topic-${DISK ? "disk" : "http"}-cosine.png`, Buffer.from(r.result.data, "base64")); }
+    await js(`document.querySelector(".popup-close").click()`); await sleep(300);
+  }
+  const inText = await js(`[...document.querySelectorAll('.article a[data-popup]')].map(a => a.getAttribute("href"))`);
+  check(`${post}: in-text links to all ${Object.keys(own).length} pages`, Object.keys(own).every(s => inText.includes(`topics/${s}.html`)), inText);
 }
-const inText = await js(`[...document.querySelectorAll('.article a[data-popup]')].map(a => a.getAttribute("href"))`);
-check("in-text links to all 4 pages", ["bpe", "softmax", "quantization", "cosine"].every(s => inText.includes(`topics/${s}.html`)), inText);
+
+// 1b. A link inside a popup opens the other popup (http: same dialog; disk: inside the frame)
+await send("Page.navigate", { url: BASE + "python-for-java-developers.html" }); await sleep(1500);
+await js(`document.querySelector('.toc a[href="topics/python-traps.html"]').click()`); await sleep(1200);
+if (!DISK) {
+  await js(`document.querySelector('dialog.popup[open] a[data-popup][href$="dataclasses.html"]').click()`); await sleep(1200);
+  const s2 = await js(`({open: !!document.querySelector("dialog.popup[open]"), title: (document.getElementById("popup-title")||{}).textContent, url: location.href})`);
+  check("link inside a popup opens the other popup, page stays", s2.open && s2.title === "Dataclasses vs Java records" && s2.url.endsWith("python-for-java-developers.html"), s2);
+} else {
+  const s2 = await js(`(async()=>{const f=document.querySelector("dialog.popup[open] iframe"); f.contentDocument.querySelector('a[href$="dataclasses.html"]').click();
+    await new Promise(r=>setTimeout(r,1200)); return {open: !!document.querySelector("dialog.popup[open]"), frame: f.contentWindow.location.href, url: location.href}})()`);
+  check("link inside a popup (disk) opens the page in the frame, post stays", s2.open && s2.frame.includes("dataclasses.html") && s2.url.endsWith("python-for-java-developers.html"), s2);
+}
 
 // 2. Each page on its own: Run every block, compare with the Output block under it
 for (const slug of Object.keys(pages)) {

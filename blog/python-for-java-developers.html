@@ -39,11 +39,17 @@
     <div class="toc-head"><span>Contents</span><a class="toc-back" href="./" aria-label="Back to Blog">← Back</a></div>
     <ol>
       <li><a href="#setup">Setup: uv and venv</a></li>
-      <li><a href="#syntax">Syntax vs Java</a></li>
+      <li><a href="#syntax">Syntax vs Java</a>
+        <ol><li><a href="topics/python-traps.html" data-popup>Python traps</a></li></ol>
+      </li>
       <li><a href="#collections">Collections</a></li>
-      <li><a href="#classes">Classes</a></li>
+      <li><a href="#classes">Classes</a>
+        <ol><li><a href="topics/dataclasses.html" data-popup>Dataclasses</a></li></ol>
+      </li>
       <li><a href="#modules">Modules and imports</a></li>
-      <li><a href="#exceptions">Exceptions</a></li>
+      <li><a href="#exceptions">Exceptions</a>
+        <ol><li><a href="topics/exceptions.html" data-popup>try / except</a></li></ol>
+      </li>
       <li><a href="#files">Files and JSON</a></li>
       <li><a href="#http">HTTP with httpx</a></li>
       <li><a href="#pytest">Testing with pytest</a></li>
@@ -124,6 +130,7 @@ low, high = min_max([3, 1, 4])       # unpacked into two names</code></pre>
     <li>Type hints are <b>not enforced</b> when the code runs. They help the IDE, and a checker such as pyright (strict mode here) reads them.</li>
     <li><b>Truthy and falsy:</b> <code>0</code>, <code>""</code>, <code>[]</code>, <code>{}</code> and <code>None</code> count as false. <code>if items:</code> means "if the list is not empty".</li>
   </ul>
+  <p><a href="topics/python-traps.html" data-popup>See five Python traps for Java developers</a>, with code you can run.</p>
 
   <h2 id="collections">3. Collections</h2>
   <div class="table-wrap">
@@ -194,6 +201,7 @@ class Message:
     <li>Use <code>@dataclass</code> for data holders: messages, documents, settings. Use a plain class when the object is mostly behaviour.</li>
     <li><b>Duck typing:</b> Python needs no <code>implements</code>. If an object has <code>.run()</code>, you can call <code>.run()</code>. An <code>ABC</code> makes the contract explicit and fails early when a method is missing.</li>
   </ul>
+  <p><a href="topics/dataclasses.html" data-popup>See dataclasses next to Java records</a>, with code you can run.</p>
 
   <h2 id="modules">5. Modules and imports</h2>
   <div class="table-wrap">
@@ -271,6 +279,7 @@ finally:
     <li><b>Catch at the edge,</b> where you can do something useful: the chat loop prints "Start Ollama: ollama serve", while the function deep inside raises. <b>Don't catch what you can't fix.</b></li>
     <li>Two styles: look first (<code>if key in d:</code>, the Java way) or just try (<code>try: d[key] except KeyError:</code>, the usual Python way). For dicts, <code>d.get(key, default)</code> does it in one call.</li>
   </ul>
+  <p><a href="topics/exceptions.html" data-popup>See which block runs when</a>: try, except, else and finally, with code you can run.</p>
 
   <h2 id="files">7. Files and JSON</h2>
   <div class="table-wrap">
@@ -430,5 +439,6 @@ def test_model_names_fake(monkeypatch: pytest.MonkeyPatch) -> None:
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/toc.js"></script>
 <script src="../assets/js/code.js"></script>
+<script src="../assets/js/popup.js"></script>
 </body>
 </html>

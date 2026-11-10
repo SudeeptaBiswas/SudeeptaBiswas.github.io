@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Python traps for Java developers — Sudeepta Biswas</title>
+  <meta name="description" content="Five places where Python surprises a Java developer: division, == vs is, truthy values, mutable defaults and zip. Runnable Python.">
+  <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/python-traps.html">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<main id="main" class="page-solo">
+  <p class="solo-back"><a href="../python-for-java-developers.html#syntax">← Python for Java Developers</a></p>
+  <article class="article" data-popup-content>
+    <p class="label">Python · Syntax</p>
+    <h1>Python traps for Java developers</h1>
+
+    <p class="lead">Python reads like Java with less typing. These five spots behave differently, and
+    they fail quietly: no compile error, just a wrong value. Each block runs in your browser; change it
+    and run it again.</p>
+
+    <h2>1. / and //</h2>
+    <p><code>/</code> always gives a float. <code>//</code> rounds <b>down</b>, not toward zero, so
+    negative numbers give a different answer than in Java.</p>
+    <pre data-run="python" data-file="traps_division.py"><code>print("7 / 2   =", 7 / 2)          # / always gives a float
+print("7 // 2  =", 7 // 2)         # // rounds down
+print("-7 // 2 =", -7 // 2)        # down means -4; Java's -7 / 2 is -3
+print("int(-7 / 2) =", int(-7 / 2))  # cut toward zero, like Java
+print("-7 % 2  =", -7 % 2)         # Java's -7 % 2 is -1
+print("2 ** 100 =", 2 ** 100)      # no overflow: int grows as needed</code></pre>
+    <p>Output:</p>
+    <pre><code>7 / 2   = 3.5
+7 // 2  = 3
+-7 // 2 = -4
+int(-7 / 2) = -3
+-7 % 2  = 1
+2 ** 100 = 1267650600228229401496703205376</code></pre>
+    <p>Porting Java maths that can go negative? Check every <code>/</code> and <code>%</code>.</p>
+
+    <h2>2. == and is</h2>
+    <p>Java's <code>==</code> on objects asks "same object?" and <code>.equals()</code> asks "same
+    value?". Python uses <code>==</code> for the value and <code>is</code> for the same object.</p>
+    <pre data-run="python" data-file="traps_is.py"><code>a = [1, 2, 3]
+b = [1, 2, 3]
+c = a                              # a second name for the same list
+
+print("a == b:", a == b)           # same value     (Java: a.equals(b))
+print("a is b:", a is b)           # same object?   (Java: a == b)
+print("a is c:", a is c)
+
+c.append(4)
+print("a after c.append(4):", a)   # one list, two names
+
+x = None
+print("x is None:", x is None)     # test for None with "is"</code></pre>
+    <p>Output:</p>
+    <pre><code>a == b: True
+a is b: False
+a is c: True
+a after c.append(4): [1, 2, 3, 4]
+x is None: True</code></pre>
+    <p>Use <code>is</code> only for <code>None</code> (and <code>True</code> / <code>False</code>).</p>
+
+    <h2>3. Truthy and falsy</h2>
+    <p><code>if x:</code> works on any value. Zero and empty things count as false.</p>
+    <pre data-run="python" data-file="traps_truthy.py"><code>for value in [0, 0.0, "", [], {}, None, "0", [0], -1]:
+    print(f"{value!r:5} -&gt; {bool(value)}")
+
+count = 0                          # a real answer: zero items
+if count:
+    print("got a count")
+else:
+    print("if count: says no count, but 0 was a real value")
+if count is not None:
+    print("if count is not None: says the count is", count)</code></pre>
+    <p>Output:</p>
+    <pre><code>0     -&gt; False
+0.0   -&gt; False
+''    -&gt; False
+[]    -&gt; False
+{}    -&gt; False
+None  -&gt; False
+'0'   -&gt; True
+[0]   -&gt; True
+-1    -&gt; True
+if count: says no count, but 0 was a real value
+if count is not None: says the count is 0</code></pre>
+    <p>Write <code>if items:</code> for "not empty". When 0 or <code>""</code> is a real answer, write
+    <code>if x is not None:</code>.</p>
+
+    <h2>4. A list as a default argument</h2>
+    <p>A default value is made <b>once</b>, when <code>def</code> runs, not on every call. So a list
+    default is shared by every call. Java has no default arguments, so this one is new.</p>
+    <pre data-run="python" data-file="traps_default.py"><code>def add_bad(item, bucket=[]):      # the [] is made ONCE, when def runs
+    bucket.append(item)
+    return bucket
+
+print(add_bad("a"))
+print(add_bad("b"))                # same list as the first call
+
+def add(item, bucket=None):        # the fix: None, then a new list per call
+    bucket = [] if bucket is None else bucket
+    bucket.append(item)
+    return bucket
+
+print(add("a"))
+print(add("b"))</code></pre>
+    <p>Output:</p>
+    <pre><code>['a']
+['a', 'b']
+['a']
+['b']</code></pre>
+    <p>Dataclasses have the same rule: <a href="dataclasses.html" data-popup>dataclasses vs Java records</a>.</p>
+
+    <h2>5. zip stops at the shorter list</h2>
+    <p><code>zip</code> pairs up items from two lists. If one is shorter, the extra items are dropped
+    with no error. A Java loop with an index would throw <code>IndexOutOfBoundsException</code>.</p>
+    <pre data-run="python" data-file="traps_zip.py"><code>words = ["cat", "mat", "rat"]
+scores = [2.0, 1.0]                # one score is missing
+
+print(list(zip(words, scores)))    # rat is dropped, no error
+
+try:
+    list(zip(words, scores, strict=True))   # Python 3.10+
+except ValueError as error:
+    print("strict=True:", error)</code></pre>
+    <p>Output:</p>
+    <pre><code>[('cat', 2.0), ('mat', 1.0)]
+strict=True: zip() argument 2 is shorter than argument 1</code></pre>
+    <p>Use <code>strict=True</code> when both lists must match, for example texts and their embeddings.</p>
+  </article>
+</main>
+<script src="../../assets/js/code.js"></script>
+</body>
+</html>

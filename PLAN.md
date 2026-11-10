@@ -73,6 +73,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 54 | Interactive temperature slider on the Softmax popup page (owner asked, 10 Nov 2026). `assets/js/demos.js`: `<div data-demo="temperature" data-words data-logits>`, slider T 0.2 to 3.0, bars = softmax(score / T). Uses the page's own cat/mat/rat 2.0/1.0/0.5 (T 1.0 = 62.9 / 23.1 / 14.0%). Popup copies content without running scripts, so popup.js calls `enhanceDemos` and the post loads demos.js. Text without JS kept inside the div. Tested http + disk, light + dark, phone 390px. |
 | 55 | Three more sliders (owner: "1 yes", 10 Nov 2026) in `demos.js`: top_k/top_p (Softmax page; top_k first, then top_p on what is left, as Ollama), bits per weight (Quantization: file/RAM size + toy weights, same codes and worst error as `quantization.py`), arrow angle and length (Cosine: live dot, norm, cosine). Cosine page also got a "Step by step" section: dot, norm, cosine worked out for question [0.7, 0.3] vs kitten [0.8, 0.2] (owner asked if the terms were covered: before, only the formula and "why divide by lengths"). `tools/tests/demo_test.mjs` 22/22 http + 22/22 disk. |
 | 56 | Projects panel: optional `short=` per project, used only in the left panel (full title as hover tip). 13 set: AI Requirements Docs, RIMS Migration, Release Management, PLM Platform (V6), ENOVIA PLM (V5), Omron Testing, ShopBook Migration, HRMS, Food Navi, NTT Data Trial, SMS VAS, DB Copy Tool, FleetCheck. Measured at 1400px: 0 of 19 pages wrap (was 13 titles). Owner: "yes, need to check" the names. |
+| 57 | Owner OK'd popup candidates 1–4 (10 Nov 2026). New pages from lessons 1.2–1.5 and 2.3: Python traps for Java developers (5 traps), Exceptions: try, except, else, finally, Dataclasses vs Java records (Python post); Reading a streamed reply (NDJSON) (AI post, sample lines, no Ollama). 14 runnable blocks, each output = real CPython output and = Pyodide output (`topics_test.mjs` 32/32 http + disk). Generator takes the post per page (`post=PY`). Links inside a popup to another popup work (http: same dialog; disk: inside the frame). Demo bars also got one colour per row (owner asked). |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -255,7 +256,7 @@ The start time on a repeat visit is the browser preparing Python, not a download
 Python stays loaded after the first Run, so later Runs take milliseconds.
 
 ## 12. More popup pages: candidates (2026-11-10, owner to pick)
-Done: BPE, Softmax and temperature, Quantization, Cosine similarity (AI post).
+Done: BPE, Softmax and temperature, Quantization, Cosine similarity, Reading a streamed reply (AI post); Python traps, Exceptions, Dataclasses (Python post). Candidates 1–4 below are done (decision 57).
 "Runnable" = can get a Run button (standard library or numpy, no Ollama).
 
 | # | Page | Post, section | Source lesson | Runnable | Why |
@@ -270,7 +271,7 @@ Done: BPE, Softmax and temperature, Quantization, Cosine similarity (AI post).
 | 8 | Chat memory and trimming the history | AI, 3 | 2.6 | yes | Wait: owner said 2.6 not now |
 | 9 | Kafka partitions + consumer groups; RabbitMQ exchange routing | Kafka, RabbitMQ | (study notes) | toy only | Diagrams more than code |
 
-Recommended next: 1, 2, 3, 4.
+Next, if wanted: 5 (comprehensions and slicing), 7 (pytest, Run support not checked), 8 (when 2.6 is allowed).
 
 Projects panel (left panel on project pages): done, decision 56 (`short=` names, 0 of 19 wrap).
 
@@ -286,11 +287,12 @@ Read this first in a new session, then `CLAUDE.md` and decisions 37–56 in Sect
 - Popup pages Softmax, Quantization, Cosine (52); AI Engineering Lab project page (53).
 - Sliders: temperature (54), top_k/top_p, bits per weight, cosine angle; cosine step by step (55).
 - Generator and browser tests saved in `tools/topics/` and `tools/tests/` (were only in a temp folder).
+- Demo bars one colour per row; popup pages Python traps, Exceptions, Dataclasses, Streaming (57).
 
 **Open: owner to answer**
-1. Push: check `git log origin/main..HEAD` (9 commits when written, e378e8a onwards).
+1. Push: check `git log origin/main..HEAD` (11 commits when written, e378e8a onwards).
 2. Check the 13 short project names (decision 56). Change any in `tools/projects_data.py`, rerun the build.
-3. Next popup pages: Section 12 recommends 1–4 (Python traps, Exceptions, Dataclasses vs records, NDJSON streaming).
+3. Popup pages 1–4 done (57). More from Section 12 only if the owner asks.
 4. AI posts growth plan, Section 10: owner said "we will check later".
 5. Make every code sample runnable where possible? Not answered.
 6. A Claude Doc about the CI/CD post was made on claude.ai by mistake: keep or delete? Not answered.

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exceptions: try, except, else, finally — Sudeepta Biswas</title>
+  <meta name="description" content="Which block runs when, first match wins, your own errors with raise ... from, and look first vs just try. Runnable Python.">
+  <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/exceptions.html">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<main id="main" class="page-solo">
+  <p class="solo-back"><a href="../python-for-java-developers.html#exceptions">← Python for Java Developers</a></p>
+  <article class="article" data-popup-content>
+    <p class="label">Python · Errors</p>
+    <h1>Exceptions: try, except, else, finally</h1>
+
+    <p class="lead">Python exceptions work like Java's unchecked ones, with two extras: an
+    <code>else</code> block and <code>raise ... from</code>. These blocks run in your browser.</p>
+
+    <h2>Which block runs when</h2>
+    <pre data-run="python" data-file="exc_order.py"><code>def parse(text):
+    print(f"parse({text!r})")
+    try:
+        number = int(text)
+    except ValueError:
+        print("  except:  not a number")
+        return None
+    else:
+        print("  else:    no error, use", number)
+        return number
+    finally:
+        print("  finally: always runs, even after return")
+
+parse("42")
+parse("forty-two")</code></pre>
+    <p>Output:</p>
+    <pre><code>parse('42')
+  else:    no error, use 42
+  finally: always runs, even after return
+parse('forty-two')
+  except:  not a number
+  finally: always runs, even after return</code></pre>
+    <ul>
+      <li><code>else</code> runs only when the <code>try</code> had no error. Java has no twin. Keep the
+      <code>try</code> small, just the line that can fail, and put the rest in <code>else</code>.</li>
+      <li><code>finally</code> runs even after <code>return</code>, as in Java.</li>
+    </ul>
+
+    <h2>First match wins</h2>
+    <p><code>except</code> blocks are tried top to bottom, and a parent catches its children. So put
+    the child first.</p>
+    <pre data-run="python" data-file="exc_first_match.py"><code>def read(d, key):
+    try:
+        return d[key]
+    except LookupError:            # parent of KeyError: matches first
+        return "LookupError block"
+    except KeyError:               # never reached
+        return "KeyError block"
+
+print(read({}, "model"))
+print(" -&gt; ".join(c.__name__ for c in KeyError.__mro__))   # the "extends" chain</code></pre>
+    <p>Output:</p>
+    <pre><code>LookupError block
+KeyError -&gt; LookupError -&gt; Exception -&gt; BaseException -&gt; object</code></pre>
+    <p><code>__mro__</code> is the class chain, like walking <code>getSuperclass()</code> in Java.
+    <code>except LookupError</code> catches both <code>KeyError</code> and <code>IndexError</code>.</p>
+
+    <h2>Your own errors, with the cause</h2>
+    <p>A raw error says what broke, not what to do. Wrap it in your own error and keep the original
+    with <code>from</code>. Java: <code>new X(msg, cause)</code>.</p>
+    <pre data-run="python" data-file="exc_from.py"><code>class OllamaError(Exception): ...            # my base error
+class OllamaDownError(OllamaError): ...      # (Parent) = extends
+
+def ask(url):
+    try:
+        # stands in for httpx.ConnectError: no network in this demo
+        raise ConnectionRefusedError("nothing is listening on " + url)
+    except OSError as error:
+        raise OllamaDownError(f"no Ollama at {url}") from error   # keep the cause
+
+try:
+    ask("http://localhost:11434")
+except OllamaError as error:                 # the parent catches every child
+    print("caught:", type(error).__name__, "-", error)
+    print("cause: ", type(error.__cause__).__name__, "-", error.__cause__)
+    print("tip:    start Ollama: ollama serve")</code></pre>
+    <p>Output:</p>
+    <pre><code>caught: OllamaDownError - no Ollama at http://localhost:11434
+cause:  ConnectionRefusedError - nothing is listening on http://localhost:11434
+tip:    start Ollama: ollama serve</code></pre>
+    <ul>
+      <li>Callers catch <code>OllamaError</code> and get every child.</li>
+      <li><b>Catch at the edge,</b> where you can do something useful: the chat loop prints the tip,
+      while the function deep inside only raises.</li>
+      <li>No checked exceptions, so a docstring should list what a function raises.</li>
+    </ul>
+
+    <h2>Look first or just try</h2>
+    <p>Three ways to read a key that may be missing:</p>
+    <pre data-run="python" data-file="exc_styles.py"><code>settings = {"model": "qwen3:1.7b"}           # no "temperature" key
+
+if "temperature" in settings:                # 1. look first (Java style)
+    t = settings["temperature"]
+else:
+    t = 0.8
+print("look first:", t)
+
+try:                                         # 2. just try (usual Python style)
+    t = settings["temperature"]
+except KeyError:
+    t = 0.8
+print("just try:  ", t)
+
+print("get:       ", settings.get("temperature", 0.8))   # 3. one call</code></pre>
+    <p>Output:</p>
+    <pre><code>look first: 0.8
+just try:   0.8
+get:        0.8</code></pre>
+    <p>For dicts, <code>get</code> is the shortest. For files and network calls, just try: the file
+    can vanish between the check and the use.</p>
+  </article>
+</main>
+<script src="../../assets/js/code.js"></script>
+</body>
+</html>

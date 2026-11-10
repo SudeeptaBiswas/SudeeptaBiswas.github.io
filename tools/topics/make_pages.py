@@ -1,4 +1,4 @@
-"""Writes blog/topics/{softmax,quantization,cosine}.html from the .py files next to this script,
+"""Writes the popup pages in blog/topics/ (all but bpe.html) from the .py files next to this script,
 and puts each script's real output under its code. bpe.html is hand-written (its code: bpe.py here).
 Usage: python tools/topics/make_pages.py   (site root defaults to two folders up)"""
 import html
@@ -8,7 +8,8 @@ import sys
 
 HERE = pathlib.Path(__file__).parent
 SITE = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else HERE.parents[1]
-POST = "ai-engineering-llm-fundamentals.html"
+AI = ("ai-engineering-llm-fundamentals.html", "AI Engineering: LLM Fundamentals")   # (post file, its title)
+PY = ("python-for-java-developers.html", "Python for Java Developers")
 
 
 def code(name: str, runnable: bool = True) -> str:
@@ -22,7 +23,13 @@ def output(name: str) -> str:
     return f"<pre><code>{html.escape(result.stdout.rstrip(), quote=False)}</code></pre>"
 
 
-def page(slug: str, title: str, description: str, label: str, back_anchor: str, body: str, demos: bool = False) -> None:
+def run(name: str) -> str:
+    """A runnable block, then its real output."""
+    return f"{code(name)}\n    <p>Output:</p>\n    {output(name)}"
+
+
+def page(slug: str, title: str, description: str, label: str, back_anchor: str, body: str,
+         demos: bool = False, post: tuple[str, str] = AI) -> None:
     extra = '\n<script src="../../assets/js/demos.js"></script>' if demos else ""
     text = f"""<!doctype html>
 <html lang="en">
@@ -38,7 +45,7 @@ def page(slug: str, title: str, description: str, label: str, back_anchor: str, 
 </head>
 <body>
 <main id="main" class="page-solo">
-  <p class="solo-back"><a href="../{POST}#{back_anchor}">← AI Engineering: LLM Fundamentals</a></p>
+  <p class="solo-back"><a href="../{post[0]}#{back_anchor}">← {post[1]}</a></p>
   <article class="article" data-popup-content>
     <p class="label">{label}</p>
     <h1>{title}</h1>
@@ -252,3 +259,169 @@ invoice  0.49</code></pre>
       <li><b>Use the same model</b> for notes and question. Vectors from two models give nonsense scores, with no error.</li>
       <li>nomic's vectors already have length 1.0, so for them cosine equals dot.</li>
     </ul>""", demos=True)
+
+page("python-traps", "Python traps for Java developers",
+     "Five places where Python surprises a Java developer: division, == vs is, truthy values, mutable defaults and zip. Runnable Python.",
+     "Python · Syntax", "syntax", f"""
+    <p class="lead">Python reads like Java with less typing. These five spots behave differently, and
+    they fail quietly: no compile error, just a wrong value. Each block runs in your browser; change it
+    and run it again.</p>
+
+    <h2>1. / and //</h2>
+    <p><code>/</code> always gives a float. <code>//</code> rounds <b>down</b>, not toward zero, so
+    negative numbers give a different answer than in Java.</p>
+    {run("traps_division.py")}
+    <p>Porting Java maths that can go negative? Check every <code>/</code> and <code>%</code>.</p>
+
+    <h2>2. == and is</h2>
+    <p>Java's <code>==</code> on objects asks "same object?" and <code>.equals()</code> asks "same
+    value?". Python uses <code>==</code> for the value and <code>is</code> for the same object.</p>
+    {run("traps_is.py")}
+    <p>Use <code>is</code> only for <code>None</code> (and <code>True</code> / <code>False</code>).</p>
+
+    <h2>3. Truthy and falsy</h2>
+    <p><code>if x:</code> works on any value. Zero and empty things count as false.</p>
+    {run("traps_truthy.py")}
+    <p>Write <code>if items:</code> for "not empty". When 0 or <code>""</code> is a real answer, write
+    <code>if x is not None:</code>.</p>
+
+    <h2>4. A list as a default argument</h2>
+    <p>A default value is made <b>once</b>, when <code>def</code> runs, not on every call. So a list
+    default is shared by every call. Java has no default arguments, so this one is new.</p>
+    {run("traps_default.py")}
+    <p>Dataclasses have the same rule: <a href="dataclasses.html" data-popup>dataclasses vs Java records</a>.</p>
+
+    <h2>5. zip stops at the shorter list</h2>
+    <p><code>zip</code> pairs up items from two lists. If one is shorter, the extra items are dropped
+    with no error. A Java loop with an index would throw <code>IndexOutOfBoundsException</code>.</p>
+    {run("traps_zip.py")}
+    <p>Use <code>strict=True</code> when both lists must match, for example texts and their embeddings.</p>""",
+     post=PY)
+
+page("exceptions", "Exceptions: try, except, else, finally",
+     "Which block runs when, first match wins, your own errors with raise ... from, and look first vs just try. Runnable Python.",
+     "Python · Errors", "exceptions", f"""
+    <p class="lead">Python exceptions work like Java's unchecked ones, with two extras: an
+    <code>else</code> block and <code>raise ... from</code>. These blocks run in your browser.</p>
+
+    <h2>Which block runs when</h2>
+    {run("exc_order.py")}
+    <ul>
+      <li><code>else</code> runs only when the <code>try</code> had no error. Java has no twin. Keep the
+      <code>try</code> small, just the line that can fail, and put the rest in <code>else</code>.</li>
+      <li><code>finally</code> runs even after <code>return</code>, as in Java.</li>
+    </ul>
+
+    <h2>First match wins</h2>
+    <p><code>except</code> blocks are tried top to bottom, and a parent catches its children. So put
+    the child first.</p>
+    {run("exc_first_match.py")}
+    <p><code>__mro__</code> is the class chain, like walking <code>getSuperclass()</code> in Java.
+    <code>except LookupError</code> catches both <code>KeyError</code> and <code>IndexError</code>.</p>
+
+    <h2>Your own errors, with the cause</h2>
+    <p>A raw error says what broke, not what to do. Wrap it in your own error and keep the original
+    with <code>from</code>. Java: <code>new X(msg, cause)</code>.</p>
+    {run("exc_from.py")}
+    <ul>
+      <li>Callers catch <code>OllamaError</code> and get every child.</li>
+      <li><b>Catch at the edge,</b> where you can do something useful: the chat loop prints the tip,
+      while the function deep inside only raises.</li>
+      <li>No checked exceptions, so a docstring should list what a function raises.</li>
+    </ul>
+
+    <h2>Look first or just try</h2>
+    <p>Three ways to read a key that may be missing:</p>
+    {run("exc_styles.py")}
+    <p>For dicts, <code>get</code> is the shortest. For files and network calls, just try: the file
+    can vanish between the check and the use.</p>""",
+     post=PY)
+
+page("dataclasses", "Dataclasses vs Java records",
+     "@dataclass next to a Java record: equality, repr, frozen, replace, and the list default trap. Runnable Python.",
+     "Python · Classes", "classes", f"""
+    <p class="lead">A Java <code>record</code> gives you a constructor, accessors, <code>equals</code>,
+    <code>hashCode</code> and <code>toString</code>. Python's <code>@dataclass</code> builds the same
+    from a list of fields. The big difference: dataclass fields can change, unless you ask for
+    <code>frozen=True</code>.</p>
+    {code("Message.java", runnable=False)}
+
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Java record</th><th>@dataclass</th><th>@dataclass(frozen=True)</th></tr></thead>
+      <tbody>
+        <tr><td>constructor</td><td>yes</td><td><code>__init__</code></td><td><code>__init__</code></td></tr>
+        <tr><td>equals</td><td>yes</td><td><code>__eq__</code></td><td><code>__eq__</code></td></tr>
+        <tr><td>toString</td><td>yes</td><td><code>__repr__</code></td><td><code>__repr__</code></td></tr>
+        <tr><td>hashCode (dict key, set)</td><td>yes</td><td>no</td><td>yes</td></tr>
+        <tr><td>fields can change</td><td>no</td><td>yes</td><td>no</td></tr>
+        <tr><td>copy with one change</td><td>write a "wither"</td><td><code>replace()</code></td><td><code>replace()</code></td></tr>
+        <tr><td>types checked</td><td>by the compiler</td><td>no</td><td>no</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>The basics</h2>
+    {run("dc_basic.py")}
+    <ul>
+      <li>A plain class compares by identity, like a Java class without <code>equals()</code>.</li>
+      <li>Type hints are not checked when the code runs: <code>role=1</code> is accepted. pydantic,
+      later in the lab, does check.</li>
+    </ul>
+
+    <h2>frozen=True: closest to a record</h2>
+    {run("dc_frozen.py")}
+    <p>Frozen also makes it hashable, so it can be a dict key or go in a set.</p>
+
+    <h2>The list default trap</h2>
+    <p><code>tags: list = []</code> would give every object the same list, so
+    <code>@dataclass</code> refuses it:</p>
+    {run("dc_default.py")}
+    <p>Use <code>field(default_factory=list)</code>: a new list for each object, as in
+    <code>Message</code> above. The same trap in plain functions:
+    <a href="python-traps.html" data-popup>Python traps for Java developers</a>.</p>""",
+     post=PY)
+
+page("streaming", "Reading a streamed reply (NDJSON)",
+     "How a streamed Ollama reply arrives as one JSON object per line, how to read it, and why .json() fails with Extra data. Runnable, no Ollama needed.",
+     "AI · Chat API", "streaming", f"""
+    <p class="lead">With <code>"stream": True</code> (Ollama's default) the reply is <b>NDJSON</b>,
+    newline-delimited JSON: one small JSON object per line. Each line holds a few characters of the
+    answer; the last line holds the stats.</p>
+
+    <h2>Why stream</h2>
+    <p>Measured with qwen3:1.7b on a PC with no GPU:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>First words on screen</th><th>Whole answer</th></tr></thead>
+      <tbody>
+        <tr><td>streamed</td><td>0.13–0.64 s</td><td>2.0–3.2 s</td></tr>
+        <tr><td>not streamed</td><td>when it is all done</td><td>about the same</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>Same total time, but the user reads while the model writes.</p>
+
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Java</th><th>Python</th></tr></thead>
+      <tbody>
+        <tr><td><code>BodyHandlers.ofLines()</code></td><td><code>with httpx.stream(...) as r:</code> + <code>r.iter_lines()</code></td></tr>
+        <tr><td><code>System.out.print(x); System.out.flush()</code></td><td><code>print(x, end="", flush=True)</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>The real code (needs Ollama)</h2>
+    {code("stream_ollama.py", runnable=False)}
+
+    <h2>Try it without Ollama</h2>
+    <p>The same loop over sample lines in the same shape:</p>
+    {run("stream_parse.py")}
+    <p>The last line has <code>done: true</code>, empty content, and the same stats as a reply without
+    streaming. Ollama's times are in nanoseconds.</p>
+
+    <h2>Why .json() fails with "Extra data"</h2>
+    <p>Forget <code>"stream": False</code> with a plain <code>httpx.post</code>, and the body is many
+    JSON objects in one string. <code>.json()</code> reads the first one and stops at the second:</p>
+    {run("stream_extra.py")}""")

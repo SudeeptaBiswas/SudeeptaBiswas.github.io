@@ -52,7 +52,9 @@
       </li>
       <li><a href="#chat">The chat API</a></li>
       <li><a href="#thinking">Thinking models</a></li>
-      <li><a href="#streaming">Streaming</a></li>
+      <li><a href="#streaming">Streaming</a>
+        <ol><li><a href="topics/streaming.html" data-popup>Reading a stream</a></li></ol>
+      </li>
       <li><a href="#sampling">Sampling</a></li>
       <li><a href="#embeddings">Embeddings</a>
         <ol><li><a href="topics/cosine.html" data-popup>Cosine similarity</a></li></ol>
@@ -297,6 +299,7 @@ reply["message"]["content"]            # the answer text</code></pre>
     <li>Read it with <code>httpx.stream("POST", url, json=body)</code> and <code>iter_lines()</code>. A plain <code>httpx.post</code> waits for the whole body.</li>
     <li>Forget <code>"stream": False</code> with <code>httpx.post</code> and you get all the lines in one string: <code>.json()</code> fails with "Extra data".</li>
   </ul>
+  <p><a href="topics/streaming.html" data-popup>See how to read a stream</a>, with sample lines you can run.</p>
 
   <h2 id="sampling">10. Sampling</h2>
   <p>Five calls, the same prompt, "Invent an unusual name for a pet cat.":</p>

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dataclasses vs Java records — Sudeepta Biswas</title>
+  <meta name="description" content="@dataclass next to a Java record: equality, repr, frozen, replace, and the list default trap. Runnable Python.">
+  <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/dataclasses.html">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<main id="main" class="page-solo">
+  <p class="solo-back"><a href="../python-for-java-developers.html#classes">← Python for Java Developers</a></p>
+  <article class="article" data-popup-content>
+    <p class="label">Python · Classes</p>
+    <h1>Dataclasses vs Java records</h1>
+
+    <p class="lead">A Java <code>record</code> gives you a constructor, accessors, <code>equals</code>,
+    <code>hashCode</code> and <code>toString</code>. Python's <code>@dataclass</code> builds the same
+    from a list of fields. The big difference: dataclass fields can change, unless you ask for
+    <code>frozen=True</code>.</p>
+    <pre data-file="Message.java"><code>record Message(String role, String content) {}
+
+var m1 = new Message("user", "hi");
+var m2 = new Message("user", "hi");
+m1.equals(m2);      // true
+m1.toString();      // Message[role=user, content=hi]
+m1.role();          // accessor; there is no setter</code></pre>
+
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Java record</th><th>@dataclass</th><th>@dataclass(frozen=True)</th></tr></thead>
+      <tbody>
+        <tr><td>constructor</td><td>yes</td><td><code>__init__</code></td><td><code>__init__</code></td></tr>
+        <tr><td>equals</td><td>yes</td><td><code>__eq__</code></td><td><code>__eq__</code></td></tr>
+        <tr><td>toString</td><td>yes</td><td><code>__repr__</code></td><td><code>__repr__</code></td></tr>
+        <tr><td>hashCode (dict key, set)</td><td>yes</td><td>no</td><td>yes</td></tr>
+        <tr><td>fields can change</td><td>no</td><td>yes</td><td>no</td></tr>
+        <tr><td>copy with one change</td><td>write a "wither"</td><td><code>replace()</code></td><td><code>replace()</code></td></tr>
+        <tr><td>types checked</td><td>by the compiler</td><td>no</td><td>no</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>The basics</h2>
+    <pre data-run="python" data-file="dc_basic.py"><code>from dataclasses import dataclass, field
+
+class PlainMessage:                          # plain class: no __eq__ written
+    def __init__(self, role, content):
+        self.role = role
+        self.content = content
+
+@dataclass
+class Message:                               # __init__, __repr__, __eq__ for free
+    role: str
+    content: str
+    tags: list[str] = field(default_factory=list)
+
+print("plain equal:    ", PlainMessage("user", "hi") == PlainMessage("user", "hi"))
+m1 = Message("user", "hi")
+m2 = Message("user", "hi")
+print("dataclass equal:", m1 == m2)
+print(m1)
+
+m1.tags.append("greeting")
+print("m2.tags:", m2.tags)                   # each object got its own list
+
+m1.content = "changed"                       # fields can change (records can't)
+print(m1)
+print(Message(role=1, content=None))         # type hints are not checked</code></pre>
+    <p>Output:</p>
+    <pre><code>plain equal:     False
+dataclass equal: True
+Message(role='user', content='hi', tags=[])
+m2.tags: []
+Message(role='user', content='changed', tags=['greeting'])
+Message(role=1, content=None, tags=[])</code></pre>
+    <ul>
+      <li>A plain class compares by identity, like a Java class without <code>equals()</code>.</li>
+      <li>Type hints are not checked when the code runs: <code>role=1</code> is accepted. pydantic,
+      later in the lab, does check.</li>
+    </ul>
+
+    <h2>frozen=True: closest to a record</h2>
+    <pre data-run="python" data-file="dc_frozen.py"><code>from dataclasses import FrozenInstanceError, dataclass, replace
+
+@dataclass(frozen=True)
+class Settings:                              # like a Java record: no setters
+    model: str
+    temperature: float = 0.8
+
+s = Settings("qwen3:1.7b")
+print(s)
+try:
+    s.temperature = 0.2
+except FrozenInstanceError as error:
+    print("FrozenInstanceError:", error)
+
+cold = replace(s, temperature=0.2)           # a changed copy ("wither")
+print(cold)
+print(s)                                     # the original is unchanged
+print("usable as a dict key:", {s: "default"}[Settings("qwen3:1.7b")])</code></pre>
+    <p>Output:</p>
+    <pre><code>Settings(model='qwen3:1.7b', temperature=0.8)
+FrozenInstanceError: cannot assign to field 'temperature'
+Settings(model='qwen3:1.7b', temperature=0.2)
+Settings(model='qwen3:1.7b', temperature=0.8)
+usable as a dict key: default</code></pre>
+    <p>Frozen also makes it hashable, so it can be a dict key or go in a set.</p>
+
+    <h2>The list default trap</h2>
+    <p><code>tags: list = []</code> would give every object the same list, so
+    <code>@dataclass</code> refuses it:</p>
+    <pre data-run="python" data-file="dc_default.py"><code>from dataclasses import dataclass
+
+try:
+    @dataclass
+    class Bad:
+        tags: list = []                      # one list for every object? refused
+except ValueError as error:
+    print("ValueError:", error)</code></pre>
+    <p>Output:</p>
+    <pre><code>ValueError: mutable default &lt;class 'list'&gt; for field tags is not allowed: use default_factory</code></pre>
+    <p>Use <code>field(default_factory=list)</code>: a new list for each object, as in
+    <code>Message</code> above. The same trap in plain functions:
+    <a href="python-traps.html" data-popup>Python traps for Java developers</a>.</p>
+  </article>
+</main>
+<script src="../../assets/js/code.js"></script>
+</body>
+</html>
