@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BPE, step by step — Sudeepta Biswas</title>
+  <title>Byte Pair Encoding (BPE) — Sudeepta Biswas</title>
   <meta name="description" content="How Byte Pair Encoding builds a tokenizer's pieces: count neighbour pairs, glue the most common, repeat. A worked example in Python.">
   <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
   <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/bpe.html">
@@ -15,7 +15,7 @@
   <p class="solo-back"><a href="../ai-engineering-llm-fundamentals.html#tokens">← AI Engineering: LLM Fundamentals</a></p>
   <article class="article" data-popup-content>
     <p class="label">AI · Tokens</p>
-    <h1>BPE, step by step</h1>
+    <h1>Byte Pair Encoding (BPE)</h1>
 
     <p class="lead">A tokenizer needs a list of pieces to cut text into. <b>BPE</b> (Byte Pair
     Encoding) builds that list from text: start with single characters, find the two
@@ -49,11 +49,11 @@
     merge 2.</p>
 
     <h2>The code</h2>
-    <pre><code>from collections import Counter
-
-def count_pairs(tokens: list[str]) -> Counter[tuple[str, str]]:
-    # zip(a, a[1:]) walks neighbours: ('t','h'), ('h','e'), ...
-    return Counter(zip(tokens, tokens[1:]))
+    <pre data-run="python" data-file="bpe.py"><code>def count_pairs(tokens: list[str]) -> dict[tuple[str, str], int]:
+    counts: dict[tuple[str, str], int] = {}
+    for left, right in zip(tokens, tokens[1:]):     # neighbours: ('t','h'), ('h','e'), ...
+        counts[(left, right)] = counts.get((left, right), 0) + 1
+    return counts
 
 def merge_pair(tokens: list[str], pair: tuple[str, str]) -> list[str]:
     merged, position = [], 0
@@ -68,7 +68,8 @@ def merge_pair(tokens: list[str], pair: tuple[str, str]) -> list[str]:
 
 tokens = list("the cat sat on the mat")      # 22 tokens
 for merge_number in range(1, 5):
-    best_pair = count_pairs(tokens).most_common(1)[0][0]
+    counts = count_pairs(tokens)
+    best_pair = max(counts, key=counts.get)    # highest count; a tie keeps the first seen
     tokens = merge_pair(tokens, best_pair)
     print(f"merge {merge_number}: {best_pair!r:12} -> {len(tokens)} tokens")
 
@@ -79,8 +80,10 @@ merge 2: ('t', 'h')   -> 17 tokens
 merge 3: ('th', 'e')  -> 15 tokens
 merge 4: ('the', ' ') -> 13 tokens
 after BPE: ['the ', 'c', 'at', ' ', 's', 'at', ' ', 'o', 'n', ' ', 'the ', 'm', 'at']</code></pre>
-    <p>Java view: the pair <code>(left, right)</code> is a small record used as a map key, and
-    <code>Counter</code> is a <code>Map&lt;Pair, Integer&gt;</code> that counts for you.</p>
+    <p>Java view: <code>counts</code> is a <code>Map&lt;Pair, Integer&gt;</code> where the pair
+    <code>(left, right)</code> is a small record used as the key, and <code>counts.get(k, 0)</code>
+    is <code>getOrDefault</code>. <code>max(counts, key=counts.get)</code> is a stream's
+    <code>max(comparing(counts::get))</code>.</p>
 
     <h2>Why it matters</h2>
     <ul>
@@ -90,5 +93,6 @@ after BPE: ['the ', 'c', 'at', ' ', 's', 'at', ' ', 'o', 'n', ' ', 'the ', 'm', 
     </ul>
   </article>
 </main>
+<script src="../../assets/js/code.js"></script>
 </body>
 </html>

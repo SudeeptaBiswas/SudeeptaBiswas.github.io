@@ -66,6 +66,7 @@
         article.className = "article popup-article";
         article.replaceChildren.apply(article, Array.prototype.slice.call(content.childNodes));
         body.replaceChildren(article);
+        if (window.enhanceCode) window.enhanceCode(article);   // copy / download buttons
         dialog.removeAttribute("aria-label");
         dialog.setAttribute("aria-labelledby", "popup-title");
         open(url);

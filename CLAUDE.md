@@ -20,7 +20,7 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 | Plan, decisions, backlog | `PLAN.md` |
 | Pages | `index.html`, `404.html`, `blog/`, `blog/topics/` (popup pages), `projects/` (index + one page per project) |
 | Project content + generator | `tools/projects_data.py`, `tools/build_projects.py` |
-| Styles / scripts | `assets/css/style.css`, `assets/js/theme.js` (dark mode), `assets/js/filter.js` (project filter), `assets/js/popup.js` (popup viewer for `blog/topics/` pages), `assets/js/toc.js` (left Contents / All projects panel and its height; header ☰ menu below 1100px; on phones every page's site links sit in the ☰ menu) |
+| Styles / scripts | `assets/css/style.css`, `assets/js/theme.js` (dark mode), `assets/js/filter.js` (project filter), `assets/js/popup.js` (popup viewer for `blog/topics/` pages), `assets/js/code.js` (Copy / Download / Run buttons on code blocks), `assets/js/toc.js` (left Contents / All projects panel and its height; header ☰ menu below 1100px; on phones every page's site links sit in the ☰ menu) |
 | Fact sources | `PLAN.md` Section 2 (FACTS.md, master.md, Java CV) |
 
 ## Never break
@@ -40,3 +40,10 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 3. Test both ways: from disk (file://, the popup shows the page in a frame) and over http
    (`python -m http.server`, the content is copied in). Keep the `.solo-back` link and the head script
    from `bpe.html`: they hide the back link and set the theme inside the frame.
+
+## Code blocks
+Every post and topic page loads `assets/js/code.js`: each `<pre>` gets Copy + Download buttons.
+- `data-file="name.py"` on the `<pre>` sets the download name (default `code.txt`).
+- `data-run="python"` adds a Run button (Python Tutor, Python 3.11). Only on code that runs on its
+  own with the standard library, and prints its result. Check it: run it locally AND in Python Tutor
+  (it can't run `collections.Counter.most_common`; plain dicts work). Show the output under it.

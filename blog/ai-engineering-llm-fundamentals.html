@@ -129,7 +129,7 @@
   <ul>
     <li>Common words are one token. Rare or unknown words are split into smaller known parts.</li>
     <li>For English, <b>1 token ≈ 4 characters ≈ ¾ of a word</b>. Other languages and code often need more.</li>
-    <li><b>BPE</b> builds the pieces: start with single letters, glue the pair that appears together most often (<code>t</code> + <code>h</code> → <code>th</code>), and repeat thousands of times. <a href="topics/bpe.html" data-popup>See BPE step by step</a>.</li>
+    <li><b>BPE</b> builds the pieces: start with single letters, glue the pair that appears together most often (<code>t</code> + <code>h</code> → <code>th</code>), and repeat thousands of times. <a href="topics/bpe.html" data-popup>See how BPE works</a>.</li>
     <li>Price, speed and limits are all counted in tokens, like paying per MB on a cloud bill.</li>
   </ul>
 
@@ -431,6 +431,7 @@ cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposi
 
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/toc.js"></script>
+<script src="../assets/js/code.js"></script>
 <script src="../assets/js/popup.js"></script>
 </body>
 </html>

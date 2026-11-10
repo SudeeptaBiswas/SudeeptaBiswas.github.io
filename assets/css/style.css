@@ -320,6 +320,17 @@ pre {
   padding: 14px 16px; overflow-x: auto; line-height: 1.5;
 }
 pre code { background: none; padding: 0; }
+/* Copy / Download / Run buttons (code.js), top-right of each code block */
+.code-wrap { position: relative; }
+.code-wrap > pre { padding-top: 40px; }
+.code-bar { position: absolute; top: 6px; right: 6px; display: flex; gap: 4px; }
+.code-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 28px;
+  padding: 0; color: var(--muted); background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; cursor: pointer; text-decoration: none;
+}
+.code-btn:hover, .code-btn:focus-visible { color: var(--accent); border-color: var(--accent); }
+@media print { .code-bar { display: none; } .code-wrap > pre { padding-top: 14px; } }
 
 /* Diagrams (inline SVG) */
 figure { margin: 24px 0; overflow-x: auto; }
