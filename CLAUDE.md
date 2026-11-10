@@ -54,6 +54,8 @@ Every post and topic page loads `assets/js/code.js`: each `<pre>` gets Copy + Do
 - Plugins live in `assets/js/runners/<name>.js` and register `window.CodeRunners.<name> = { attach(ctx) }`
   (`ctx`: `pre`, `wrap`, `bar`, `code()`, `icon()`, `button()`, `config`). `code.js` loads `config.js` and
   the named plugin only on pages with a runnable block.
+- A block with a Run button is also editable in place (reader types, Run/Copy/Download use the edited code, Reset
+  restores, nothing saved; Tab = 4 spaces, Ctrl+Enter = Run, Esc = leave). Blocks without `data-run` stay read-only.
 - Only mark code that runs on its own (standard library or numpy), with no Ollama or files, and prints
   its result. Check it in the page with the Run button, and show the expected output under it.
 - Comparison of runners (measured): `PLAN.md` Section 11.

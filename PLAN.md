@@ -74,6 +74,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 55 | Three more sliders (owner: "1 yes", 10 Nov 2026) in `demos.js`: top_k/top_p (Softmax page; top_k first, then top_p on what is left, as Ollama), bits per weight (Quantization: file/RAM size + toy weights, same codes and worst error as `quantization.py`), arrow angle and length (Cosine: live dot, norm, cosine). Cosine page also got a "Step by step" section: dot, norm, cosine worked out for question [0.7, 0.3] vs kitten [0.8, 0.2] (owner asked if the terms were covered: before, only the formula and "why divide by lengths"). `tools/tests/demo_test.mjs` 22/22 http + 22/22 disk. |
 | 56 | Projects panel: optional `short=` per project, used only in the left panel (full title as hover tip). 13 set: AI Requirements Docs, RIMS Migration, Release Management, PLM Platform (V6), ENOVIA PLM (V5), Omron Testing, ShopBook Migration, HRMS, Food Navi, NTT Data Trial, SMS VAS, DB Copy Tool, FleetCheck. Measured at 1400px: 0 of 19 pages wrap (was 13 titles). Owner: "yes, need to check" the names. |
 | 57 | Owner OK'd popup candidates 1–4 (10 Nov 2026). New pages from lessons 1.2–1.5 and 2.3: Python traps for Java developers (5 traps), Exceptions: try, except, else, finally, Dataclasses vs Java records (Python post); Reading a streamed reply (NDJSON) (AI post, sample lines, no Ollama). 14 runnable blocks, each output = real CPython output and = Pyodide output (`topics_test.mjs` 32/32 http + disk). Generator takes the post per page (`post=PY`). Links inside a popup to another popup work (http: same dialog; disk: inside the frame). Demo bars also got one colour per row (owner asked). |
+| 58 | Runnable blocks are editable in place (owner OK, 10 Nov 2026): `contenteditable="plaintext-only"` on the block's code, added only when a Run plugin attaches. Run, Copy and Download use the edited code; Reset (shows once edited) restores; nothing is saved. Keys: Tab = 4 spaces, Ctrl/Cmd+Enter = Run, Esc = leave (in the popup the first Esc leaves the editor, the second closes the popup). Old browsers without plaintext-only keep read-only blocks. `edit_test.mjs` 18/18 http, 11/11 disk. Fixes the Python traps lead ("change it and run it again"), which was not true before. |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -288,9 +289,10 @@ Read this first in a new session, then `CLAUDE.md` and decisions 37–56 in Sect
 - Sliders: temperature (54), top_k/top_p, bits per weight, cosine angle; cosine step by step (55).
 - Generator and browser tests saved in `tools/topics/` and `tools/tests/` (were only in a temp folder).
 - Demo bars one colour per row; popup pages Python traps, Exceptions, Dataclasses, Streaming (57).
+- Runnable blocks editable in place, with Reset (58).
 
 **Open: owner to answer**
-1. Push: check `git log origin/main..HEAD` (11 commits when written, e378e8a onwards).
+1. Push: check `git log origin/main..HEAD` (12 commits when written, e378e8a onwards).
 2. Check the 13 short project names (decision 56). Change any in `tools/projects_data.py`, rerun the build.
 3. Popup pages 1–4 done (57). More from Section 12 only if the owner asks.
 4. AI posts growth plan, Section 10: owner said "we will check later".

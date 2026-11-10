@@ -341,7 +341,13 @@ pre code { background: none; padding: 0; }
 .code-wrap > pre.code-output.busy { color: var(--muted); font-style: italic; }
 .code-wrap > pre.code-output.error { border-left-color: #c0392b; }
 .code-wrap > pre:has(~ .code-output:not([hidden])) { border-radius: 8px 8px 0 0; margin-bottom: 0; }
-@media print { .code-bar { display: none; } .code-wrap > pre { padding-top: 14px; } }
+/* Editable runnable blocks (code.js editable()) */
+.code-editable > pre { cursor: text; }
+.code-editable > pre > code { display: block; min-height: 1.5em; outline: none; caret-color: var(--accent); }
+.code-editable > pre:focus-within { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.code-hint { position: absolute; top: 12px; left: 16px; font-size: 12px; color: var(--muted); pointer-events: none; }
+.code-edited > .code-hint { color: var(--accent); }
+@media print { .code-bar, .code-hint { display: none; } .code-wrap > pre { padding-top: 14px; } }
 
 /* Interactive demos (assets/js/demos.js): [data-demo] boxes */
 .demo { margin: 20px 0; padding: 16px 18px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: var(--radius); }

@@ -3,13 +3,15 @@
 // A block marked data-run="python" also gets a Run button from a runner plugin:
 // assets/js/config.js names the plugin ("runner"), and its file in
 // assets/js/runners/ is loaded only on pages that have such a block.
+// When a Run button is added, the block can also be edited in place (see editable()).
 // popup.js calls window.enhanceCode(box) after it loads a page into the popup.
 (function () {
   var ICONS = {
     copy: '<path d="M9 9h10v12H9z"/><path d="M5 15H4V3h11v1"/>',
     done: '<path d="M5 12l5 5 9-10"/>',
     download: '<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/>',
-    run: '<path d="M7 4l13 8-13 8z"/>'
+    run: '<path d="M7 4l13 8-13 8z"/>',
+    reset: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/>'
   };
   // Folder of this script, so config.js and runners/ load from the right place on any page.
   var here = document.currentScript ? document.currentScript.src.replace(/[^/]*$/, "") : "";
@@ -52,7 +54,7 @@
       if (name === "off") return;
       return loadScript(here + "runners/" + name + ".js").then(function () {
         runner = (window.CodeRunners || {})[name] || null;
-        waiting.forEach(function (ctx) { if (runner) runner.attach(ctx); });
+        waiting.forEach(function (ctx) { if (runner) attach(ctx); });
         waiting = [];
       });
     }).catch(function () { waiting = []; });   // no Run button; Copy and Download still work
@@ -88,6 +90,64 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
+  // A runnable block can be edited in place: Run, Copy and Download all use the code as it is
+  // now. Reset brings back the original. Nothing is saved: a reload shows the original again.
+  // Keys inside: Tab = 4 spaces, Ctrl+Enter (Cmd+Enter) = Run, Esc = leave (focus goes to the buttons;
+  // in the popup a second Esc closes it).
+  function editable(ctx) {
+    var el = ctx.pre.querySelector("code") || ctx.pre;
+    el.contentEditable = "plaintext-only";
+    if (el.contentEditable !== "plaintext-only") { el.removeAttribute("contenteditable"); return; }   // old browser: read-only
+    var original = el.textContent;
+    el.spellcheck = false;
+    el.setAttribute("autocapitalize", "off");
+    el.setAttribute("autocorrect", "off");
+    el.setAttribute("role", "textbox");
+    el.setAttribute("aria-multiline", "true");
+    el.setAttribute("aria-label", "Python code, editable. Ctrl+Enter runs it, Esc leaves the editor.");
+    ctx.wrap.classList.add("code-editable");
+
+    var hint = document.createElement("span");
+    hint.className = "code-hint";
+    hint.textContent = "editable · Ctrl+Enter runs";
+    ctx.wrap.appendChild(hint);
+
+    var reset = button("reset", "Reset to the original code", function () {
+      el.textContent = original;
+      changed();
+      el.focus();
+    });
+    reset.hidden = true;
+    ctx.bar.insertBefore(reset, ctx.bar.firstChild);
+
+    function changed() {
+      var edited = el.textContent !== original;
+      reset.hidden = !edited;
+      ctx.wrap.classList.toggle("code-edited", edited);
+      hint.textContent = (edited ? "edited" : "editable") + " · Ctrl+Enter runs";
+    }
+    el.addEventListener("input", changed);
+    el.addEventListener("keydown", function (e) {
+      if (e.key === "Tab" && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        document.execCommand("insertText", false, "    ");
+      } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        var run = ctx.bar.querySelector('[aria-label^="Run"]');
+        if (run) run.click();
+      } else if (e.key === "Escape") {
+        e.preventDefault();   // in the popup: the first Esc leaves the editor, the next one closes the popup
+        var first = ctx.bar.querySelector(".code-btn:not([hidden])");
+        if (first) first.focus(); else el.blur();
+      }
+    });
+  }
+
+  function attach(ctx) {
+    editable(ctx);
+    runner.attach(ctx);
+  }
+
   function enhance(pre) {
     if (pre.classList.contains("code-output") || pre.parentNode.classList.contains("code-wrap")) return;
     var wrap = document.createElement("div");
@@ -115,7 +175,7 @@
     if (pre.getAttribute("data-run") === "python") {
       var ctx = { pre: pre, wrap: wrap, bar: bar, code: text, icon: icon, button: button,
                   get config() { return window.SITE_CONFIG || {}; } };   // read live: config.js may load later
-      if (runner) runner.attach(ctx);
+      if (runner) attach(ctx);
       else { waiting.push(ctx); loadRunner(); }
     }
   }
