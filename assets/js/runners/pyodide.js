@@ -49,7 +49,9 @@
             show(box, "Running…", "busy");
             py.setStdout({ batched: function (s) { lines.push(s); } });
             py.setStderr({ batched: function (s) { lines.push(s); } });
-            return py.loadPackagesFromImports(ctx.code()).then(function () {
+            show(box, "Running… (loading packages the code imports, first time only)", "busy");
+            // messageCallback: keep Pyodide's "Loading numpy" notes out of the reader's output
+            return py.loadPackagesFromImports(ctx.code(), { messageCallback: function () {} }).then(function () {
               var scope = py.globals.get("dict")();   // fresh names for every run
               return py.runPythonAsync(ctx.code(), { globals: scope })
                 .finally(function () { scope.destroy(); });

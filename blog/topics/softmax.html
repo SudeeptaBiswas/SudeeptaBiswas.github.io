@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Softmax and temperature — Sudeepta Biswas</title>
+  <meta name="description" content="How a model's raw scores become odds, how temperature reshapes them, and how top_k, top_p and a seed shape the pick. Runnable Python.">
+  <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/softmax.html">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<main id="main" class="page-solo">
+  <p class="solo-back"><a href="../ai-engineering-llm-fundamentals.html#logits">← AI Engineering: LLM Fundamentals</a></p>
+  <article class="article" data-popup-content>
+    <p class="label">AI · Sampling</p>
+    <h1>Softmax and temperature</h1>
+
+    <p class="lead">For every next token, the model gives each word in its vocabulary a raw score
+    (a <b>logit</b>). <b>Softmax</b> turns those scores into odds that add up to 100%. Sampling then
+    picks one token from those odds.</p>
+
+    <h2>From scores to odds</h2>
+    <pre><code>softmax(score_i) = e^score_i / (e^score_1 + e^score_2 + ...)</code></pre>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Word</th><th>Score (logit)</th><th>e^score</th><th>Odds</th></tr></thead>
+      <tbody>
+        <tr><td>cat</td><td>2.0</td><td>7.39</td><td>7.39 / 11.76 = 63%</td></tr>
+        <tr><td>mat</td><td>1.0</td><td>2.72</td><td>2.72 / 11.76 = 23%</td></tr>
+        <tr><td>rat</td><td>0.5</td><td>1.65</td><td>1.65 / 11.76 = 14%</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p><code>e^x</code> makes every value positive and stretches the gaps: a score 1 point higher
+    means about 2.7 times the odds.</p>
+
+    <h2>Temperature</h2>
+    <p>Temperature is one division, score ÷ T, right before softmax:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>T</th><th>cat</th><th>mat</th><th>rat</th><th>Feels like</th></tr></thead>
+      <tbody>
+        <tr><td>0.2</td><td>0.99</td><td>0.01</td><td>0.00</td><td>almost greedy: safe, repeats</td></tr>
+        <tr><td>1.0</td><td>0.63</td><td>0.23</td><td>0.14</td><td>the model's own odds</td></tr>
+        <tr><td>2.0</td><td>0.48</td><td>0.29</td><td>0.23</td><td>flatter: rare words come up often</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>T = 0 would divide by zero; Ollama treats it as greedy (always the top token). Measured with
+    qwen3:1.7b, "Invent an unusual name for a pet cat", five calls: at T 0 it said Zephyrclaw five
+    times; at T 0.6 it gave five different names.</p>
+
+    <h2>top_k, top_p and the seed</h2>
+    <ul>
+      <li><b>top_k 2</b> keeps the 2 most likely tokens, then softmax runs again on them: cat 0.73, mat 0.27. Java/SQL view: <code>ORDER BY prob DESC LIMIT 2</code>.</li>
+      <li><b>top_p 0.8</b> keeps the most likely tokens until they cover 80%: cat (0.63), then mat (0.86), stop.</li>
+      <li>The <b>pick</b> is a weighted random choice, like a loot table. A <b>seed</b> makes it repeatable, like <code>new Random(42)</code> in a JUnit test.</li>
+    </ul>
+
+    <h2>The code</h2>
+    <pre data-run="python" data-file="softmax.py"><code>import math
+import random
+
+def softmax(scores: list[float], temperature: float = 1.0) -&gt; list[float]:
+    scaled = [score / temperature for score in scores]
+    biggest = max(scaled)                                # subtract the max: same result, no overflow
+    exps = [math.exp(score - biggest) for score in scaled]
+    total = sum(exps)
+    return [value / total for value in exps]
+
+words = ["cat", "mat", "rat"]
+scores = [2.0, 1.0, 0.5]                                 # logits the model gave
+
+for temperature in [0.2, 1.0, 2.0]:
+    odds = softmax(scores, temperature)
+    print(f"T {temperature}: " + "  ".join(f"{w} {p:.2f}" for w, p in zip(words, odds)))
+
+def top_p(words: list[str], odds: list[float], p: float) -&gt; list[str]:
+    kept, covered = [], 0.0
+    for word, chance in sorted(zip(words, odds), key=lambda pair: pair[1], reverse=True):
+        kept.append(word)
+        covered += chance
+        if covered &gt;= p:                                 # enough of the odds covered: stop
+            break
+    return kept
+
+print("top_p 0.8 keeps:", top_p(words, softmax(scores), 0.8))
+
+rng = random.Random(42)                                  # seed: the same picks every run
+picks = [rng.choices(words, weights=softmax(scores))[0] for _ in range(10)]
+print("10 picks at T 1.0, seed 42:", picks)</code></pre>
+    <p>Output:</p>
+    <pre><code>T 0.2: cat 0.99  mat 0.01  rat 0.00
+T 1.0: cat 0.63  mat 0.23  rat 0.14
+T 2.0: cat 0.48  mat 0.29  rat 0.23
+top_p 0.8 keeps: ['cat', 'mat']
+10 picks at T 1.0, seed 42: ['mat', 'cat', 'cat', 'cat', 'mat', 'mat', 'rat', 'cat', 'cat', 'cat']</code></pre>
+    <p>At T 1.0 the 10 picks are mostly cat, sometimes mat, once rat: close to the 63 / 23 / 14 odds.
+    Run it again: the seed gives the same 10 picks.</p>
+
+    <h2>Why it matters</h2>
+    <ul>
+      <li>JSON output, tool calls, an LLM judge: use T 0. One "creative" token breaks parsing.</li>
+      <li>Answers too samey or too wild? Fix the prompt first. The prompt sets the scores; temperature only reshapes them.</li>
+    </ul>
+  </article>
+</main>
+<script src="../../assets/js/code.js"></script>
+</body>
+</html>

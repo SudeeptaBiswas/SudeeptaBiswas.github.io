@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cosine similarity — Sudeepta Biswas</title>
+  <meta name="description" content="How embeddings are compared: dot product, length, and cosine, with a toy search in plain Python and in numpy.">
+  <script>(function(){var t,r=document.documentElement,m=location.hash.match(/theme=(dark|light)/);try{t=localStorage.getItem("theme");}catch(e){}if(m)t=m[1];if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";r.setAttribute("data-theme",t);if(window.self!==window.top)r.classList.add("in-frame");})();</script>
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/topics/cosine.html">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<main id="main" class="page-solo">
+  <p class="solo-back"><a href="../ai-engineering-llm-fundamentals.html#embeddings">← AI Engineering: LLM Fundamentals</a></p>
+  <article class="article" data-popup-content>
+    <p class="label">AI · Embeddings</p>
+    <h1>Cosine similarity</h1>
+
+    <p class="lead">An embedding turns a text into a list of numbers, a <b>vector</b>. Texts with
+    similar meaning get vectors that point the same way. <b>Cosine similarity</b> measures how alike
+    two directions are: 1 same, 0 unrelated, -1 opposite.</p>
+
+    <h2>Arrows on a map</h2>
+    <p>Real embeddings have 768 numbers. With two numbers, [about animals, about money], you can draw them:</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Text</th><th>Vector</th><th>Points</th></tr></thead>
+      <tbody>
+        <tr><td>animal</td><td>[0.9, 0.1]</td><td>east</td></tr>
+        <tr><td>kitten</td><td>[0.8, 0.2]</td><td>nearly the same way</td></tr>
+        <tr><td>invoice</td><td>[0.1, 0.9]</td><td>north</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h2>The formula</h2>
+    <pre><code>dot(a, b)    = a0*b0 + a1*b1 + ...                 (Java: a for loop)
+norm(a)      = sqrt(dot(a, a))                     (arrow length, Pythagoras)
+cosine(a, b) = dot(a, b) / (norm(a) * norm(b))</code></pre>
+    <p><b>Why divide by the lengths?</b> A long note and a short note about the same thing point the
+    same way but have different lengths. <code>dot</code> grows with length; cosine doesn't.</p>
+
+    <h2>The code</h2>
+    <pre data-run="python" data-file="cosine.py"><code>import math
+
+def dot(a: list[float], b: list[float]) -&gt; float:
+    if len(a) != len(b):                                 # zip would silently stop at the shorter one
+        raise ValueError(f"lengths differ: {len(a)} vs {len(b)}")
+    return sum(x * y for x, y in zip(a, b))
+
+def norm(a: list[float]) -&gt; float:
+    return math.sqrt(dot(a, a))                          # arrow length
+
+def cosine(a: list[float], b: list[float]) -&gt; float:
+    return dot(a, b) / (norm(a) * norm(b))
+
+# Two numbers per text: [about animals, about money]
+notes = {"animal": [0.9, 0.1], "kitten": [0.8, 0.2], "invoice": [0.1, 0.9]}
+question = [0.7, 0.3]                                    # "a small pet": mostly animal
+
+for name, vector in notes.items():
+    print(f"{name:8} cosine {cosine(question, vector):.2f}")
+
+ranked = sorted(notes, key=lambda name: cosine(question, notes[name]), reverse=True)
+print("top 2:", ranked[:2])
+
+kitten = notes["kitten"]
+long_kitten = [x * 10 for x in kitten]                   # same direction, 10 times longer
+print(f"dot    animal-kitten {dot(notes['animal'], kitten):.2f}  vs long kitten {dot(notes['animal'], long_kitten):.2f}")
+print(f"cosine animal-kitten {cosine(notes['animal'], kitten):.2f}  vs long kitten {cosine(notes['animal'], long_kitten):.2f}")</code></pre>
+    <p>Output:</p>
+    <pre><code>animal   cosine 0.96
+kitten   cosine 0.99
+invoice  cosine 0.49
+top 2: ['kitten', 'animal']
+dot    animal-kitten 0.74  vs long kitten 7.40
+cosine animal-kitten 0.99  vs long kitten 0.99</code></pre>
+    <p>Search is just this: score the question against every note, sort, keep the top k.</p>
+
+    <h2>The same with numpy</h2>
+    <p>numpy does the whole table in one line. This block loads numpy when you run it.</p>
+    <pre data-run="python" data-file="cosine_numpy.py"><code>import numpy as np
+
+names = ["animal", "kitten", "invoice"]
+notes = np.array([[0.9, 0.1], [0.8, 0.2], [0.1, 0.9]])   # one row per note
+question = np.array([0.7, 0.3])
+
+scores = notes @ question / (np.linalg.norm(notes, axis=1) * np.linalg.norm(question))
+for i in np.argsort(-scores):                            # best first
+    print(f"{names[i]:8} {scores[i]:.2f}")</code></pre>
+    <p>Output:</p>
+    <pre><code>kitten   0.99
+animal   0.96
+invoice  0.49</code></pre>
+
+    <h2>Real scores</h2>
+    <p>Measured with <code>nomic-embed-text</code> (768 numbers per text):</p>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Pair</th><th>Cosine</th></tr></thead>
+      <tbody>
+        <tr><td>cat vs kitten</td><td>0.84</td></tr>
+        <tr><td>I love this movie vs I hate this movie</td><td>0.69</td></tr>
+        <tr><td>happy vs sad</td><td>0.66</td></tr>
+        <tr><td>cat vs dog</td><td>0.60</td></tr>
+        <tr><td>cat vs invoice</td><td>0.40</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <ul>
+      <li><b>Unrelated is about 0.3–0.45, not 0.</b> Compare scores with each other; never hard-code "0.5 = match".</li>
+      <li><b>Love vs hate scores high:</b> embeddings measure what a text is about, not whether it is positive or true.</li>
+      <li><b>Use the same model</b> for notes and question. Vectors from two models give nonsense scores, with no error.</li>
+      <li>nomic's vectors already have length 1.0, so for them cosine equals dot.</li>
+    </ul>
+  </article>
+</main>
+<script src="../../assets/js/code.js"></script>
+</body>
+</html>

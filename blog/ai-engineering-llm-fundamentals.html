@@ -43,14 +43,20 @@
         <ol><li><a href="topics/bpe.html" data-popup>BPE</a></li></ol>
       </li>
       <li><a href="#context">Context and memory</a></li>
-      <li><a href="#logits">Logits and softmax</a></li>
+      <li><a href="#logits">Logits and softmax</a>
+        <ol><li><a href="topics/softmax.html" data-popup>Softmax</a></li></ol>
+      </li>
       <li><a href="#ollama">Ollama</a></li>
-      <li><a href="#size">Size, RAM and speed</a></li>
+      <li><a href="#size">Size, RAM and speed</a>
+        <ol><li><a href="topics/quantization.html" data-popup>Quantization</a></li></ol>
+      </li>
       <li><a href="#chat">The chat API</a></li>
       <li><a href="#thinking">Thinking models</a></li>
       <li><a href="#streaming">Streaming</a></li>
       <li><a href="#sampling">Sampling</a></li>
-      <li><a href="#embeddings">Embeddings</a></li>
+      <li><a href="#embeddings">Embeddings</a>
+        <ol><li><a href="topics/cosine.html" data-popup>Cosine similarity</a></li></ol>
+      </li>
       <li><a href="#check">Check yourself</a></li>
       <li><a href="#next">Coming next</a></li>
       <li><a href="#refs">Further reading</a></li>
@@ -156,6 +162,7 @@ Call 3 sends: [system, user1, answer1, user2, answer2, user3]   ← keeps growin
   These scores are <b>logits</b>. <b>Softmax</b> turns them into odds that add up to 100%:</p>
   <pre><code>scores:   cat 2.0   mat 1.0   rat 0.5
 softmax:  cat 63%   mat 23%   rat 14%</code></pre>
+  <p><a href="topics/softmax.html" data-popup>See how softmax and temperature work</a>.</p>
   <ul>
     <li>Always taking the top one is <b>greedy</b>. A weighted random pick is <b>sampling</b> (<a href="#sampling">section 10</a>).</li>
     <li><b>Hallucination:</b> the model picks what <i>sounds</i> right, not what <i>is</i> right. Like autocomplete suggesting a method that doesn't exist. Always check facts.</li>
@@ -188,7 +195,8 @@ softmax:  cat 63%   mat 23%   rat 14%</code></pre>
 
   <h2 id="size">6. Size, RAM and speed</h2>
   <p><b>Quantization</b> stores each weight in fewer bits: smaller and faster, slightly less
-  precise. Java view: <code>double</code> vs <code>float</code> vs <code>short</code> vs <code>byte</code>.</p>
+  precise. Java view: <code>double</code> vs <code>float</code> vs <code>short</code> vs <code>byte</code>.
+  <a href="topics/quantization.html" data-popup>See how quantization works</a>.</p>
   <pre><code>file size (GB) ≈ billions of weights × bits per weight ÷ 8</code></pre>
   <div class="table-wrap">
   <table>
@@ -304,6 +312,7 @@ reply["message"]["content"]            # the answer text</code></pre>
   <p>The model never "chooses"; it outputs odds. Sampling then picks one, like a loot table in
   a game. Four settings control the pick:</p>
   <pre><code>logits → ÷ temperature → softmax → cut the tail (top_k, top_p) → weighted random pick (seed)</code></pre>
+  <p><a href="topics/softmax.html" data-popup>See softmax, temperature and top_p in code</a>.</p>
   <p><b>Temperature</b> divides the scores before softmax. Same cat / mat / rat scores:</p>
   <div class="table-wrap">
   <table>
@@ -354,6 +363,7 @@ reply["message"]["content"]            # the answer text</code></pre>
   <pre><code>dot(a, b)    = a0*b0 + a1*b1 + ...
 norm(a)      = sqrt(dot(a, a))                  # arrow length
 cosine(a, b) = dot(a, b) / (norm(a) * norm(b))  # 1 same, 0 unrelated, -1 opposite</code></pre>
+  <p><a href="topics/cosine.html" data-popup>See how cosine similarity works</a>, with a toy search in Python and numpy.</p>
   <p>Dividing by the lengths makes a long note and a short note on the same topic score the
   same: dot gave 0.74 vs 7.40, cosine 1.00 for both. nomic's vectors already have length 1.0,
   so for them cosine = dot.</p>
