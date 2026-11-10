@@ -60,6 +60,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 41 | CI/CD post date: 10 September 2026 (owner) | 2026-11-10 | 10 November 2026 |
 | 42 | Blog In Progress: CI/CD card removed (post is under Published; same as decision 24). Published line: "Jenkins + Docker Compose: 4 environments, blue/green backend, promotion by image digest, rollback and backups." Repo link now only in the post. AI Engineering card alone now spans the full width | 2026-11-10 | 37, 38 (card kept with post link) |
 | 43 | Blog: In Progress grid gets `.grid.fill` (auto-fill), so a lone card keeps half width on wide screens (full width on phones). Published list: no tag after the date ("Study notes", "CI/CD" dropped; posts keep their study box). Dates: Kafka 20 September 2026, RabbitMQ 5 October 2026. Published sorted newest first: Messaging (RabbitMQ, Kafka) then CI/CD | 2026-11-10 | 42 full-width card; 1 November 2026 dates; CI/CD group first |
+| 44 | Blog In Progress: 2 cards, AI Engineering and Python for Java Developers, each linking an in-progress post (`ai-engineering-llm-fundamentals.html`, `python-for-java-developers.html`) built from the lab's `docs/review/`. Not under Published (owner: in progress, more later). Study box kept. Meta says "Started <date> · In progress"; dates = first topic done (2 Nov / 5 Nov 2026). Numbers are the lab's own measurements | 2026-11-10 | 42-43 (1 card, project link only) |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -180,6 +181,7 @@ Retest: 26/26 new checks, 46/46 blog/menu, 11/11 groups, phone checks, panel nev
 | cloud_containers.md | Cloud | todo |
 | aws_terraform_lab.md | Cloud | todo |
 | claude_code.md | AI delivery | todo |
+| ai_engineering_lab docs/review (phase 01, 02) | Python, AI | in progress (2 posts) |
 | plm_3dexperience.md | PLM | todo (check client details first) |
 | interview_questions.md | — | skip (prep only) |
 

@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Python for Java Developers — Sudeepta Biswas</title>
+  <meta name="description" content="Python learned as a Java developer: uv, syntax, collections, classes, modules, files and HTTP, and pytest, each compared with Java.">
+  <meta property="og:title" content="Python for Java Developers">
+  <meta property="og:description" content="Python learned as a Java developer: uv, syntax, collections, classes, modules, files and HTTP, and pytest, each compared with Java.">
+  <meta property="og:type" content="article">
+  <script>(function(){var t;try{t=localStorage.getItem("theme");}catch(e){}if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);})();</script>
+  <meta property="og:url" content="https://sudeeptabiswas.github.io/blog/python-for-java-developers.html">
+  <link rel="canonical" href="https://sudeeptabiswas.github.io/blog/python-for-java-developers.html">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">Sudeepta Biswas</a>
+    <nav class="nav" aria-label="Main">
+      <a href="../projects/">Projects</a>
+      <a href="../#skills">Skills</a>
+      <a href="../#experience">Experience</a>
+      <a href="./" aria-current="page">Blog</a>
+    </nav>
+    <button class="theme-toggle" type="button">Dark</button>
+  </div>
+</header>
+
+<main id="main">
+<div class="page-layout">
+  <nav class="toc" id="contents" aria-label="Contents">
+    <details>
+    <summary>Contents</summary>
+    <div class="toc-body">
+    <div class="toc-head"><span>Contents</span><a class="toc-back" href="./" aria-label="Back to Blog">← Back</a></div>
+    <ol>
+      <li><a href="#setup">Setup: uv and venv</a></li>
+      <li><a href="#syntax">Syntax vs Java</a></li>
+      <li><a href="#collections">Collections</a></li>
+      <li><a href="#classes">Classes and dataclasses</a></li>
+      <li><a href="#modules">Modules, imports, exceptions</a></li>
+      <li><a href="#http">Files, JSON, HTTP</a></li>
+      <li><a href="#pytest">Testing with pytest</a></li>
+      <li><a href="#check">Check yourself</a></li>
+      <li><a href="#next">Coming next</a></li>
+      <li><a href="#refs">Further reading</a></li>
+    </ol>
+    </div>
+    </details>
+  </nav>
+<article class="article">
+  <p class="label">Python · Study notes</p>
+  <h1>Python for Java Developers</h1>
+  <p class="post-meta">Started 2 November 2026 · In progress · Python 3, uv, httpx, pytest</p>
+
+  <p class="lead">Python is the language most AI tools are written in. These notes map each
+  Python idea to the Java one I already know, so the new part is only what really differs.</p>
+
+  <div class="note">These are my study notes from my <a href="../projects/ai-engineering-lab.html">AI Engineering Lab</a>,
+  not production experience. This post is in progress: a section is added as each topic is finished.</div>
+
+  <h2 id="setup">1. Setup: uv and venv</h2>
+  <pre><code>pyproject.toml (dependencies) → uv sync → .venv (packages) + uv.lock (exact versions)
+                               → uv run python file.py   (no "activate" needed)</code></pre>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Python</th><th>Java twin</th></tr></thead>
+    <tbody>
+      <tr><td><code>pyproject.toml</code></td><td><code>pom.xml</code> / <code>build.gradle</code></td></tr>
+      <tr><td><code>uv.lock</code></td><td>Gradle lockfile: exact versions</td></tr>
+      <tr><td><code>.venv</code></td><td>A per-project <code>~/.m2</code>, git-ignored</td></tr>
+      <tr><td><code>uv run</code></td><td><code>./gradlew run</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="syntax">2. Syntax vs Java</h2>
+  <ul>
+    <li>Blocks are set by indentation and <code>:</code>. No <code>;</code>, no <code>++</code>.</li>
+    <li><code>None</code>, <code>True</code>, <code>and</code> / <code>or</code> / <code>not</code> instead of <code>null</code>, <code>true</code>, <code>&amp;&amp;</code>.</li>
+    <li>Type hints are <b>not enforced</b> when the code runs. A checker such as pyright reads them.</li>
+  </ul>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Trap</th><th>Python</th><th>Java</th></tr></thead>
+    <tbody>
+      <tr><td>Division</td><td><code>7 / 2</code> is 3.5; <code>7 // 2</code> is 3</td><td><code>7 / 2</code> is 3</td></tr>
+      <tr><td>Equality</td><td><code>==</code> same value; <code>is</code> same object</td><td><code>.equals()</code> vs <code>==</code></td></tr>
+      <tr><td>Truth</td><td><code>if items:</code> means "not empty". <code>0</code>, <code>""</code>, <code>[]</code>, <code>{}</code>, <code>None</code> are false</td><td>Only booleans</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="collections">3. Collections</h2>
+  <pre><code>list [..]   dict {k: v}   set {..} / set()   tuple (..)   len(x), x in y
+
+nums = [0, 1, 2, 3, 4, 5]
+nums[1:4]    # [1, 2, 3]  start included, end excluded
+nums[-2:]    # [4, 5]     negative = from the end
+squares = [n * n for n in nums if n % 2 == 0]   # a stream in one line</code></pre>
+  <ul>
+    <li>Use a <b>set</b> for <code>x in items</code> on big data: fast lookup. A list keeps order and duplicates.</li>
+    <li><b>Trap:</b> <code>def add(item, bucket=[])</code> shares one list between every call. Write <code>bucket=None</code> and create the list inside.</li>
+  </ul>
+
+  <h2 id="classes">4. Classes and dataclasses</h2>
+  <pre><code>from dataclasses import dataclass, field
+
+@dataclass
+class Note:                      # a Java record / POJO
+    title: str
+    tags: list[str] = field(default_factory=list)   # "= []" is an error</code></pre>
+  <ul>
+    <li><code>self</code> is <code>this</code>, written out. <code>_x</code> means "internal", by convention only.</li>
+    <li><code>@dataclass</code> writes <code>__init__</code>, <code>__repr__</code> and <code>__eq__</code>. Use it for data; a plain class for behaviour.</li>
+    <li><b>Duck typing:</b> anything with a <code>.run()</code> method works. An abstract base class (ABC) is the explicit contract, like a Java interface, and fails early.</li>
+  </ul>
+
+  <h2 id="modules">5. Modules, imports, exceptions</h2>
+  <pre><code>import x → search sys.path (script folder, then .venv) → run x top to bottom ONCE → cache
+error → except blocks in order (child before parent) → else (no error) → finally (always)</code></pre>
+  <ul>
+    <li>Importing a module <b>runs</b> it, so a module should only define things at top level.</li>
+    <li><code>if __name__ == "__main__":</code> runs only when the file is started directly.</li>
+    <li>No checked exceptions: nothing forces a catch, so docstrings list what a function raises.</li>
+    <li><code>raise AppError("...") from error</code> keeps the original as the cause, like <code>new AppException(msg, cause)</code>.</li>
+    <li>Catch at the edge, where you can do something useful.</li>
+  </ul>
+
+  <h2 id="http">6. Files, JSON, HTTP</h2>
+  <pre><code>from pathlib import Path
+import json, httpx
+
+notes = json.loads(Path("notes.json").read_text(encoding="utf-8"))   # text → dict
+
+reply = httpx.post("http://127.0.0.1:11434/api/chat", json=body, timeout=60)
+reply.raise_for_status()      # a 404 is NOT an exception until you ask
+data = reply.json()</code></pre>
+  <ul>
+    <li><code>open(p, "w")</code> wipes the file first; <code>"a"</code> appends. Open files inside <code>with</code>, like try-with-resources.</li>
+    <li>Catch <code>httpx.TransportError</code>, the parent of both connect errors.</li>
+    <li>On my Windows PC, <code>localhost</code> tried IPv6 first: <b>2.16 s</b> per call, against <b>0.02 s</b> with <code>127.0.0.1</code>.</li>
+  </ul>
+
+  <h2 id="pytest">7. Testing with pytest</h2>
+  <pre><code>def test_search_sends_one_batched_call(monkeypatch):
+    sent = []                                   # a spy, kept inside the test
+    def fake_embed(texts):
+        sent.append(texts)
+        return [[1.0, 0.0]] * len(texts)
+    monkeypatch.setattr(search_module, "embed", fake_embed)   # patch where it is looked up
+
+    search_module.search("cat", ["a", "b"])
+
+    assert len(sent) == 1</code></pre>
+  <ul>
+    <li>A test with no <code>assert</code> <b>passes</b>. Empty stubs call <code>pytest.fail(...)</code>.</li>
+    <li>A call that should raise goes <b>inside</b> <code>with pytest.raises(...)</code>.</li>
+    <li>Floats are not exact: compare with <code>pytest.approx</code>.</li>
+    <li>Fakes test my logic fast, with no model running. One test marked <code>@pytest.mark.ollama</code> proves the real thing; <code>-m "not ollama"</code> skips it.</li>
+    <li>To know a passing test really tests something, break the code on purpose: it must fail.</li>
+  </ul>
+
+  <h2 id="check">8. Check yourself</h2>
+  <details><summary>pyproject.toml, uv.lock and .venv in Java terms?</summary><p>pom.xml, a Gradle lockfile, and a per-project ~/.m2.</p></details>
+  <details><summary>7 / 2 vs 7 // 2?</summary><p>3.5 vs 3.</p></details>
+  <details><summary>What is wrong with def add(item, bucket=[])?</summary><p>One list is shared by every call. Use bucket=None, then make a new list.</p></details>
+  <details><summary>A list default in a dataclass?</summary><p>field(default_factory=list).</p></details>
+  <details><summary>Why can't you import a folder named 01_python_fundamentals?</summary><p>It starts with a digit, so it is not a valid Python name.</p></details>
+  <details><summary>Is a 404 an exception in httpx?</summary><p>No. Check status_code or call raise_for_status().</p></details>
+  <details><summary>Why keep a spy's list inside the test?</summary><p>At module level it is shared by every test and never emptied, so results depend on test order.</p></details>
+
+  <h2 id="next">9. Coming next</h2>
+  <ul>
+    <li>Type hints and pydantic.</li>
+    <li><code>async</code> / <code>await</code>.</li>
+  </ul>
+
+  <h2 id="refs">10. Further reading</h2>
+  <ul>
+    <li><a href="https://docs.python.org/3/tutorial/" rel="noopener">The Python tutorial</a></li>
+    <li><a href="https://docs.astral.sh/uv/" rel="noopener">uv documentation</a></li>
+    <li><a href="https://www.python-httpx.org/" rel="noopener">httpx documentation</a></li>
+    <li><a href="https://docs.pytest.org/" rel="noopener">pytest documentation</a></li>
+  </ul>
+
+  <p class="back-links"><a href="#contents">↑ Back to contents</a> <a href="./">← All posts</a></p>
+</article>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© 2026 Sudeepta Biswas</span>
+    <span><a href="https://www.linkedin.com/in/sudeepta-biswas" rel="noopener">LinkedIn</a> · <a href="https://github.com/SudeeptaBiswas" rel="noopener">GitHub</a> · <a href="./">Blog</a></span>
+  </div>
+</footer>
+
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/toc.js"></script>
+</body>
+</html>
