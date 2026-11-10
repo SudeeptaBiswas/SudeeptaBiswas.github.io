@@ -31,6 +31,8 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 - Header/footer are copied in every page (except `blog/topics/` popup pages, which have none): change all pages together. For `projects/`,
   edit `page()` in `tools/build_projects.py` and rerun (hand edits there are lost).
 - `.nojekyll` stays (stops GitHub running Jekyll).
+- Left panel (Contents) titles: short, one line (panel link is ~150px, about 20 characters). The section
+  heading can be longer; only the panel text is short.
 
 ## Add a popup page (detail shown over a post)
 1. New file `blog/topics/<slug>.html`: copy `blog/topics/bpe.html`. Content goes inside
