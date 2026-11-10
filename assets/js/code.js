@@ -1,7 +1,8 @@
 // Code blocks: Copy and Download buttons in the top-right corner of every
-// <pre> in a post. A block marked data-run="python" also gets a Run button that
-// opens the code in Python Tutor (an online Python runner) in a new tab.
-// Download name: data-file="bpe.py" on the <pre>, else "code.txt".
+// <pre> in a post. Download name: data-file="bpe.py" on the <pre>, else "code.txt".
+// A block marked data-run="python" also gets a Run button from a runner plugin:
+// assets/js/config.js names the plugin ("runner"), and its file in
+// assets/js/runners/ is loaded only on pages that have such a block.
 // popup.js calls window.enhanceCode(box) after it loads a page into the popup.
 (function () {
   var ICONS = {
@@ -10,6 +11,11 @@
     download: '<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/>',
     run: '<path d="M7 4l13 8-13 8z"/>'
   };
+  // Folder of this script, so config.js and runners/ load from the right place on any page.
+  var here = document.currentScript ? document.currentScript.src.replace(/[^/]*$/, "") : "";
+  var runner = null;       // the plugin, once loaded
+  var waiting = [];        // runnable blocks seen before the plugin arrived
+  var loading = false;
 
   function icon(name) {
     return '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" ' +
@@ -26,6 +32,30 @@
     b.innerHTML = icon(name);
     b.addEventListener("click", action);
     return b;
+  }
+
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src; s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  // Load config.js, then the runner it names. "off" (or a missing plugin) = no Run button.
+  function loadRunner() {
+    if (loading) return;
+    loading = true;
+    var start = window.SITE_CONFIG ? Promise.resolve() : loadScript(here + "config.js");
+    start.then(function () {
+      var name = (window.SITE_CONFIG || {}).runner || "off";
+      if (name === "off") return;
+      return loadScript(here + "runners/" + name + ".js").then(function () {
+        runner = (window.CodeRunners || {})[name] || null;
+        waiting.forEach(function (ctx) { if (runner) runner.attach(ctx); });
+        waiting = [];
+      });
+    }).catch(function () { waiting = []; });   // no Run button; Copy and Download still work
   }
 
   function copyText(text) {
@@ -58,14 +88,8 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
-  function pythonTutor(text) {
-    return "https://pythontutor.com/visualize.html#code=" + encodeURIComponent(text) +
-      "&cumulative=false&heapPrimitives=nevernest&mode=edit&origin=opt-frontend.js&py=311" +
-      "&rawInputLstJSON=%5B%5D&textReferences=false";
-  }
-
   function enhance(pre) {
-    if (pre.parentNode.classList.contains("code-wrap")) return;
+    if (pre.classList.contains("code-output") || pre.parentNode.classList.contains("code-wrap")) return;
     var wrap = document.createElement("div");
     wrap.className = "code-wrap";
     pre.parentNode.insertBefore(wrap, pre);
@@ -86,18 +110,14 @@
     bar.appendChild(button("download", "Download code", function () {
       download(text(), pre.getAttribute("data-file") || "code.txt");
     }));
-    if (pre.getAttribute("data-run") === "python") {
-      var run = document.createElement("a");
-      run.className = "code-btn";
-      run.href = pythonTutor(text());
-      run.target = "_blank";
-      run.rel = "noopener";
-      run.title = "Run online in Python Tutor (opens a new tab)";
-      run.setAttribute("aria-label", run.title);
-      run.innerHTML = icon("run");
-      bar.appendChild(run);
-    }
     wrap.appendChild(bar);
+
+    if (pre.getAttribute("data-run") === "python") {
+      var ctx = { pre: pre, wrap: wrap, bar: bar, code: text, icon: icon, button: button,
+                  get config() { return window.SITE_CONFIG || {}; } };   // read live: config.js may load later
+      if (runner) runner.attach(ctx);
+      else { waiting.push(ctx); loadRunner(); }
+    }
   }
 
   window.enhanceCode = function (box) {

@@ -66,6 +66,7 @@ different technologies, screenshots where allowed. Blog of improved study notes.
 | 47 | Popup viewer: `assets/js/popup.js` opens a `blog/topics/` page's `[data-popup-content]` in a `<dialog>` over the post (Esc, ×, click outside close; focus returns; "Open as a page" link). Topic pages are plain (no header/footer/panel) and work on their own. First one: BPE, linked from AI post section 2 and as a sub-item under "2. Tokens" in the panel. Rejected: iframe (own scroll + theme), full pages with panel (owner: not needed) | 2026-11-10 | — |
 | 48 | Popup from disk: file:// blocks fetch, so popup.js shows the page in a frame inside the dialog (theme passed as `#theme=`, back link hidden when framed); http still copies the content in. Panel sub-item renamed "BPE" (owner: no "step by step"). 18/18 browser checks pass from disk and over http | 2026-11-10 | 47 (file:// fell back to opening the page) |
 | 49 | Code blocks: Copy + Download buttons top-right of every `<pre>` (`assets/js/code.js`, all 5 posts + topic pages; popup calls `window.enhanceCode`). `data-run="python"` adds Run → Python Tutor 3.11 (`py=311`; `py=3` = 3.6 broke on `list[str]`). BPE page: title "Byte Pair Encoding (BPE)" (owner), in-post link "See how BPE works", code rewritten without `Counter` (Python Tutor failed on `most_common`); same output locally and in Python Tutor. Tests: 12/12 code (http), 9/9 (disk), 18/18 popup each | 2026-11-10 | — |
+| 50 | Run button is a plugin chosen in `assets/js/config.js` (`runner`: "pyodide" default, "pythontutor", "off"). Plugins in `assets/js/runners/`; code.js loads config + the named plugin only where `data-run` blocks exist. Pyodide 314.0.7 from jsDelivr: output under the block, fresh names per run, errors as a traceback, imports (numpy) load by themselves. Reason: Section 11 analysis. Tests: 12/12 runner (http), 10/10 (disk); code 12/12 + 9/9, popup 18/18 + 18/18 | 2026-11-10 | 49 (Python Tutor hard-coded) |
 
 Why the change (decision 4): you want to learn React. React is a separate
 learning project; v1 ships fast in plain HTML/CSS.
@@ -228,7 +229,7 @@ Docs read: [Pyodide](https://pyodide.org/en/stable/usage/downloading-and-deployi
 [PyScript editor](https://docs.pyscript.net/2026.7.3/user-guide/editor/),
 [Codapi in-browser](https://antonz.org/in-browser-code-playgrounds/), [Python Tutor](https://pythontutor.com/).
 
-Recommendation: **Pyodide**, loaded only when the reader clicks Run, output shown under the code
+Chosen (decision 50): **Pyodide**, loaded only when the reader clicks Run, output shown under the code
 block on the page. The only option that is real CPython, works from disk and online, runs numpy
 (needed from lab phase 04), shows no ads and keeps the code in the reader's browser. Cost: 8.8 MB
 and ~5 s on the first Run per visit. Python Tutor could stay as a second "step through" link for

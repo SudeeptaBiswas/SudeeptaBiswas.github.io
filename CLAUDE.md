@@ -20,7 +20,7 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 | Plan, decisions, backlog | `PLAN.md` |
 | Pages | `index.html`, `404.html`, `blog/`, `blog/topics/` (popup pages), `projects/` (index + one page per project) |
 | Project content + generator | `tools/projects_data.py`, `tools/build_projects.py` |
-| Styles / scripts | `assets/css/style.css`, `assets/js/theme.js` (dark mode), `assets/js/filter.js` (project filter), `assets/js/popup.js` (popup viewer for `blog/topics/` pages), `assets/js/code.js` (Copy / Download / Run buttons on code blocks), `assets/js/toc.js` (left Contents / All projects panel and its height; header ☰ menu below 1100px; on phones every page's site links sit in the ☰ menu) |
+| Styles / scripts | `assets/css/style.css`, `assets/js/theme.js` (dark mode), `assets/js/filter.js` (project filter), `assets/js/popup.js` (popup viewer for `blog/topics/` pages), `assets/js/code.js` (Copy / Download / Run buttons on code blocks), `assets/js/config.js` (site settings: which Run plugin), `assets/js/runners/` (Run plugins), `assets/js/toc.js` (left Contents / All projects panel and its height; header ☰ menu below 1100px; on phones every page's site links sit in the ☰ menu) |
 | Fact sources | `PLAN.md` Section 2 (FACTS.md, master.md, Java CV) |
 
 ## Never break
@@ -44,6 +44,12 @@ Project pages are generated. Never hand-edit `projects/*.html`.
 ## Code blocks
 Every post and topic page loads `assets/js/code.js`: each `<pre>` gets Copy + Download buttons.
 - `data-file="name.py"` on the `<pre>` sets the download name (default `code.txt`).
-- `data-run="python"` adds a Run button (Python Tutor, Python 3.11). Only on code that runs on its
-  own with the standard library, and prints its result. Check it: run it locally AND in Python Tutor
-  (it can't run `collections.Counter.most_common`; plain dicts work). Show the output under it.
+- `data-run="python"` adds a Run button. Which one is a plugin, set in `assets/js/config.js`:
+  `runner: "pyodide"` (default: runs in the reader's browser, output under the block),
+  `"pythontutor"` (opens Python Tutor in a new tab) or `"off"`. Change the word, reload. Nothing else.
+- Plugins live in `assets/js/runners/<name>.js` and register `window.CodeRunners.<name> = { attach(ctx) }`
+  (`ctx`: `pre`, `wrap`, `bar`, `code()`, `icon()`, `button()`, `config`). `code.js` loads `config.js` and
+  the named plugin only on pages with a runnable block.
+- Only mark code that runs on its own (standard library or numpy), with no Ollama or files, and prints
+  its result. Check it in the page with the Run button, and show the expected output under it.
+- Comparison of runners (measured): `PLAN.md` Section 11.

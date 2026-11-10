@@ -330,6 +330,15 @@ pre code { background: none; padding: 0; }
   border-radius: 6px; cursor: pointer; text-decoration: none;
 }
 .code-btn:hover, .code-btn:focus-visible { color: var(--accent); border-color: var(--accent); }
+.code-btn:disabled { opacity: 0.5; cursor: progress; }
+/* Output of the Run button (runner "pyodide"), right under its code block */
+.code-wrap > pre.code-output {
+  margin-top: -1px; padding: 10px 16px; border-radius: 0 0 8px 8px; max-height: 320px; overflow: auto;
+  background: var(--bg); border: 1px solid var(--border); border-left: 4px solid var(--accent); white-space: pre-wrap;
+}
+.code-wrap > pre.code-output.busy { color: var(--muted); font-style: italic; }
+.code-wrap > pre.code-output.error { border-left-color: #c0392b; }
+.code-wrap > pre:has(~ .code-output:not([hidden])) { border-radius: 8px 8px 0 0; margin-bottom: 0; }
 @media print { .code-bar { display: none; } .code-wrap > pre { padding-top: 14px; } }
 
 /* Diagrams (inline SVG) */
